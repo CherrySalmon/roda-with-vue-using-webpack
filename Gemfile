@@ -2,6 +2,7 @@
 
 source 'https://rubygems.org'
 
+gem 'dry-validation', '~>1.10'
 gem 'figaro', '~>1.2'
 gem 'foreman', '~>0.0'
 gem 'puma', '~>6.0'

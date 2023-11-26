@@ -2,6 +2,7 @@
 
 require 'roda'
 require 'json'
+require_relative '../forms/form_file'
 
 module Todo
   # Backend web app controller
@@ -21,7 +22,7 @@ module Todo
       # api part
       r.on 'todos' do
         r.post do
-          data= JSON.parse(r.body.read)
+          data = JSON.parse(r.body.read)
           todo = Todo.create(data)
           response.status = 201
           todo.to_json
@@ -48,6 +49,22 @@ module Todo
           JSON.pretty_generate({ success: true, message: 'delete the todo' })
         rescue StandardError
           r.halt 500, { message: 'Database error' }.to_json
+        end
+      end
+
+      r.on 'upload' do
+        r.post do
+          # Assuming `params[:file_metadata]` contains the metadata like { file_name: 'example.txt', file_type: 'text/plain' }
+          result = Forms::FileMetadataSchema.new.call(JSON.parse(r.body.read))
+          if result.success?
+            # Process the file upload
+            # ...
+            response['Content-Type'] = 'application/json'
+            response.status = 200
+            JSON.pretty_generate({ success: true, message: 'File uploaded successfully' })
+          else
+            r.halt 422, { message: 'Validation error' }.to_json
+          end
         end
       end
 

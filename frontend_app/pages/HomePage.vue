@@ -1,7 +1,6 @@
 <template>
-
   <el-container class="todo-list">
-  
+    <FileUpload></FileUpload>
     <el-header>
       <h1>Todo List</h1>
     </el-header>
@@ -90,6 +89,7 @@ import {
   ElTooltip
 } from 'element-plus'
 import axios from 'axios'
+import FileUpload from '../components/FileUpload.vue'
 
 export default {
 
@@ -104,7 +104,8 @@ export default {
     ElDatePicker,
     ElButton,
     ElCheckbox,
-    ElTooltip
+    ElTooltip,
+    FileUpload
   },
 
   data() {
