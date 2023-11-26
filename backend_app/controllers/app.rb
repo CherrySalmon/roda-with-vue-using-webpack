@@ -2,7 +2,7 @@
 
 require 'roda'
 require 'json'
-require_relative '../forms/form_file'
+require_relative '../forms/markdown_file_form'
 
 module Todo
   # Backend web app controller
@@ -55,7 +55,7 @@ module Todo
       r.on 'upload' do
         r.post do
           # Assuming `params[:file_metadata]` contains the metadata like { file_name: 'example.txt', file_type: 'text/plain' }
-          result = Forms::FileMetadataSchema.new.call(JSON.parse(r.body.read))
+          result = Forms::MarkdownFileSchema.new.call(JSON.parse(r.body.read))
           if result.success?
             # Process the file upload
             # ...

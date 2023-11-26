@@ -8,35 +8,27 @@
 <script>
 import Ajv from 'ajv'
 import axios from 'axios'
-  
+import MarkdownFileSchema from '../schemas/markdown_file_schema.json'
+
 export default {
     methods: {
       handleFileUpload(event) {
-        const file = event.target.files[0];
+        const file = event.target.files[0]
         const fileMetadata = {
           file_name: file.name,
           file_type: file.type
-        };
-  
-        // Define JSON Schema for file metadata
-        const schema = {
-          type: "object",
-          properties: {
-            file_name: { type: "string" },
-            file_type: { type: "string" }
-          },
-          required: ["file_name", "file_type"]
-        };
-  
-        const ajv = new Ajv();
-        const validate = ajv.compile(schema);
+        }
+
+        const ajv = new Ajv()
+        const validate = ajv.compile(MarkdownFileSchema)
+        
   
         if (validate(fileMetadata)) {
           // Proceed with uploading the file to the API
-          this.uploadFile(file, fileMetadata);
+          this.uploadFile(file, fileMetadata)
         } else {
           // Handle validation errors
-          console.error(validate.errors);
+          console.error(validate.errors)
         }
       },
       async uploadFile(file, fileMetadata) {
@@ -47,9 +39,9 @@ export default {
           // Handle successful response
         })
         .catch(error => {
-          console.error('Error uploading file metadata:', error);
+          console.error('Error uploading file metadata:', error)
           // Handle error
-        });
+        })
       }
     }
 };
