@@ -8,7 +8,7 @@
 <script>
 import Ajv from 'ajv'
 import axios from 'axios'
-import MarkdownFileSchema from '../schemas/markdown_file_schema.json'
+import MarkdownFileSchema from '../../schemas/markdown_file_schema.json'
 
 export default {
     methods: {

@@ -54,16 +54,14 @@ module Todo
 
       r.on 'upload' do
         r.post do
-          # Assuming `params[:file_metadata]` contains the metadata like { file_name: 'example.txt', file_type: 'text/plain' }
-          result = Forms::MarkdownFileSchema.new.call(JSON.parse(r.body.read))
-          if result.success?
+          file_metadata = JSON.parse(r.body.read)
+          if Forms::MarkdownFileForm.validate(file_metadata)
             # Process the file upload
-            # ...
-            response['Content-Type'] = 'application/json'
             response.status = 200
-            JSON.pretty_generate({ success: true, message: 'File uploaded successfully' })
+            'File uploaded and validated.'
           else
-            r.halt 422, { message: 'Validation error' }.to_json
+            response.status = 422
+            'Invalid file metadata.'
           end
         end
       end
