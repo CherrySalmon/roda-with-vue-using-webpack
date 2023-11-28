@@ -2,7 +2,7 @@ require 'sequel'
 require 'figaro'
 require 'roda'
 require 'logger'
-module Todo
+module BackendApp
   # Configuration for the API
   class Api < Roda
     plugin :environments

@@ -2,7 +2,7 @@
 
 require 'sequel'
 require 'json'
-module Todo
+module BackendApp
   # Domain model for a single todo
   class Todo < Sequel::Model
     def to_json(options = {})

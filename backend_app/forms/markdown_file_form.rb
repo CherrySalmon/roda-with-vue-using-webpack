@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'json_schemer'
 
-module Todo
+module BackendApp
   module Forms
     # Define a schema for file metadata validation
     class MarkdownFileForm

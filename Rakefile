@@ -18,12 +18,12 @@ namespace :db do
 
     # Run the migrations
     Dir.glob("#{migration_path}/*.rb").each { |file| require file }
-    Sequel::Migrator.run(Todo::Api.db, migration_path)
+    Sequel::Migrator.run(BackendApp::Api.db, migration_path)
   end
 
   desc 'Delete dev or test database file'
   task drop: [:config] do
-    @app = Todo::Api
+    @app = BackendApp::Api
     if @app.environment == :production
       puts 'Cannot wipe production database!'
       return

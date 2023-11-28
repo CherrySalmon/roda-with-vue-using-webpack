@@ -4,7 +4,7 @@ require 'roda'
 require 'json'
 require_relative '../forms/markdown_file_form'
 
-module Todo
+module BackendApp
   # Backend web app controller
   class App < Roda
     # app using
