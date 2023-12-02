@@ -1,13 +1,13 @@
 This is a JSON Schema example.
 
-File name: `[entity's name]_schema.json` (In snake_case)
-Entity name: `[entity's name]Schema` (In upper camel case)
+File name: `[name].json` (In snake_case)
+DTO name: `[Name]` (In upper camel case)
 Schema:
 ```
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "[Entity] Schema",
-    "description": "Schema for [Entity] data validation",
+    "title": "[DTOy] Schema",
+    "description": "Schema for [DTO] data validation",
     "type": "object",
     "properties": {
       "[property_1]": {
