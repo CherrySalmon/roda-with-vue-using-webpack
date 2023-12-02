@@ -17,7 +17,8 @@ module BackendApp
     # Make the environment variables accessible to other classes
     def self.config = Figaro.env
     db_url = ENV['DATABASE_URL']
-    @db = Sequel.connect(db_url, logger: Logger.new($stderr))
+    # @db = Sequel.connect(db_url, logger: Logger.new($stderr))
+    @db = Sequel.connect(db_url)
     def self.db = @db # rubocop:disable Style/TrivialAccessors
-  end
+    end
 end

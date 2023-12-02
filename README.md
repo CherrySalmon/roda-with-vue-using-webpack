@@ -61,6 +61,9 @@ When you're finished working:
 
   ```shell
   bundle exec rake db:migrate
+
+  # Test
+  # RACK_ENV=test bundle exec rake db:migrate
   ```
 
 ## Run the Web App
@@ -140,3 +143,6 @@ Rakefile
 config.ru
 require_app.rb
 ```
+
+## To-dos
+- [] Add rack spec, style
