@@ -13,6 +13,7 @@
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.3",
+    "google-auth-library": "^9.4.2",
     "html-webpack-plugin": "^5.5.1",
     "unplugin-auto-import": "^0.16.7",
     "unplugin-vue-components": "^0.25.2",
@@ -28,6 +29,8 @@
   "dependencies": {
     "axios": "^1.6.0",
     "element-plus": "^2.4.2",
-    "vue-router": "^4.2.5"
+    "vue-google-oauth2": "^1.5.10",
+    "vue-router": "^4.2.5",
+    "vue3-google-login": "^2.0.25"
   }
 }

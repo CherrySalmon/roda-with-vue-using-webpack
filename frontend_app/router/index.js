@@ -28,23 +28,30 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../pages/HomePage.vue';
 import AboutPage from '../pages/AboutPage.vue';
+import LoginPage from '../pages/LoginPage.vue';
+
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'Home',
     component: HomePage
   },
   {
-    path: '/about', 
+    path: '/about',
     name: 'About',
     component: AboutPage
+  },
+  {
+    path: '/',
+    name: 'Test',
+    component: LoginPage
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes 
+  routes
 })
 
 export default router
