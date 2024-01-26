@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 
-const GOOGLE_CLIENT_ID = '324530495132-fdh8vl7jidbuv4d3bnu68qdja2jr798i.apps.googleusercontent.com'
+const GOOGLE_CLIENT_ID = ''
 
 const data = ref()
 const userData = ref(null)
