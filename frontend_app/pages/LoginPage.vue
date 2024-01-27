@@ -7,58 +7,58 @@
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import { googleTokenLogin } from 'vue3-google-login'
-import axios from 'axios'
-import { useRouter } from 'vue-router';
+<script>
+import { googleTokenLogin } from 'vue3-google-login';
+import axios from 'axios';
 
-const router = useRouter();
+export default {
+    name: 'LoginPage',
 
-const data = ref()
-const userData = ref(null)
+    data() {
+        return {
+            data: null,
+            userData: null
+        };
+    },
 
-// Define sendTokenToBackend function
-async function sendTokenToBackend(accessToken) {
-    try {
-        const response = await axios.post('/verify_google_token', {
-            access_token: accessToken
-        });
-        if (response.status === 200) {
-            console.log("User Info:", response.data);
-            return response.data
-        } else {
-            console.error('Error sending token to backend');
+    methods: {
+        async sendTokenToBackend(accessToken) {
+            try {
+                const response = await axios.post('/verify_google_token', {
+                    access_token: accessToken
+                });
+                if (response.status === 200) {
+                    console.log("User Info:", response.data);
+                    return response.data;
+                } else {
+                    console.error('Error sending token to backend');
+                }
+            } catch (error) {
+                console.error('Error:', error.response || error);
+            }
+        },
+
+        async handleGoogleAccessTokenLogin() {
+            try {
+                const response = await googleTokenLogin({
+                    clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+                    scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+                });
+
+                this.data = response;
+                console.log('access_token:', response.access_token);
+                const userInfo = await this.sendTokenToBackend(response.access_token);
+                this.userData = userInfo;
+
+                if (userInfo) {
+                    this.$router.push('/home');
+                }
+            } catch (error) {
+                console.error('Login Failed:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error:', error.response || error);
-        // Handle network errors or server errors
     }
-}
-
-// Modify handleGoogleAccessTokenLogin to use sendTokenToBackend
-const handleGoogleAccessTokenLogin = async () => {
-    try {
-        const response = await googleTokenLogin({
-            clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
-        });
-
-        data.value = response;
-        console.log('access_token:', response.access_token)
-        // Await the response from sendTokenToBackend
-        const userInfo = await sendTokenToBackend(response.access_token);
-        userData.value = userInfo; // Set userData to the actual user info
-        // console.log(userData.value)
-        if (userInfo) {
-            router.push('/home'); // Redirect to the dashboard or another route
-        }
-
-    } catch (error) {
-        console.error('Login Failed:', error);
-    }
-}
-
+};
 </script>
 
 
