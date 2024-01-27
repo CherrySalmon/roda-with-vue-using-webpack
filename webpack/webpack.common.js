@@ -10,6 +10,11 @@ const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
 const __base = path.resolve(__dirname, '..');
 const __src = path.resolve(__base, 'frontend_app');
 
+const webpack = require('webpack');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: path.resolve(__base, 'frontend_app', '.env.local') });
+
 module.exports = {
     //Entry: main file that init our application
     entry: path.resolve(__src, 'main.js'),
@@ -31,10 +36,13 @@ module.exports = {
         new VueLoaderPlugin(),
         AutoImport({
             resolvers: [ElementPlusResolver()],
-          }),
+        }),
         Components({
             resolvers: [ElementPlusResolver()],
-          }),
+        }),
+        new webpack.DefinePlugin({
+            'process.env': JSON.stringify(process.env)
+        })
     ],
 
     //Webpack dosent know how to handler all type of files and what to do with them, so this section 

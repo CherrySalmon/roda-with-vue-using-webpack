@@ -1,3 +1,12 @@
+
+<template>
+    <div>
+        <button type="button" @click="handleGoogleAccessTokenLogin">
+            使用 Google 進行登入
+        </button>
+    </div>
+</template>
+
 <script setup>
 import { ref } from 'vue'
 import { googleTokenLogin } from 'vue3-google-login'
@@ -5,9 +14,6 @@ import axios from 'axios'
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-
-
-const GOOGLE_CLIENT_ID = ''
 
 const data = ref()
 const userData = ref(null)
@@ -34,7 +40,7 @@ async function sendTokenToBackend(accessToken) {
 const handleGoogleAccessTokenLogin = async () => {
     try {
         const response = await googleTokenLogin({
-            clientId: GOOGLE_CLIENT_ID,
+            clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
             scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
         });
 
@@ -55,22 +61,6 @@ const handleGoogleAccessTokenLogin = async () => {
 
 </script>
 
-<template>
-    <div>
-        <button type="button" @click="handleGoogleAccessTokenLogin">
-            使用 Google 進行登入
-        </button>
-        <!-- <div v-if="userData">
-            <pre>{{ data }}</pre>
-            <p></p>
-            <pre>{{ userData }}</pre> Temporary debugging -->
-
-        <!-- <p>Username: {{ userData.name }}</p>
-            <p>Email: {{ userData.email }}</p> -->
-        <!-- Add more user info as needed -->
-        <!-- </div> -->
-    </div>
-</template>
 
 <style scoped>
 p {
