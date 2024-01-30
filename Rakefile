@@ -14,11 +14,19 @@ namespace :db do
 
     # Set up the migration path
     migration_path = File.expand_path('backend_app/db/migration', __dir__)
-    print('migration_path:', migration_path)
 
     # Run the migrations
     Dir.glob("#{migration_path}/*.rb").each { |file| require file }
     Sequel::Migrator.run(Todo::Api.db, migration_path)
+  end
+
+  desc 'Seed the database with default data'
+  task seed: [:config] do
+    seed_path = File.expand_path('backend_app/db/seeds.rb')
+
+    # Load and execute the seed script
+    load(seed_path)
+    puts 'Database has been seeded.'
   end
 
   desc 'Delete dev or test database file'

@@ -60,7 +60,9 @@ When you're finished working:
 5. set the db
 
   ```shell
+  bundle exec rake db:drop
   bundle exec rake db:migrate
+  bundle exec rake db:seed
   ```
 
 ## Run the Web App

@@ -1,15 +1,17 @@
 
 <template>
     <div>
-        <button type="button" @click="handleGoogleAccessTokenLogin">
+        <el-button type="primary" @click="handleGoogleAccessTokenLogin">
             使用 Google 進行登入
-        </button>
+        </el-button>
+        
     </div>
 </template>
 
 <script>
 import { googleTokenLogin } from 'vue3-google-login';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export default {
     name: 'LoginPage',
@@ -22,13 +24,16 @@ export default {
     },
 
     methods: {
+        onLoginSuccess(user_id) {
+            Cookies.set('user', user_id, { expires: 7 }); // Expires in 7 days
+        },
         async sendTokenToBackend(accessToken) {
             try {
-                const response = await axios.post('/verify_google_token', {
+                const response = await axios.post('/api/auth/verify_google_token', {
                     access_token: accessToken
                 });
-                if (response.status === 200) {
-                    console.log("User Info:", response.data);
+                if (response.status === 200 || response.status === 201) {
+                    // console.log("User Info:", response.data);
                     return response.data;
                 } else {
                     console.error('Error sending token to backend');
@@ -37,7 +42,6 @@ export default {
                 console.error('Error:', error.response || error);
             }
         },
-
         async handleGoogleAccessTokenLogin() {
             try {
                 const response = await googleTokenLogin({
@@ -46,11 +50,11 @@ export default {
                 });
 
                 this.data = response;
-                console.log('access_token:', response.access_token);
+                // console.log('access_token:', response.access_token);
                 const userInfo = await this.sendTokenToBackend(response.access_token);
                 this.userData = userInfo;
-
                 if (userInfo) {
+                    this.onLoginSuccess(userInfo.user_info.id)
                     this.$router.push('/home');
                 }
             } catch (error) {

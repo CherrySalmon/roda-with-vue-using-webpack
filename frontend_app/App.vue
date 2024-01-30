@@ -6,6 +6,26 @@
   <router-view/>
 </template>
 
+<script>
+import Cookies from 'js-cookie';
+
+export default {
+    data() {
+        return {
+        };
+    },
+
+    methods: {
+      getUserFromCookie() {
+        return Cookies.get('user');
+      },
+      onLogout() {
+        Cookies.remove('user');
+      }
+    }
+  }
+</script>
+
 <style>
 #app {
   font-family: Helvetica, Arial, sans-serif;

@@ -117,7 +117,7 @@ export default {
 
   methods: {
     async addTodo() {
-      const response = await axios.post('/todos', {
+      const response = await axios.post('/api/todos', {
         name: this.newTodoText,
         due_date: this.dueDate || null
       })
@@ -127,12 +127,12 @@ export default {
       this.fetchTodos()
     },
     async removeTodo(todo) {
-    await axios.delete(`/todos/${todo.id}`)
+    await axios.delete(`/api/todos/${todo.id}`)
     this.todos = this.todos.filter(t => t.id !== todo.id)
     },
     
     async fetchTodos() {
-      const response = await axios.get('/todos')
+      const response = await axios.get('/api/todos')
       this.todos = response.data.data.map(todo => todo.data.attributes)  
     }
   },
