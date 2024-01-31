@@ -10,4 +10,4 @@
 - Choose **web application** as the type of project/application's credential
 - Add localhost to Authorized JavaScript origins
 ![](images/google_authorized_javascript_origins.png)
-- Copy the client id into your frontend_app/.env.local
+5. Copy the client id into your `frontend_app/.env.local`
