@@ -17,10 +17,10 @@ export default {
 
     methods: {
       getUserFromCookie() {
-        return Cookies.get('user');
+        return Cookies.get('account');
       },
       onLogout() {
-        Cookies.remove('user');
+          Cookies.remove('account');
       }
     }
   }

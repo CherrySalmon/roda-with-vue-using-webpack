@@ -4,11 +4,11 @@ require 'roda'
 require 'json'
 require_relative '../models/account'
 require_relative '../controllers/routes/todos'
-require_relative '../controllers/routes/role'
+require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
 
 module Todo
-  class App < Roda
+  class Api < Roda
     plugin :render
     plugin :public, root: 'dist'
     plugin :all_verbs
@@ -40,9 +40,9 @@ module Todo
           r.run Routes::Authentication # Routes::Authentication is defined in 'routes/authentication.rb'
         end
 
-        # All role-related routes are under 'api/role'
-        r.on 'role' do
-          r.run Routes::Role
+        # All account-related routes are under 'api/account'
+        r.on 'account' do
+          r.run Routes::Accounts
         end
 
         r.get do

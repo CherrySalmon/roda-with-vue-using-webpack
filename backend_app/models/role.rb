@@ -16,5 +16,9 @@ module Todo
       validates_presence :name
       validates_unique :name
     end
+
+    def self.get_id_by_name(name)
+      Role.where(name:).get(:id)
+    end
   end
 end

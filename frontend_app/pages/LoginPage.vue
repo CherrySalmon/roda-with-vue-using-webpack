@@ -24,8 +24,8 @@ export default {
     },
 
     methods: {
-        onLoginSuccess(user_id) {
-            Cookies.set('user', user_id, { expires: 7 }); // Expires in 7 days
+        onLoginSuccess(account_id) {
+            Cookies.set('account', account_id, { expires: 7 }); // Expires in 7 days
         },
         async sendTokenToBackend(accessToken) {
             try {

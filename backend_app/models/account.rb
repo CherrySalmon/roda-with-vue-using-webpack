@@ -32,6 +32,7 @@ module Todo
     def to_hash_with_role
       permissions = role.granted_permissions.map { |gp| gp.permission.name }
       {
+        id:,
         name:,
         email:,
         role: role&.name,
