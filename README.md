@@ -56,8 +56,9 @@ When you're finished working:
 4. set the envirnment
 
 - Copy the `./backend_app/config/secrets_example.yml` to `./backend_app/config/secrets.yml`
+- Copy the `./backend_app/db/account_seeds_example.rb` to `./backend_app/db/account_seeds.rb` and add admin account information.
 
-5. set the db
+1. set the db
 
   ```shell
   bundle exec rake db:drop

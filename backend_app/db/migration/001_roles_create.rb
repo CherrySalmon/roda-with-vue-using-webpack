@@ -7,7 +7,7 @@ Sequel.migration do
     # Create roles table
     create_table(:roles) do
       primary_key :id
-      String :name, unique: true, null: false
+      String :name
     end
   end
 end

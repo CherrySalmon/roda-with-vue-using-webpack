@@ -5,15 +5,52 @@ require 'sequel'
 
 module Todo
   class Account < Sequel::Model
-    many_to_one :role
-    one_through_one :granted_permissions, join_table: :granted_permissions, left_key: :role_id, right_key: :permission_id
-
     # validation for the model
     plugin :validation_helpers
+    many_to_many :roles, join_table: :account_roles
     def validate
       super
-      validates_presence [:name, :email, :role_id]
+      validates_presence [:name, :email]
       validates_unique :email
+    end
+
+    # Add a new account with the specified data
+    def self.add_account(user_data)
+      account = Account.create(
+        name: user_data[:name],
+        email: user_data[:email],
+        sso_token: user_data[:sso_token]
+      )
+      # Find or create roles and associate them with the account
+      user_data[:roles].each do |role_name|
+        role = Role.first(name: role_name)
+        account.add_role(role)
+      end
+      account
+    end
+
+    def self.update_account(account_id, user_data)
+      account = Account[account_id]
+
+      if account
+        # Update account attributes
+        account.update(
+          name: user_data['name'],
+          email: user_data['email'],
+          sso_token: user_data['sso_token']
+        )
+
+        puts user_data['roles']
+
+        # Clear existing roles and associate new roles
+        account.remove_all_roles
+
+        user_data['roles'].each do |role_name|
+          role = Role.first(name: role_name)
+          account.add_role(role) if role
+        end
+      end
+      account
     end
 
     def attributes
@@ -21,22 +58,7 @@ module Todo
         id:,
         name:,
         email:,
-        role_id:
-      }
-    end
-
-    def permissions_for_account
-      role.granted_permissions.map { |gp| gp.permission.name }
-    end
-
-    def to_hash_with_role
-      permissions = role.granted_permissions.map { |gp| gp.permission.name }
-      {
-        id:,
-        name:,
-        email:,
-        role: role&.name,
-        permissions:
+        roles: roles.map(&:name)
       }
     end
   end

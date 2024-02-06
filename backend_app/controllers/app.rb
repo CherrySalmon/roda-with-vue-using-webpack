@@ -3,7 +3,6 @@
 require 'roda'
 require 'json'
 require_relative '../models/account'
-require_relative '../controllers/routes/todos'
 require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
 

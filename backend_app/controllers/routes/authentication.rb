@@ -25,15 +25,8 @@ module Todo
                 response.status = 200
                 { success: true, message: 'Login successful', user_info: account.attributes }.to_json
               else
-                # Account doesn't exist, create a new one
-                account = Account.create(
-                  name: user_data['name'].force_encoding('UTF-8'),
-                  email: user_data['email'],
-                  role_id: 4,
-                  sso_token: access_token
-                )
-                response.status = 201
-                { success: true, message: 'Account created', user_info: account.attributes }.to_json
+                response.status = 404
+                { success: true, message: 'Account not exist', user_info: user_data }.to_json
               end
             rescue JSON::ParserError => e
               response.status = 400

@@ -22,7 +22,7 @@ namespace :db do
 
   desc 'Seed the database with default data'
   task seed: [:config] do
-    seed_path = File.expand_path('backend_app/db/seeds.rb')
+    seed_path = File.expand_path('backend_app/db/account_seeds.rb')
 
     # Load and execute the seed script
     load(seed_path)
