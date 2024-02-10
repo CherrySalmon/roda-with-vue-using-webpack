@@ -4,7 +4,7 @@
         <el-button type="primary" @click="handleGoogleAccessTokenLogin">
             使用 Google 進行登入
         </el-button>
-        
+
     </div>
 </template>
 
@@ -50,7 +50,7 @@ export default {
                 });
 
                 this.data = response;
-                // console.log('access_token:', response.access_token);
+                console.log('access_token:', response.access_token);
                 const userInfo = await this.sendTokenToBackend(response.access_token);
                 this.userData = userInfo;
                 if (userInfo) {
