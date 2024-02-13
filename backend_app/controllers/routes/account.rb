@@ -4,10 +4,10 @@ require 'json'
 
 module Todo
   module Routes
-    class Accounts < Roda
+    class Accounts < Roda # rubocop:disable Style/Documentation
       plugin :all_verbs
-      route do |r|
-        r.on do
+      route do |r| # rubocop:disable Metrics/BlockLength
+        r.on do # rubocop:disable Metrics/BlockLength
           r.get do
             # List all accounts with name, email, account name
             accounts = Account.all.map do |account|
@@ -17,23 +17,21 @@ module Todo
             { success: true, data: accounts }.to_json
           end
           r.post do
-            begin
-              request_body = JSON.parse(r.body.read)
-              user_data = request_body['user_data']
-              account = Account.add_account(
-                {
-                  name: user_data['name'].force_encoding('UTF-8'),
-                  email: user_data['email'],
-                  roles: user_data['roles'],
-                  sso_token: user_data['sso_token']
-                }
-              )
-              response.status = 201
-              { success: true, message: 'Account created', user_info: account.attributes }.to_json
-            rescue JSON::ParserError => e
-              response.status = 400
-              { error: 'Fail to create account', details: e.message }.to_json
-            end
+            request_body = JSON.parse(r.body.read)
+            user_data = request_body['user_data']
+            account = Account.add_account(
+              {
+                name: user_data['name'].force_encoding('UTF-8'),
+                email: user_data['email'],
+                roles: user_data['roles'],
+                sso_token: user_data['sso_token']
+              }
+            )
+            response.status = 201
+            { success: true, message: 'Account created', user_info: account.attributes }.to_json
+          rescue JSON::ParserError => e
+            response.status = 400
+            { error: 'Fail to create account', details: e.message }.to_json
           end
           r.put String do |target_id|
             request_body = JSON.parse(r.body.read)
