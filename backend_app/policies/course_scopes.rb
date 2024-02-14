@@ -9,7 +9,6 @@ module Todo
         target_account ||= current_account
         @full_scope = all_courses(target_account)
         @own_scope = owned_courses(current_account)
-        #   @share_scope = shared_dramalists(current_account)
         @current_account = current_account
         @target_account = target_account
       end
@@ -19,7 +18,8 @@ module Todo
           @full_scope
         else
           @full_scope.select do |course|
-            teachers_include_account?(course, @current_account) || staffs_include_account?(course, @current_account)
+            teachers_include_account?(course, @current_account) ||
+              staffs_include_account?(course, @current_account)
           end
         end
       end
@@ -27,10 +27,6 @@ module Todo
       def ownable
         @own_scope
       end
-
-      # def shareable
-      #   @share_scope
-      # end
 
       private
 
@@ -40,13 +36,6 @@ module Todo
           course.to_h.merge(policies: policy.summary)
         end
       end
-
-      # def shared_dramalists(account)
-      #   account.visitings.map do |dramalist|
-      #     policy = DramalistPolicy.new(account, dramalist)
-      #     dramalist.to_h.merge(policies: policy.summary)
-      #   end
-      # end
 
       def all_courses(account)
         puts account.owned_courses # + account.visitings

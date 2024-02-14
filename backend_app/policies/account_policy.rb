@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AccountPolicy # rubocop:disable Style/Documentation
-  attr_reader :requestor, :this_account
+  # attr_reader :requestor, :this_account
 
   def initialize(requestor, account)
     @requestor = requestor
@@ -36,11 +36,11 @@ class AccountPolicy # rubocop:disable Style/Documentation
 
   # Check if the requestor is the owner of the account
   def self_request?
-    requestor == this_account
+    @requestor == @this_account
   end
 
   # Check if the requestor has an admin role
   def requestor_is_admin?
-    requestor.roles.include?('Admin')
+    @requestor.roles.any? { |role| role.values[:name] == 'admin' }
   end
 end

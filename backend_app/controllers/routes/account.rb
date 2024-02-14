@@ -6,6 +6,7 @@ module Todo
   module Routes
     class Accounts < Roda # rubocop:disable Style/Documentation
       plugin :all_verbs
+      plugin :request_headers
       route do |r| # rubocop:disable Metrics/BlockLength
         r.on do # rubocop:disable Metrics/BlockLength
           r.get do
@@ -52,15 +53,10 @@ module Todo
           end
 
           r.delete String do |target_id|
-            # request_body = JSON.parse(r.body.read)
-            # user_data = request_body['user_data']
-
-            # ------------Test by Tiffany------------
-            # Assuming `auth` is available that contains the current user's account and possibly scope.
-            # You might need to adjust how `auth` is obtained based on your authentication system.
-            auth = { account: current_account, scope: nil } # Define how to get the current_account
-
-            # Call the RemoveAccount service
+            # ------------Test by Tiffany-----------
+            puts r.headers['account_id']
+            auth = Account.first(id: r.headers['account_id'])
+            puts 'account:', auth
             RemoveAccount.call(auth:, target_id:)
 
             response.status = 200
@@ -75,8 +71,11 @@ module Todo
             response.status = 404
             { error: 'User not found', details: e.message }.to_json
 
+            # request_body = JSON.parse(r.body.read)
+            # user_data = request_body['user_data']
             # begin
             #   account = Account.first(id: target_id)
+            #   puts 'account:', account
             #   if account
             #     account.delete
             #     response.status = 200
