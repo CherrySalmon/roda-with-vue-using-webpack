@@ -52,23 +52,43 @@ module Todo
           end
 
           r.delete String do |target_id|
-            request_body = JSON.parse(r.body.read)
-            user_data = request_body['user_data']
+            # request_body = JSON.parse(r.body.read)
+            # user_data = request_body['user_data']
 
-            begin
-              account = Account.first(id: target_id)
-              if account
-                account.delete
-                response.status = 200
-                { success: true, message: 'User deleted' }.to_json
-              else
-                response.status = 404
-                { error: 'User not found' }.to_json
-              end
-            rescue JSON::ParserError => e
-              response.status = 400
-              { error: 'Invalid JSON', details: e.message }.to_json
-            end
+            # ------------Test by Tiffany------------
+            # Assuming `auth` is available that contains the current user's account and possibly scope.
+            # You might need to adjust how `auth` is obtained based on your authentication system.
+            auth = { account: current_account, scope: nil } # Define how to get the current_account
+
+            # Call the RemoveAccount service
+            Todo::RemoveAccount.call(auth:, target_id:)
+
+            response.status = 200
+            { success: true, message: 'User deleted' }.to_json
+          rescue RemoveAccount::ForbiddenError => e
+            response.status = 403 # Forbidden status code
+            { error: 'Forbidden', details: e.message }.to_json
+          rescue JSON::ParserError => e
+            response.status = 400
+            { error: 'Invalid JSON', details: e.message }.to_json
+          rescue Sequel::NoMatchingRow => e # Catch if Account.first(id: target_id) returns nil
+            response.status = 404
+            { error: 'User not found', details: e.message }.to_json
+
+            # begin
+            #   account = Account.first(id: target_id)
+            #   if account
+            #     account.delete
+            #     response.status = 200
+            #     { success: true, message: 'User deleted' }.to_json
+            #   else
+            #     response.status = 404
+            #     { error: 'User not found' }.to_json
+            #   end
+            # rescue JSON::ParserError => e
+            #   response.status = 400
+            #   { error: 'Invalid JSON', details: e.message }.to_json
+            # end
           end
         end
       end
