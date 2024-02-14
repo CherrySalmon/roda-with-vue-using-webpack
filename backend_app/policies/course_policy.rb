@@ -41,7 +41,7 @@ module Todo
     private
 
     def account_is_admin?
-      @account.role == 'Admin'
+      @account.roles.include?('Admin')
     end
 
     def course_involves_account?

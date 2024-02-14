@@ -41,6 +41,6 @@ class AccountPolicy # rubocop:disable Style/Documentation
 
   # Check if the requestor has an admin role
   def requestor_is_admin?
-    requestor.role == 'Admin'
+    requestor.roles.include?('Admin')
   end
 end

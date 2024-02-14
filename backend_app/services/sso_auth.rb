@@ -2,8 +2,8 @@ require 'net/http'
 require 'json'
 
 module Todo
-  class SSOAuth
-    def self.fetch_user_info(access_token)
+  class SSOAuth # rubocop:disable Style/Documentation
+    def self.fetch_user_info(access_token) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
       uri = URI('https://www.googleapis.com/oauth2/v3/userinfo')
       uri.query = URI.encode_www_form(access_token:)
 

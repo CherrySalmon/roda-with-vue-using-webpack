@@ -3,9 +3,10 @@
 class RolePolicy # rubocop:disable Style/Documentation
   attr_reader :requestor, :target_account
 
-  def initialize(requestor, target_account)
+  def initialize(requestor, target_account, new_roles)
     @requestor = requestor
     @target_account = target_account
+    @new_roles = new_roles # The role being assigned to the target_account
   end
 
   # Admins or the account owner can read the role information
@@ -15,7 +16,7 @@ class RolePolicy # rubocop:disable Style/Documentation
 
   # Admins or the account owner can update roles, but only admins can assign admin roles
   def can_update?
-    (requestor_is_admin? || requestor_is_owner?) && admin_role_assignable?
+    (!include_admin_role? || requestor_is_owner?) || requestor_is_admin?
   end
 
   # Summary of permissions
@@ -30,7 +31,7 @@ class RolePolicy # rubocop:disable Style/Documentation
 
   # Check if the requestor has an admin role
   def requestor_is_admin?
-    requestor.role == 'Admin'
+    requestor.roles.include?('Admin')
   end
 
   # Check if the requestor is the owner of the account
@@ -38,11 +39,7 @@ class RolePolicy # rubocop:disable Style/Documentation
     requestor == target_account
   end
 
-  # Check if the admin role is assignable by the requestor
-  # You will need to implement the appropriate logic based on your application's rules
-  def admin_role_assignable?
-    # This is a placeholder for your logic to determine if an admin role can be assigned.
-    # For example, you might have a rule that only super admins can assign admin roles,
-    # or that an admin can only assign an admin role if they have a specific permission.
+  def include_admin_role?
+    @new_role == 'Admin'
   end
 end

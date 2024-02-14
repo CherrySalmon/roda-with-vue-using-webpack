@@ -61,7 +61,7 @@ module Todo
             auth = { account: current_account, scope: nil } # Define how to get the current_account
 
             # Call the RemoveAccount service
-            Todo::RemoveAccount.call(auth:, target_id:)
+            RemoveAccount.call(auth:, target_id:)
 
             response.status = 200
             { success: true, message: 'User deleted' }.to_json
