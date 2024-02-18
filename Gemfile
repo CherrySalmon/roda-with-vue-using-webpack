@@ -10,7 +10,9 @@ gem 'roda', '~>3.0'
 gem 'sequel', '~>5.0'
 gem 'tilt'
 gem 'google-id-token'
-
+gem 'dry-validation', '~>1.10'
+gem 'rack-ssl-enforcer'
+gem 'rbnacl'
 
 group :production do
   gem 'pg', '~>1.0'

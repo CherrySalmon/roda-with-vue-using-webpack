@@ -8,7 +8,7 @@ module Securable
   class NoKeyError < StandardError; end
 
   # Generate key for Rake tasks (typically not called at runtime)
-  def generate_key
+  def self.generate_key
     key = RbNaCl::Random.random_bytes(RbNaCl::SecretBox.key_bytes)
     Base64.strict_encode64 key
   end

@@ -30,7 +30,7 @@ export default {
         async sendTokenToBackend(accessToken) {
             try {
                 const response = await axios.post('/api/auth/verify_google_token', {
-                    access_token: accessToken
+                    sso_token: accessToken
                 });
                 if (response.status === 200 || response.status === 201) {
                     // console.log("User Info:", response.data);
@@ -50,7 +50,7 @@ export default {
                 });
 
                 this.data = response;
-                console.log('access_token:', response.access_token);
+                console.log('sso_token:', response.access_token);
                 const userInfo = await this.sendTokenToBackend(response.access_token);
                 this.userData = userInfo;
                 if (userInfo) {

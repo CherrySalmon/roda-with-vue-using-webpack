@@ -12,20 +12,33 @@ module Todo
           end
           r.post do
             request_body = JSON.parse(r.body.read)
-            access_token = request_body['access_token']
-            user_info = SSOAuth.fetch_user_info(access_token)
+            sso_token = request_body['sso_token']
+            user_info = SSOAuth.fetch_user_info(sso_token)
             user_data = JSON.parse(user_info)
 
             # Check if the account exists
             account = Account.first(email: user_data['email'])
-
             if account
-              # Account exists, respond with success
+              jwt = JWTCredential.generate_jwt(account.attributes[:id], account.attributes[:roles])
+              account_data = account.attributes
+              account_data['credential'] = jwt
+              # puts JWTCredential.decode_jwt(jwt)
               response.status = 200
-              { success: true, message: 'Login successful', user_info: account.attributes }.to_json
+              { success: true, message: 'Login successful', user_info: account_data }.to_json
             else
-              response.status = 404
-              { success: true, message: 'Account not exist', user_info: user_data }.to_json
+              account = Account.add_account(
+                {
+                  name: user_data['name'].force_encoding('UTF-8'),
+                  email: user_data['email'],
+                  roles: ['member'],
+                  sso_token: sso_token
+                }
+              )
+              jwt = JWTCredential.generate_jwt(account.attributes[:id], account.attributes[:roles])
+              account_data = account.attributes
+              account_data['credential'] = jwt
+              response.status = 201
+              { success: true, message: 'Account created', user_info: account_data }.to_json
             end
           rescue JSON::ParserError => e
             response.status = 400

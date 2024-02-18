@@ -42,3 +42,14 @@ namespace :db do
     puts "Deleted #{db_filename}"
   end
 end
+
+task :load_lib do
+  require_app('lib')
+end
+
+namespace :generate do
+  desc 'Create rbnacl key'
+  task :msg_key => :load_lib do
+    puts "New MSG_KEY (base64): #{Todo::JWTCredential.generate_key}"
+  end
+end

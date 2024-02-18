@@ -36,7 +36,7 @@ module Todo
           end
           r.put String do |target_id|
             request_body = JSON.parse(r.body.read)
-            user_data = request_body['user_data']
+            user_data = request_body
             begin
               account = Account.update_account(target_id, user_data)
               if account

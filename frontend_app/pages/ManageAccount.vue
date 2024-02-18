@@ -4,8 +4,7 @@
         <el-table-column type="index" width="50" />
         <el-table-column prop="name" label="Name" width="180" />
         <el-table-column prop="email" label="Email" />
-        <el-table-column prop="role" label="Role" />
-        <el-table-column prop="permissions" label="Permissions" />
+        <el-table-column prop="roles" label="Roles" />
         <el-table-column label="Operations" width="180">
             <template #default="scope">
                 <el-button @click="openEditDialog(scope.row)" size="small">Edit</el-button>
@@ -16,10 +15,10 @@
     <el-dialog title="Edit Account" v-model="editDialogVisible">
       <el-form :model="selectedAccount" label-width="80px">
         <el-form-item label="Email">
-          <el-input v-model="selectedAccount.email" autocomplete="off"></el-input>
+          <el-input class="editor-input-box" v-model="selectedAccount.email" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Role">
-          <el-select v-model="selectedAccount.role" placeholder="Please select a role">
+        <el-form-item label="Roles">
+          <el-select class="editor-input-box" v-model="selectedAccount.roles" placeholder="Please select a role" multiple>
             <el-option
               v-for="option in roleOptions"
               :key="option.value"
@@ -50,8 +49,7 @@ export default {
             roleOptions: [
                 { label: 'Admin', value: 'admin' },
                 { label: 'Teacher', value: 'teacher' },
-                { label: 'Staff', value: 'staff' },
-                { label: 'Student', value: 'student' }
+                { label: 'Member', value: 'member' }
             ],
             editDialogVisible: false,
             selectedAccount: {}
@@ -95,7 +93,7 @@ export default {
             }
         },
         async getUserRole(account_id) {
-            const response = await axios.post('/api/account', {
+            const response = await axios.get('/api/account', {
                 account_id: account_id
             })
             if (response.status === 200) {
@@ -115,5 +113,9 @@ export default {
 .page-container {
     width: 80%;
     margin: auto;
+}
+
+.editor-input-box {
+    width: 100%;
 }
 </style>
