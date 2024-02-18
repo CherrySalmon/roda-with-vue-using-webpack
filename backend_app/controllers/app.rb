@@ -7,11 +7,13 @@ require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
 
 module Todo
-  class Api < Roda
+  class Api < Roda # rubocop:disable Style/Documentation
     plugin :render
     plugin :public, root: 'dist'
     plugin :all_verbs
     plugin :halt
+
+    # include SecureRequestHelpers
 
     # Register the error_handler plugin
     plugin :error_handler do |e|
