@@ -3,13 +3,22 @@
 class AccountPolicy # rubocop:disable Style/Documentation
   # attr_reader :requestor, :this_account
 
-  def initialize(requestor, account)
+  def initialize(requestor, account = nil)
     @requestor = requestor
     @this_account = account
   end
 
+  # Admin can view any account;
+  def can_view_all?
+    requestor_is_admin?
+  end
+
+  def can_create?
+    @requestor!= nil
+  end
+
   # Admin can view any account; account owners can view their own account
-  def can_view?
+  def can_view_single?
     requestor_is_admin? || self_request?
   end
 
@@ -26,7 +35,8 @@ class AccountPolicy # rubocop:disable Style/Documentation
   # Summary of permissions
   def summary
     {
-      can_view: can_view?,
+      can_view_all: can_view_all?,
+      can_view_single: can_view_single?,
       can_update: can_update?,
       can_delete: can_delete?
     }
@@ -36,11 +46,11 @@ class AccountPolicy # rubocop:disable Style/Documentation
 
   # Check if the requestor is the owner of the account
   def self_request?
-    @requestor == @this_account
+    @requestor['id'] == @this_account
   end
 
   # Check if the requestor has an admin role
   def requestor_is_admin?
-    @requestor.roles.any? { |role| role.values[:name] == 'admin' }
+    @requestor['roles'].include?('admin')
   end
 end

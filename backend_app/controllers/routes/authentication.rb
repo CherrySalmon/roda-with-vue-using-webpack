@@ -22,7 +22,6 @@ module Todo
               jwt = JWTCredential.generate_jwt(account.attributes[:id], account.attributes[:roles])
               account_data = account.attributes
               account_data['credential'] = jwt
-              # puts JWTCredential.decode_jwt(jwt)
               response.status = 200
               { success: true, message: 'Login successful', user_info: account_data }.to_json
             else

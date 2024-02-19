@@ -56,8 +56,7 @@ export default {
         }
     },
     mounted() {
-        this.user_id = this.getUserFromCookie()
-        this.getUserRole(this.user_id)
+        this.getUserRole()
     },
     methods: {
         openEditDialog(account) {
@@ -71,7 +70,11 @@ export default {
         async updateAccount(account) {
             try {
                 account.account_id = this.user_id // for auth information
-                const response = await axios.put(`/api/account/${account.id}`, account)
+                const response = await axios.put(`/api/account/${account.id}`, account, {
+                    headers: {
+                        Authorization: `Bearer ${this.getCredentialFromCookie()}`
+                    }
+                })
                 if (response.status === 200) {
                     this.getUserRole(this.user_id)
                 }
@@ -83,18 +86,22 @@ export default {
         async deleteAccount(id) {
             try {
                 const response = await axios.delete(`/api/account/${id}`, {
-                    account_id: this.user_id
+                    headers: {
+                        Authorization: `Bearer ${this.getCredentialFromCookie()}`
+                    }
                 })
                 if (response.status === 200) {
-                    this.getUserRole(this.user_id)
+                    this.getUserRole()
                 }
             } catch (error) {
                 console.error('Error deleting account', error)
             }
         },
-        async getUserRole(account_id) {
+        async getUserRole() {
             const response = await axios.get('/api/account', {
-                account_id: account_id
+                headers: {
+                    Authorization: `Bearer ${this.getCredentialFromCookie()}`
+                }
             })
             if (response.status === 200) {
                 this.accounts = response.data.data
@@ -102,12 +109,13 @@ export default {
                 console.error('Error sending token to backend')
             }
         },
-        getUserFromCookie() {
-            return Cookies.get('account')
+        getCredentialFromCookie() {
+            return Cookies.get('account_credential')
         }
     }
-  }
+}
 </script>
+
 
 <style scoped>
 .page-container {

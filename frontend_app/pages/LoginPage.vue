@@ -24,8 +24,11 @@ export default {
     },
 
     methods: {
-        onLoginSuccess(account_id) {
-            Cookies.set('account', account_id, { expires: 7 }); // Expires in 7 days
+        onLoginSuccess(account_info) {
+            let exp_day = 7
+            Cookies.set('account_id', account_info.id, { expires: exp_day });
+            Cookies.set('account_roles', account_info.roles.join(','), { expires: exp_day });
+            Cookies.set('account_credential', account_info.credential, { expires: exp_day });
         },
         async sendTokenToBackend(accessToken) {
             try {
@@ -33,7 +36,6 @@ export default {
                     sso_token: accessToken
                 });
                 if (response.status === 200 || response.status === 201) {
-                    // console.log("User Info:", response.data);
                     return response.data;
                 } else {
                     console.error('Error sending token to backend');
@@ -50,11 +52,10 @@ export default {
                 });
 
                 this.data = response;
-                console.log('sso_token:', response.access_token);
                 const userInfo = await this.sendTokenToBackend(response.access_token);
                 this.userData = userInfo;
                 if (userInfo) {
-                    this.onLoginSuccess(userInfo.user_info.id)
+                    this.onLoginSuccess(userInfo.user_info)
                     this.$router.push('/home');
                 }
             } catch (error) {

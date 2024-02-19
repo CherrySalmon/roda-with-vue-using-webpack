@@ -17,38 +17,33 @@ module Todo
     # Add a new account with the specified data
     def self.add_account(user_data)
       account = Account.create(
-        name: user_data[:name],
-        email: user_data[:email],
-        sso_token: user_data[:sso_token]
+        name: user_data['name'],
+        email: user_data['email'],
+        sso_token: user_data['sso_token']
       )
+      
       # Find or create roles and associate them with the account
-      user_data[:roles].each do |role_name|
+      user_data['roles'].each do |role_name|
         role = Role.first(name: role_name)
         account.add_role(role)
       end
       account
     end
 
-    def self.update_account(account_id, user_data)
-      account = Account[account_id]
+    def update_account(user_data)
+      # Update account attributes directly
+      self.name = user_data['name'] if user_data['name']
+      self.email = user_data['email'] if user_data['email']
+      self.sso_token = user_data['sso_token'] if user_data['sso_token']
+      save_changes
 
-      if account
-        # Initialize an empty hash for the attributes to update
-        attributes_to_update = {}
-        attributes_to_update[:name] = user_data['name'] if user_data['name']
-        attributes_to_update[:email] = user_data['email'] if user_data['email']
-        attributes_to_update[:sso_token] = user_data['sso_token'] if user_data['sso_token']
-    
-        account.update(attributes_to_update) unless attributes_to_update.empty?
-        # Clear existing roles and associate new roles
-        account.remove_all_roles
-
-        user_data['roles'].each do |role_name|
-          role = Role.first(name: role_name)
-          account.add_role(role) if role
-        end
+      # Clear existing roles and associate new roles
+      remove_all_roles
+      user_data['roles'].each do |role_name|
+        role = Role.first(name: role_name)
+        add_role(role) if role
       end
-      account
+      true
     end
 
     def attributes
