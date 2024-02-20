@@ -20,7 +20,8 @@ module Todo
       account = Account.create(
         name: user_data[:name],
         email: user_data[:email],
-        sso_token: user_data[:sso_token]
+        sso_token: user_data[:sso_token],
+        avatar: user_data[:avatar]
       )
       # Find or create roles and associate them with the account
       user_data[:roles].each do |role_name|
@@ -34,7 +35,9 @@ module Todo
       # Update account attributes directly
       self.name = user_data['name'] if user_data['name']
       self.email = user_data['email'] if user_data['email']
+      self.avatar = user_data['avatar'] if user_data['avatar']
       self.sso_token = user_data['sso_token'] if user_data['sso_token']
+
       save_changes
 
       # Clear existing roles and associate new roles
@@ -51,6 +54,7 @@ module Todo
         id:,
         name:,
         email:,
+        avatar:,
         roles: roles.map(&:name)
       }
     end

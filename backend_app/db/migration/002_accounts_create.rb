@@ -10,6 +10,7 @@ Sequel.migration do
       foreign_key :role_id, :roles
       String :email, null: false
       String :sso_token
+      String :avatar
     end
   end
 end

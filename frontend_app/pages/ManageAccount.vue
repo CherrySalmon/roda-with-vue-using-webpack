@@ -2,6 +2,11 @@
   <div class="page-container">
     <el-table style="width: 100%" :data="accounts">
         <el-table-column type="index" width="50" />
+        <el-table-column width="70">
+            <template #default="scope">
+                <el-avatar shape="square" :size="40" :src="scope.row.avatar" />
+            </template>
+        </el-table-column>
         <el-table-column prop="name" label="Name" width="180" />
         <el-table-column prop="email" label="Email" />
         <el-table-column prop="roles" label="Roles" />
@@ -40,6 +45,7 @@
 <script>
 import Cookies from 'js-cookie'
 import axios from 'axios'
+import { imageEmits } from 'element-plus'
 
 export default {
     data() {
@@ -53,35 +59,36 @@ export default {
             ],
             editDialogVisible: false,
             selectedAccount: {}
-        }
+        };
     },
     mounted() {
-        this.getUserRole()
+        this.getUserRole();
     },
     methods: {
         openEditDialog(account) {
-            this.selectedAccount = account
-            this.editDialogVisible = true
+            this.selectedAccount = account;
+            this.editDialogVisible = true;
         },
         confirmEdit() {
-            this.updateAccount(this.selectedAccount)
-            this.editDialogVisible = false
+            this.updateAccount(this.selectedAccount);
+            this.editDialogVisible = false;
         },
         async updateAccount(account) {
             try {
-                account.account_id = this.user_id // for auth information
+                account.account_id = this.user_id; // for auth information
                 const response = await axios.put(`/api/account/${account.id}`, account, {
                     headers: {
                         Authorization: `Bearer ${this.getCredentialFromCookie()}`
                     }
-                })
+                });
                 if (response.status === 200) {
-                    this.getUserRole(this.user_id)
+                    this.getUserRole(this.user_id);
                 }
-            } catch (error) {
-                console.error('Error updating account', error)
             }
-            this.showEditDialog = false
+            catch (error) {
+                console.error('Error updating account', error);
+            }
+            this.showEditDialog = false;
         },
         async deleteAccount(id) {
             try {
@@ -89,12 +96,13 @@ export default {
                     headers: {
                         Authorization: `Bearer ${this.getCredentialFromCookie()}`
                     }
-                })
+                });
                 if (response.status === 200) {
-                    this.getUserRole()
+                    this.getUserRole();
                 }
-            } catch (error) {
-                console.error('Error deleting account', error)
+            }
+            catch (error) {
+                console.error('Error deleting account', error);
             }
         },
         async getUserRole() {
@@ -102,17 +110,19 @@ export default {
                 headers: {
                     Authorization: `Bearer ${this.getCredentialFromCookie()}`
                 }
-            })
+            });
             if (response.status === 200) {
-                this.accounts = response.data.data
-            } else {
-                console.error('Error sending token to backend')
+                this.accounts = response.data.data;
+            }
+            else {
+                console.error('Error sending token to backend');
             }
         },
         getCredentialFromCookie() {
-            return Cookies.get('account_credential')
+            return Cookies.get('account_credential');
         }
-    }
+    },
+    components: { imageEmits }
 }
 </script>
 
