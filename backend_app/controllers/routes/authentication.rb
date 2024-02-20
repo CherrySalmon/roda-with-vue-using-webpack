@@ -15,7 +15,6 @@ module Todo
             sso_token = request_body['sso_token']
             user_info = SSOAuth.fetch_user_info(sso_token)
             user_data = JSON.parse(user_info)
-
             # Check if the account exists
             account = Account.first(email: user_data['email'])
             if account

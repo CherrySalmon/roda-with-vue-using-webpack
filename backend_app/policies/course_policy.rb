@@ -1,61 +1,70 @@
 # frozen_string_literal: true
 
-module Todo
-  # Policy to determine if an account can view, edit, or delete a particular course
-  class CoursePolicy
-    def initialize(account, course, auth_scope = nil)
-      @account = account
-      @course = course
-      @auth_scope = auth_scope
-    end
+class CoursePolicy
+  def initialize(requestor, course = nil)
+    @requestor = requestor
+    @this_course = course
+  end
 
-    # Only the course's teachers can create a course
-    def can_create?
-      course_teachers_include_account?
-    end
+  # Admin can view any course;
+  def can_view_all?
+    requestor_is_admin?
+  end
 
-    # Admins and the course's teachers, staff, and students can read a course
-    def can_view?
-      account_is_admin? || course_involves_account?
-    end
+  # Teacher can create a course
+  def can_create?
+    requestor_is_teacher?
+  end
 
-    # Only Admins and the course's teachers and staff can update a course
-    def can_update?
-      account_is_admin? || course_teachers_include_account? || course_staffs_include_account?
-    end
+  # Admin can view any course;
+  def can_view?
+    requestor_is_admin? || self_enrolled?
+  end
 
-    # Only Admins and the course's teacher and staff can delete a course
-    def can_delete?
-      account_is_admin? || course_teachers_include_account? || course_staffs_include_account?
-    end
+  # Admin can update any course;
+  def can_update?
+    requestor_is_instructor? || requestor_is_staff? || requestor_is_admin?
+  end
 
-    def summary
-      {
-        can_create: can_create?,
-        can_view: can_view?,
-        can_update: can_update?,
-        can_delete: can_delete?
-      }
-    end
+  # Admin can delete any course;
+  def can_delete?
+    requestor_is_instructor?
+  end
 
-    private
+  # Summary of permissions
+  def summary
+    {
+      can_view_all: can_view_all?,
+      can_view: can_view?,
+      can_create: can_create?,
+      can_update: can_update?,
+      can_delete: can_delete?
+    }
+  end
 
-    def account_is_admin?
-      @account.roles.any? { |role| role.values[:name] == 'admin' }
-    end
+  private
 
-    def course_involves_account?
-      @course.teachers.include?(@account) ||
-        @course.staffs.include?(@account) ||
-        @course.students.include?(@account)
-    end
+  # Check if the requestor is enrolled in the course
+  def self_enrolled?
+    @this_course&.accounts&.any? { |account| account.id == @requestor['id'] }
+  end
 
-    def course_teachers_include_account?
-      @course.teachers.include?(@account)
-    end
+  # Check if the requestor has an admin role
+  def requestor_is_admin?
+    @requestor['roles'].include?('admin')
+  end
 
-    def course_staffs_include_account?
-      @course.staffs.include?(@account)
-    end
+  # Check if the requestor has an teacher role
+  def requestor_is_teacher?
+    @requestor['roles'].include?('teacher')
+  end
+
+  # Check if the requestor has an instructor role for the course
+  def requestor_is_instructor?
+    @requestor['roles'].include?('instructor')
+  end
+  # Check if the requestor has an staff role for the course
+  def requestor_is_staff?
+    @requestor['roles'].include?('staff')
   end
 end

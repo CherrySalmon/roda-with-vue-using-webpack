@@ -5,6 +5,7 @@ require 'json'
 require_relative '../models/account'
 require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
+require_relative '../controllers/routes/course'
 
 module Todo
   class Api < Roda # rubocop:disable Style/Documentation
@@ -44,6 +45,11 @@ module Todo
         # All account-related routes are under 'api/account'
         r.on 'account' do
           r.run Routes::Accounts
+        end
+
+        # All course-related routes are under 'api/course'
+        r.on 'course' do
+          r.run Routes::Courses
         end
 
         r.get do
