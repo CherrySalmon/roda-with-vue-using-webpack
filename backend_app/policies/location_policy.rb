@@ -11,22 +11,22 @@ module Todo
 
     # Only the course's teachers and staff can update a location
     def can_create?
-      can_write? && course_teachers_or_staff_include_account?
+      course_teachers_or_staff_include_account?
     end
 
     # Everyone can read a location
     def can_view?
-      can_read?
+      true
     end
 
     # Only the course's teachers and staff can update a location
     def can_update?
-      can_write? && course_teachers_or_staff_include_account?
+      course_teachers_or_staff_include_account?
     end
 
     # Only the course's teachers and staff can update a location
     def can_delete?
-      can_write? && course_teachers_or_staff_include_account?
+      course_teachers_or_staff_include_account?
     end
 
     def summary
@@ -39,14 +39,6 @@ module Todo
     end
 
     private
-
-    def can_read?
-      @auth_scope ? @auth_scope.can_read?('locations') : false
-    end
-
-    def can_write?
-      @auth_scope ? @auth_scope.can_write?('locations') : false
-    end
 
     def course_teachers_or_staff_include_account?
       @course.teachers.include?(@account) ||
