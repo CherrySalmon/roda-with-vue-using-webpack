@@ -15,8 +15,6 @@ module Todo
     plugin :all_verbs
     plugin :halt
 
-    # include SecureRequestHelpers
-
     # Register the error_handler plugin
     plugin :error_handler do |e|
       case e
