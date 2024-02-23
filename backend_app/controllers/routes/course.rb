@@ -119,6 +119,32 @@ module Todo
                   response.status = 403
                   { error: 'Forbidden', details: e.message }.to_json
               end
+
+              r.on String do |event_id|
+                # PUT api/course/:course_id/event/:event_id
+                r.put do
+                  request_body = JSON.parse(r.body.read)
+                  EventService.update(requestor, event_id, request_body)
+                  response.status = 200
+                  { success: true, message: 'Event updated'}.to_json
+                rescue EventService::AccountNotFoundError => e
+                  response.status = 404
+                  { error: 'Forbidden', details: e.message }.to_json
+                rescue EventService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+
+                # DELETE api/course/:course_id/event/:event_id
+                r.delete do
+                  EventService.remove_event(requestor, event_id)
+                  response.status = 200
+                  { success: true, message: 'Event deleted' }.to_json
+                rescue EventService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+              end
             end
 
             r.on do

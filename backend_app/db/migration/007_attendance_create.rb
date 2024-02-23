@@ -16,7 +16,7 @@ Sequel.migration do
       DateTime :created_at
       DateTime :updated_at
 
-      unique %i[course_id account_id created_at]
+      unique %i[course_id account_id event_id]
     end
   end
 end

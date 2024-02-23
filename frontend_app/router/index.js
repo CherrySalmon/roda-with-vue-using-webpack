@@ -5,6 +5,7 @@ import AllCourses from '../pages/course/AllCourse.vue'
 import SingleCourse from '../pages/course/SingleCourse.vue'
 import ManageCourse from '../pages/ManageCourse.vue';
 import PageNotFound from '../pages/404.vue'
+import AttendanceTrack from '../pages/course/AttendanceTrack.vue'
 
 const routes = [
   {
@@ -21,6 +22,11 @@ const routes = [
     path: '/course/:id',
     name: 'SingleCourse',
     component: SingleCourse
+  },
+  {
+    path: '/attendance',
+    name: 'AttendanceTrack',
+    component: AttendanceTrack
   },
   {
     path: '/manage-account',
