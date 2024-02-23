@@ -27,6 +27,11 @@ module Todo
       Event.add_event(course_id, event_data)
     end
 
+    def self.find(requestor, time)
+      Event.find_event(requestor, time)
+    end
+
+
     def self.find_course(course_id)
       Course.first(id: course_id) || raise(CourseNotFoundError, "Course with ID #{course_id} not found.")
     end

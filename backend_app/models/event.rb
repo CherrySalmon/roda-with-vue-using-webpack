@@ -37,6 +37,12 @@ module Todo
       { error: "Failed to add event: #{e.message}" }
     end
 
+    def self.find_event(requestor, time)
+      course_ids = AccountCourse.where(account_id: requestor['account_id']).select_map(:course_id)
+      events = Event.where{start_time <= time}.where{end_time >= time}.where(course_id: course_ids).all
+      events.map(&:values) # or any other way you wish to serialize the data
+    end
+
     def attributes
       {
         id:,
