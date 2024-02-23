@@ -6,6 +6,7 @@ require_relative '../models/account'
 require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
 require_relative '../controllers/routes/course'
+require_relative '../controllers/routes/location'
 
 module Todo
   class Api < Roda # rubocop:disable Style/Documentation
@@ -50,6 +51,11 @@ module Todo
         # All course-related routes are under 'api/course'
         r.on 'course' do
           r.run Routes::Courses
+        end
+
+        # All course-related routes are under 'api/location'
+        r.on 'location' do
+          r.run Routes::Locations
         end
 
         r.get do

@@ -13,7 +13,7 @@ module Todo
           auth_header = r.headers['Authorization']
           requestor = JWTCredential.decode_jwt(auth_header)
 
-          # GET api/list_all
+          # GET api/course/list_all
           r.on 'list_all' do
             r.get do
               courses = CourseService.list_all(requestor)
@@ -68,7 +68,7 @@ module Todo
                 end
               end
             end
-            
+
             r.on do
               # GET api/course/:id
               r.get do
