@@ -18,25 +18,30 @@ module Todo
     end
 
     def self.listByAccountID(account_id)
-      # This will return an array of Course instances associated with the account_id
+      # Fetch courses directly associated with the given account_id
+      # through the account_course_roles join table
       Course.join(:account_course_roles, course_id: :id)
             .where(account_id:)
             .select_all(:courses)
-      Course.all.map(&:attributes)
+            .all
+            .map do |course|
+              course.attributes(account_id)
+            end
     end
 
-    def attributes
+    def attributes(account_id = nil)
       {
-        id:,
-        name:,
-        semester:,
-        created_at:,
-        updated_at:,
-        logo:,
-        start_time:,
-        repeat:,
-        duration:,
-        occurrence:
+        id: id,
+        name: name,
+        semester: semester,
+        created_at: created_at,
+        updated_at: updated_at,
+        logo: logo,
+        start_time: start_time,
+        repeat: repeat,
+        duration: duration,
+        occurrence: occurrence,
+        enroll_identity: account_id ? get_enroll_identity(account_id) : {}
       }
     end
 
@@ -60,6 +65,11 @@ module Todo
     end
 
     private
+
+    def get_enroll_identity(account_id)
+      account_course_role = AccountCourse.first(account_id: account_id, course_id: self.id)
+      account_course_role ? account_course_role.roles : nil
+    end
 
     def add_or_find_account(email)
       Account.find_or_create(email:)

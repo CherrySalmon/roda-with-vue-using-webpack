@@ -25,35 +25,89 @@ module Todo
             end
           end
 
-          r.on 'enroll' do
-            # GET api/course/enroll - Retrieve enrollment information
-            r.get String do |id|
-              course_id = id
-              enrollments = CourseService.get_enrollments(requestor, course_id)
-              response.status = 200
-              { success: true, data: enrollments }.to_json
-            rescue CourseService::ForbiddenError => e
-              response.status = 403
-              { error: 'Forbidden', details: e.message }.to_json
-            rescue CourseService::CourseNotFoundError => e
-              response.status = 404
-              { error: 'Course not found', details: e.message }.to_json
-            end
+          r.on String do |course_id|
 
-            # PUT api/course/enroll - Update or add enrollments
-            r.put String do |id|
-              request_body = JSON.parse(r.body.read)
-              course_id = id
-              enrolled_data = request_body["enroll"] # Expects an array of {email: "email", roles: "role1,role2"}
-              CourseService.update_enrollments(requestor, course_id, enrolled_data)
-              response.status = 200
-              { success: true, message: 'Enrollments updated' }.to_json
-            rescue JSON::ParserError
-              response.status = 400
-              { error: 'Invalid JSON format' }.to_json
-            rescue CourseService::CourseNotFoundError => e
-              response.status = 404
-              { error: 'Course not found', details: e.message }.to_json
+            r.on 'enroll' do
+              # GET api/course/:course_id/enroll - Retrieve enrollment information
+              r.get do
+                enrollments = CourseService.get_enrollments(requestor, course_id)
+                response.status = 200
+                { success: true, data: enrollments }.to_json
+
+              rescue CourseService::ForbiddenError => e
+                response.status = 403
+                { error: 'Forbidden', details: e.message }.to_json
+              rescue CourseService::CourseNotFoundError => e
+                response.status = 404
+                { error: 'Course not found', details: e.message }.to_json
+              end
+              # POST api/course/:course_id/enroll - Update or add enrollments
+              r.post do
+                request_body = JSON.parse(r.body.read)
+                enrolled_data = request_body["enroll"] # Expects an array of {email: "email", roles: "role1,role2"}
+                CourseService.update_enrollments(requestor, course_id, enrolled_data)
+                response.status = 200
+                { success: true, message: 'Enrollments updated' }.to_json
+              rescue JSON::ParserError
+                response.status = 400
+                { error: 'Invalid JSON format' }.to_json
+              rescue CourseService::CourseNotFoundError => e
+                response.status = 404
+                { error: 'Course not found', details: e.message }.to_json
+              end
+
+              r.on String do |account_id|
+                # DELETE api/course/:course_id/enroll/:enroll_id
+                r.delete do
+                  CourseService.remove_enroll(requestor, course_id, account_id)
+                  response.status = 200
+                  { success: true, message: 'Course deleted' }.to_json
+                rescue CourseService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+              end
+            end
+            
+            r.on do
+              # GET api/course/:id
+              r.get do
+                course = CourseService.get(requestor, course_id)
+                response.status = 200
+                { success: true, data: course }.to_json
+              rescue CourseService::ForbiddenError => e
+                response.status = 403
+                { error: 'Forbidden', details: e.message }.to_json
+              end
+              # PUT api/course/:id
+              r.put do
+                request_body = JSON.parse(r.body.read)
+                CourseService.update(requestor, course_id, request_body)
+                response.status = 200
+                { success: true, message: 'Course updated'}.to_json
+              rescue CourseService::CourseNotFoundError => e
+                response.status = 404
+                { error: 'Course not found', details: e.message }.to_json
+              rescue CourseService::ForbiddenError => e
+                response.status = 403
+                { error: 'Forbidden', details: e.message }.to_json
+              end
+
+              # DELETE api/course/:id
+              r.delete do
+                CourseService.remove(requestor, course_id)
+                response.status = 200
+                { success: true, message: 'Course deleted' }.to_json
+              rescue CourseService::ForbiddenError => e
+                response.status = 403
+                { error: 'Forbidden', details: e.message }.to_json
+              rescue JSON::ParserError => e
+                response.status = 400
+                { error: 'Invalid JSON', details: e.message }.to_json
+              rescue Sequel::NoMatchingRow => e
+                response.status = 404
+                { error: 'Course not found', details: e.message }.to_json
+              end
             end
           end
 
@@ -107,36 +161,6 @@ module Todo
           rescue CourseService::ForbiddenError => e
             response.status = 403
             { error: 'Forbidden', details: e.message }.to_json
-          end
-
-          # PUT api/course/:id
-          r.put String do |course_id|
-            request_body = JSON.parse(r.body.read)
-            CourseService.update(requestor, course_id, request_body)
-            response.status = 200
-            { success: true, message: 'Course updated'}.to_json
-          rescue CourseService::CourseNotFoundError => e
-            response.status = 404
-            { error: 'Course not found', details: e.message }.to_json
-          rescue CourseService::ForbiddenError => e
-            response.status = 403
-            { error: 'Forbidden', details: e.message }.to_json
-          end
-
-          # DELETE api/course/:id
-          r.delete String do |course_id|
-            CourseService.remove(requestor, course_id)
-            response.status = 200
-            { success: true, message: 'Course deleted' }.to_json
-          rescue CourseService::ForbiddenError => e
-            response.status = 403
-            { error: 'Forbidden', details: e.message }.to_json
-          rescue JSON::ParserError => e
-            response.status = 400
-            { error: 'Invalid JSON', details: e.message }.to_json
-          rescue Sequel::NoMatchingRow => e
-            response.status = 404
-            { error: 'Course not found', details: e.message }.to_json
           end
         rescue JWTCredential::ArgumentError => e
           response.status = 400

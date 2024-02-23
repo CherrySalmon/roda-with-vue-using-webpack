@@ -28,6 +28,7 @@ module Todo
                 {
                   name: user_data['name'].force_encoding('UTF-8'),
                   email: user_data['email'],
+                  avatar: user_data['picture'],
                   roles: ['member'],
                   sso_token: sso_token
                 }
