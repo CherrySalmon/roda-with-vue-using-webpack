@@ -1,27 +1,30 @@
 # frozen_string_literal: true
 
-require_relative '../policies/attendance_policy'
+require_relative '../policies/event_policy'
 
 module Todo
-  # Manages attendance requests
-  class AttendanceService
+  # Manages event requests
+  class EventService
     # Custom error classes
     class ForbiddenError < StandardError; end
-    class AttendanceNotFoundError < StandardError; end
+    class EventNotFoundError < StandardError; end
 
-    # Lists joined course's attendance, if authorized
+    # Lists course's event, if authorized
     def self.list(requestor, course_id)
       course = find_course(course_id)
       verify_policy(requestor, :view, course)
-      attendances = Attendance.list_attendance(requestor['account_id'], course_id)
-      attendances || raise(ForbiddenError, 'You have no access to list attendance.')
+      events = Event.list_event(course_id)
+      events || raise(ForbiddenError, 'You have no access to list events.')
     end
 
-    # Creates a new attendance, if authorized
-    def self.create(requestor, attendance_data, course_id)
+    # Creates a new event, if authorized
+    def self.create(requestor, event_data, course_id)
+      puts "event_data: #{event_data}"
       course = find_course(course_id)
+      puts "course: #{course}"
+
       verify_policy(requestor, :create, course)
-      Attendance.add_attendance(requestor['account_id'], course_id, attendance_data)
+      Event.add_event(course_id, event_data)
     end
 
     def self.find_course(course_id)
@@ -30,7 +33,7 @@ module Todo
 
     # Checks authorization for the requested action
     def self.verify_policy(requestor, action = nil, course = nil)
-      policy = AttendancePolicy.new(requestor, course)
+      policy = EventPolicy.new(requestor, course)
       action_check = action ? policy.send("can_#{action}?") : true
       raise(ForbiddenError, 'You have no access to perform this action.') unless action_check
 
