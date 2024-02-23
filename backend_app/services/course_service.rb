@@ -23,13 +23,8 @@ module Todo
     # Creates a new course, if authorized
     def self.create(requestor, course_data)
       verify_policy(requestor, :create)
-      course = Course.create(course_data) || raise("Failed to create course.")
-      onwer = {
-        "email": requestor['email'],
-        "roles": 'owner,teacher'
-      }
-      CourseService.update_enrollments(requestor, course.id, onwer) if course_data['enroll']
-      course
+      course = Course.create_course(requestor['account_id'], course_data) || raise("Failed to create course.")
+      course.attributes(requestor['account_id'])
     end
 
     def self.get(requestor, course_id)

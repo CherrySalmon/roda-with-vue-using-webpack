@@ -154,7 +154,7 @@ module Todo
             request_body = JSON.parse(r.body.read)
             course = CourseService.create(requestor, request_body)
             response.status = 201
-            { success: true, message: 'Course created', course_info: course.attributes }.to_json
+            { success: true, message: 'Course created', course_info: course }.to_json
           rescue JSON::ParserError => e
             response.status = 400
             { error: 'Invalid JSON', details: e.message }.to_json
