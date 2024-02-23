@@ -52,6 +52,11 @@ module Todo
           r.run Routes::Courses
         end
 
+        # All curren-event-related routes are under 'api/course'
+        r.on 'current_event' do
+          r.run Routes::CurrentEvents
+        end
+
         r.get do
           response['Content-Type'] = 'application/json'
           { success: true, message: 'Welcome to the Todo API' }.to_json
