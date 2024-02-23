@@ -82,10 +82,7 @@ module Todo
 
               # POST api/course/:course_id/attendance/
               r.post do
-                puts "course_id: #{course_id}"
                 request_body = JSON.parse(r.body.read)
-                puts "request_body: #{request_body}"
-                puts "requestor: #{requestor}"
                 attendance = AttendanceService.create(requestor, request_body, course_id)
                 response.status = 201
                 { success: true, message: 'Attendance created', attendance_info: attendance.attributes }.to_json
@@ -93,6 +90,32 @@ module Todo
                   response.status = 400
                   { error: 'Invalid JSON', details: e.message }.to_json
                 rescue AttendanceService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+              end
+            end
+
+            r.on 'event' do
+              # GET api/course/:course_id/event/
+              r.get do
+                events = EventService.list(requestor, course_id)
+                response.status = 200
+                { success: true, data: events }.to_json
+                rescue EventService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+              end
+
+              # POST api/course/:course_id/event/
+              r.post do
+                request_body = JSON.parse(r.body.read)
+                event = EventService.create(requestor, request_body, course_id)
+                response.status = 201
+                { success: true, message: 'Event created', event_info: event.attributes }.to_json
+                rescue JSON::ParserError => e
+                  response.status = 400
+                  { error: 'Invalid JSON', details: e.message }.to_json
+                rescue EventService::ForbiddenError => e
                   response.status = 403
                   { error: 'Forbidden', details: e.message }.to_json
               end
