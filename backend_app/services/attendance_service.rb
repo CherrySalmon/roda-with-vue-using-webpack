@@ -13,7 +13,7 @@ module Todo
     def self.list(requestor, course_id)
       course = find_course(course_id)
       verify_policy(requestor, :view, course)
-      attendances = Attendance.list_attendance(requestor['id'], course_id)
+      attendances = Attendance.list_attendance(requestor['account_id'], course_id)
       attendances || raise(ForbiddenError, 'You have no access to list attendance.')
     end
 
@@ -30,7 +30,7 @@ module Todo
         puts "No accounts associated with this course or the course doesn't exist."
       end
       verify_policy(requestor, :create, course)
-      Attendance.add_attendance(requestor['id'], course_id, attendance_data)
+      Attendance.add_attendance(requestor['account_id'], course_id, attendance_data)
     end
 
     def self.find_course(course_id)

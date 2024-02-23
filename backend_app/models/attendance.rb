@@ -21,7 +21,7 @@ module Todo
     def self.list_attendance(account_id, course_id)
       # Assuming Attendance::account_id actually references account_course_roles.id
       # First, find the account_course_role_id(s) that match the account_id and course_id
-      account_course_role_ids = AccountCourseRole.where(account_id:, course_id:).select_map(:id)
+      account_course_role_ids = AccountCourse.where(account_id:, course_id:).select_map(:id)
 
       # Then, query the attendances using those account_course_role_id(s)
       attendances = Attendance.where(account_id: account_course_role_ids).all
@@ -31,19 +31,21 @@ module Todo
     def self.add_attendance(account_id, course_id, attendance_details)
       account_course_role_id = find_account_course_role_id(account_id, course_id)
 
+      # result = Attendance.where(account_id: account_course_role_id, course_id: course_id, event_id: attendance_details['event_id']).first
+      # raise 'Attendance already done' if result
+
       # Create the Attendance record
       attendance = Attendance.create(
         account_id: account_course_role_id, # This is actually the AccountCourseRole ID
-        course_id:, # Assuming you also directly relate attendances to courses
-        name: attendance_details[:name],
-        event_id: attendance_details[:event_id],
-        latitude: attendance_details[:latitude],
-        longitude: attendance_details[:longitude],
+        course_id: course_id, # Assuming you also directly relate attendances to courses
+        event_id: attendance_details['event_id'],
+        name: attendance_details['name'],
+        latitude: attendance_details['latitude'],
+        longitude: attendance_details['longitude'],
         created_at: Time.now, # or omit if using automatic timestamps
         updated_at: Time.now  # or omit if using automatic timestamps
       )
 
-      attendance.values # Return the created attendance record details
     rescue StandardError => e
       # Handle error (e.g., AccountCourseRole not found, validation errors)
       { error: "Failed to add attendance: #{e.message}" }
@@ -63,9 +65,7 @@ module Todo
       }
     end
 
-    private
-
-    def find_account_course_role_id(account_id, course_id)
+    def self.find_account_course_role_id(account_id, course_id)
       account_course_role = AccountCourse.where(account_id:, course_id:).first
       raise 'AccountCourse not found' unless account_course_role
 

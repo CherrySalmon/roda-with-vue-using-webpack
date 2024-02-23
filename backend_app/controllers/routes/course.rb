@@ -44,7 +44,7 @@ module Todo
               # POST api/course/:course_id/enroll - Update or add enrollments
               r.post do
                 request_body = JSON.parse(r.body.read)
-                enrolled_data = request_body["enroll"] # Expects an array of {email: "email", roles: "role1,role2"}
+                enrolled_data = [request_body["enroll"]] # Expects an array of {email: "email", roles: "role1,role2"}
                 CourseService.update_enrollments(requestor, course_id, enrolled_data)
                 response.status = 200
                 { success: true, message: 'Enrollments updated' }.to_json
@@ -68,7 +68,36 @@ module Todo
                 end
               end
             end
-            
+
+            r.on 'attendance' do
+              # GET api/course/:course_id/attendance
+              r.get do
+                attendances = AttendanceService.list(requestor, course_id)
+                response.status = 200
+                { success: true, data: attendances }.to_json
+                rescue AttendanceService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+              end
+
+              # POST api/course/:course_id/attendance/
+              r.post do
+                puts "course_id: #{course_id}"
+                request_body = JSON.parse(r.body.read)
+                puts "request_body: #{request_body}"
+                puts "requestor: #{requestor}"
+                attendance = AttendanceService.create(requestor, request_body, course_id)
+                response.status = 201
+                { success: true, message: 'Attendance created', attendance_info: attendance.attributes }.to_json
+                rescue JSON::ParserError => e
+                  response.status = 400
+                  { error: 'Invalid JSON', details: e.message }.to_json
+                rescue AttendanceService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+              end
+            end
+
             r.on do
               # GET api/course/:id
               r.get do
@@ -108,34 +137,6 @@ module Todo
                 response.status = 404
                 { error: 'Course not found', details: e.message }.to_json
               end
-            end
-          end
-
-          r.on 'attendance' do
-            # GET api/course/:id/attendance
-            r.get String do |course_id|
-              attendances = AttendanceService.list(requestor, course_id)
-              response.status = 200
-              { success: true, data: attendances }.to_json
-              rescue AttendanceService::ForbiddenError => e
-                response.status = 403
-                { error: 'Forbidden', details: e.message }.to_json
-            end
-
-            # POST api/course/:id/attendance/
-            r.post String do |course_id|
-              puts "course_id: #{course_id}"
-              request_body = JSON.parse(r.body.read)
-              puts "request_body: #{request_body}"
-              attendance = AttendanceService.create(requestor, request_body, course_id)
-              response.status = 201
-              { success: true, message: 'Attendance created', attendance_info: attendance.attributes }.to_json
-              rescue JSON::ParserError => e
-                response.status = 400
-                { error: 'Invalid JSON', details: e.message }.to_json
-              rescue AttendanceService::ForbiddenError => e
-                response.status = 403
-                { error: 'Forbidden', details: e.message }.to_json
             end
           end
 
