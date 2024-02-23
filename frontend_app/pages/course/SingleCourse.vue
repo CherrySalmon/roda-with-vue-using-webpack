@@ -78,7 +78,7 @@
         <el-table-column prop="name" label="Name" width="180" />
         <el-table-column prop="email" label="Email" />
         <el-table-column label="Role">
-          <template #default="scope" >
+          <template #default="scope">
             <el-select v-model="scope.row.enrolls" placeholder="Select role" @change="updateEnrollment(scope.row)" multiple :disabled="scope.row.enrolls.includes('owner')">
               <el-option label="Instructor" value="instructor"></el-option>
               <el-option label="Staff" value="staff"></el-option>
@@ -88,7 +88,7 @@
         </el-table-column>
         <el-table-column label="Operations" width="180">
             <template #default="scope">
-                <el-button type="danger" @click="deleteEnrollments(scope.row.id)" size="small">Delete</el-button>
+                <el-button type="danger" @click="deleteEnrollments(scope.row.account_id)" size="small">Delete</el-button>
             </template>
         </el-table-column>
     </el-table>
