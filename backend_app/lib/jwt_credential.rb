@@ -25,7 +25,6 @@ module Todo
       Base64.urlsafe_encode64(nonce + encrypted_payload)
     end
 
-
     def self.decode_jwt(auth_header)
       raise ArgumentError, 'Authorization header cannot be nil or empty' unless auth_header && auth_header.start_with?('Bearer ')
   

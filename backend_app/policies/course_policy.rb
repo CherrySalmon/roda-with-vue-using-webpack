@@ -28,7 +28,7 @@ class CoursePolicy
 
   # Admin can delete any course;
   def can_delete?
-    requestor_is_instructor?
+    requestor_is_admin? || requestor_is_instructor?
   end
 
   # Summary of permissions
@@ -46,7 +46,8 @@ class CoursePolicy
 
   # Check if the requestor is enrolled in the course
   def self_enrolled?
-    @this_course&.accounts&.any? { |account| account.id == @requestor['id'] }
+    enroll = @this_course&.accounts&.any? { |account| account.account_id == @requestor['account_id'] }
+    enroll
   end
 
   # Check if the requestor has an admin role

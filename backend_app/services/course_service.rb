@@ -18,14 +18,23 @@ module Todo
 
     # Lists all joined courses, if authorized
     def self.list(requestor)
-        verify_policy(requestor, :view)
-        courses = Course.listByAccountID(requestor['id'])
-        courses || raise(ForbiddenError, 'You have no access to list courses.')
+      Course.listByAccountID(requestor['account_id'])
     end
     # Creates a new course, if authorized
     def self.create(requestor, course_data)
       verify_policy(requestor, :create)
-      Course.create(course_data) || raise("Failed to create course.")
+      course = Course.create(course_data) || raise("Failed to create course.")
+      onwer = {
+        "email": requestor['email'],
+        "roles": 'owner,teacher'
+      }
+      CourseService.update_enrollments(requestor, course.id, onwer) if course_data['enroll']
+      course
+    end
+
+    def self.get(requestor, course_id)
+      course = Course.first(id: course_id)
+      course.attributes(requestor['account_id'])
     end
 
     # Updates an existing course, if authorized
@@ -40,6 +49,13 @@ module Todo
       course = find_course(course_id)
       verify_policy(requestor, :delete, course)
       course.delete
+    end
+
+    def self.remove_enroll(requestor, course_id, account_id)
+      course = find_course(course_id)
+      verify_policy(requestor, :update, course)
+      account = AccountCourse.first(account_id: account_id)
+      account.delete
     end
 
     def self.get_enrollments(requestor, course_id)

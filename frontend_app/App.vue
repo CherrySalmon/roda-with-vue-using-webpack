@@ -1,9 +1,40 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+  <div id="app">
+    <el-row class="app-container">
+      <el-col :span="6">
+        <el-menu
+          default-active="2"
+          class="el-menu-vertical-demo"
+          :collapse="isCollapse"
+          @select="handleSelect"
+        >
+          <el-menu-item index="/manage-account">
+            <el-icon><Avatar /></el-icon>
+            <template #title>Account Management</template>
+          </el-menu-item>
+          <el-menu-item index="/manage-course">
+            <el-icon><setting /></el-icon>
+            <template #title>Course Management</template>
+          </el-menu-item>
+          <el-menu-item index="/course">
+            <el-icon><document /></el-icon>
+            <template #title>Course</template>
+          </el-menu-item>
+          <el-menu-item index="/login">
+            <el-icon><document /></el-icon>
+            <template #title>Login</template>
+          </el-menu-item>
+        </el-menu>
+      </el-col>
+      <el-col :span="18">
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </el-col>
+    </el-row>
   </div>
-  <router-view/>
 </template>
 
 <script>
@@ -12,15 +43,20 @@ import Cookies from 'js-cookie';
 export default {
     data() {
         return {
+
         };
     },
 
     methods: {
+      handleSelect(key, keyPath) {
+        console.log(key, keyPath)
+        this.$router.push(key)
+      },
       getUserFromCookie() {
-        return Cookies.get('account');
+        return Cookies.get('account_credential');
       },
       onLogout() {
-          Cookies.remove('account');
+          Cookies.remove('account_credential');
       }
     }
   }
@@ -34,17 +70,14 @@ export default {
   text-align: center;
   color: #2c3e50;
 }
-
-#nav {
-  padding: 30px;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
 }
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
 </style>
