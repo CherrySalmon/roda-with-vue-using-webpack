@@ -39,6 +39,27 @@
 
 <script>
 import Cookies from 'js-cookie';
+// Debounce function to limit the rate at which a function is executed
+const debounce = (callback, delay) => {
+  let tid;
+  return function (...args) {
+    const ctx = this;
+    if (tid) clearTimeout(tid);
+    tid = setTimeout(() => {
+      callback.apply(ctx, args);
+    }, delay);
+  };
+};
+
+// Saving the original ResizeObserver
+const OriginalResizeObserver = window.ResizeObserver;
+
+// Modifying ResizeObserver to use debounced callback
+window.ResizeObserver = class ResizeObserver extends OriginalResizeObserver {
+  constructor(callback) {
+    super(debounce(callback, 20));
+  }
+};
 
 export default {
     data() {

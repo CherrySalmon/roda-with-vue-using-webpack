@@ -29,6 +29,13 @@ module Todo
             end
     end
 
+    def self.create_course(account_id, course_data)
+      course = Course.create(course_data)
+      account_course_role = AccountCourse.find_or_create(account_id: account_id, course_id: course.id)
+      account_course_role.update(roles: 'owner')
+      course
+    end
+
     def attributes(account_id = nil)
       {
         id: id,
@@ -54,12 +61,14 @@ module Todo
 
     def get_enrollments
       # Assuming AccountCourse model exists and represents the account_course_roles table
-      AccountCourse.where(course_id: id).map do |enrollment|
-        account = Account[enrollment.account_id]
+      AccountCourse.where(course_id: self.id).map do |enrollment|
+        account = Account.first( id: enrollment.account_id)
         {
           account_id: account.id,
           email: account.email,
-          roles: enrollment.roles
+          name: account.name,
+          avatar: account.avatar,
+          enroll_identity: enrollment.roles
         }
       end
     end

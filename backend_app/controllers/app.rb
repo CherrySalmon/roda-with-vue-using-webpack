@@ -6,6 +6,7 @@ require_relative '../models/account'
 require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
 require_relative '../controllers/routes/course'
+require_relative '../controllers/routes/location'
 
 module Todo
   class Api < Roda # rubocop:disable Style/Documentation
@@ -13,8 +14,6 @@ module Todo
     plugin :public, root: 'dist'
     plugin :all_verbs
     plugin :halt
-
-    # include SecureRequestHelpers
 
     # Register the error_handler plugin
     plugin :error_handler do |e|
@@ -50,6 +49,11 @@ module Todo
         # All course-related routes are under 'api/course'
         r.on 'course' do
           r.run Routes::Courses
+        end
+
+        # All course-related routes are under 'api/location'
+        r.on 'location' do
+          r.run Routes::Locations
         end
 
         # All curren-event-related routes are under 'api/course'

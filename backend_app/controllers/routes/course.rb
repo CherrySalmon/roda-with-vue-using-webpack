@@ -13,7 +13,7 @@ module Todo
           auth_header = r.headers['Authorization']
           requestor = JWTCredential.decode_jwt(auth_header)
 
-          # GET api/list_all
+          # GET api/course/list_all
           r.on 'list_all' do
             r.get do
               courses = CourseService.list_all(requestor)
@@ -204,7 +204,7 @@ module Todo
             request_body = JSON.parse(r.body.read)
             course = CourseService.create(requestor, request_body)
             response.status = 201
-            { success: true, message: 'Course created', course_info: course.attributes }.to_json
+            { success: true, message: 'Course created', course_info: course }.to_json
           rescue JSON::ParserError => e
             response.status = 400
             { error: 'Invalid JSON', details: e.message }.to_json
