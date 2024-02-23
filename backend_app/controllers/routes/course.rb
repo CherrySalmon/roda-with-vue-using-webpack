@@ -111,6 +111,34 @@ module Todo
             end
           end
 
+          r.on 'attendance' do
+            # GET api/course/:id/attendance
+            r.get String do |course_id|
+              attendances = AttendanceService.list(requestor, course_id)
+              response.status = 200
+              { success: true, data: attendances }.to_json
+              rescue AttendanceService::ForbiddenError => e
+                response.status = 403
+                { error: 'Forbidden', details: e.message }.to_json
+            end
+
+            # POST api/course/:id/attendance/
+            r.post String do |course_id|
+              puts "course_id: #{course_id}"
+              request_body = JSON.parse(r.body.read)
+              puts "request_body: #{request_body}"
+              attendance = AttendanceService.create(requestor, request_body, course_id)
+              response.status = 201
+              { success: true, message: 'Attendance created', attendance_info: attendance.attributes }.to_json
+              rescue JSON::ParserError => e
+                response.status = 400
+                { error: 'Invalid JSON', details: e.message }.to_json
+              rescue AttendanceService::ForbiddenError => e
+                response.status = 403
+                { error: 'Forbidden', details: e.message }.to_json
+            end
+          end
+
           # GET api/course
           r.get do
             courses = CourseService.list(requestor)
@@ -138,7 +166,7 @@ module Todo
           response.status = 400
           response.write({ error: 'Token error', details: e.message }.to_json)
           r.halt
-        rescue => e
+        rescue StandardError => e
           response.status = 500
           response.write({ error: 'Internal server error', details: e.message }.to_json)
           r.halt
