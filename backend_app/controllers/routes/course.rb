@@ -44,7 +44,7 @@ module Todo
               # POST api/course/:course_id/enroll - Update or add enrollments
               r.post do
                 request_body = JSON.parse(r.body.read)
-                enrolled_data = request_body["enroll"] # Expects an array of {email: "email", roles: "role1,role2"}
+                enrolled_data = [request_body["enroll"]] # Expects an array of {email: "email", roles: "role1,role2"}
                 CourseService.update_enrollments(requestor, course_id, enrolled_data)
                 response.status = 200
                 { success: true, message: 'Enrollments updated' }.to_json
@@ -118,6 +118,32 @@ module Todo
                 rescue EventService::ForbiddenError => e
                   response.status = 403
                   { error: 'Forbidden', details: e.message }.to_json
+              end
+
+              r.on String do |event_id|
+                # PUT api/course/:course_id/event/:event_id
+                r.put do
+                  request_body = JSON.parse(r.body.read)
+                  EventService.update(requestor, event_id, request_body)
+                  response.status = 200
+                  { success: true, message: 'Event updated'}.to_json
+                rescue EventService::AccountNotFoundError => e
+                  response.status = 404
+                  { error: 'Forbidden', details: e.message }.to_json
+                rescue EventService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+
+                # DELETE api/course/:course_id/event/:event_id
+                r.delete do
+                  EventService.remove_event(requestor, event_id)
+                  response.status = 200
+                  { success: true, message: 'Event deleted' }.to_json
+                rescue EventService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
               end
             end
 

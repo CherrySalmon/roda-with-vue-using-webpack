@@ -12,6 +12,8 @@ Sequel.migration do
       String :name, null: false
       DateTime :start_time
       DateTime :end_time
+
+      unique %i[start_time end_time]
     end
   end
 end

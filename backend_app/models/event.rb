@@ -23,7 +23,7 @@ module Todo
     end
 
     def self.add_event(course_id, event_details)
-      event = Event.create(
+      event = Event.find_or_create(
         course_id: course_id,
         name: event_details['name'],
         location_id: event_details['location_id'],

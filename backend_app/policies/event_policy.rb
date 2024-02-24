@@ -25,11 +25,11 @@ module Todo
 
     # Student can update the attendance;
     def can_update?
-      requestor_is_instructor? || requestor_is_staff?
+      requestor_is_teacher? || requestor_is_instructor? || requestor_is_staff?
     end
 
     def can_delete?
-      requestor_is_instructor? || requestor_is_staff?
+      requestor_is_teacher? || requestor_is_instructor? || requestor_is_staff?
     end
 
     # Summary of permissions

@@ -31,6 +31,18 @@ module Todo
       Event.find_event(requestor, time)
     end
 
+    def self.update(requestor, event_id, event_data)
+      event = Event.first(id: event_id)
+      verify_policy(requestor, :update, event)
+      event.update(event_data) || raise("Failed to update event with ID #{event_id}.")
+    end
+
+    def self.remove_event(requestor, event_id)
+      event = Event.first(id: event_id)
+      verify_policy(requestor, :delete, event)
+      event.delete
+    end
+
 
     def self.find_course(course_id)
       Course.first(id: course_id) || raise(CourseNotFoundError, "Course with ID #{course_id} not found.")
