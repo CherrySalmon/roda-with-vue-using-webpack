@@ -19,16 +19,19 @@
         <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Attendance</el-button>
 
         <h3 style="margin-top: 3%;">Attendance Events</h3>
-        <el-card v-for="event in attendanceEvents" :key="event.id" class="event-item" shadow="hover"
-          @click="showModifyAttendanceEventDialog = true">
-          <el-icon @click.stop="deleteAttendanceEvent(event.id)">
-            <Delete />
-          </el-icon>
+        <el-card v-for="event in attendanceEvents" :key="event.id" class="event-item" shadow="hover">
           <div style="padding: 14px">
             <h3>{{ event.name }}</h3>
             <!-- <p>Start Time: {{ event.start_time }}</p>
-        <p>End Time: {{ event.end_time }}</p> -->
+            <p>End Time: {{ event.end_time }}</p> -->
           </div>
+          <el-icon :size="18" @click="editAttendanceEvent(event.id)">
+            <Edit />
+          </el-icon>
+          <span style="margin-left: 10px;"></span> <!-- Add space between icons -->
+          <el-icon :size="18" @click.stop="deleteAttendanceEvent(event.id)">
+            <Delete />
+          </el-icon>
         </el-card>
       </div>
     </div>
@@ -146,6 +149,33 @@
         <el-button type="primary" @click="createAttendanceEvent">Confirm</el-button>
       </span>
     </el-dialog>
+
+    <!-- Modify Attendance Event Dialog -->
+    <el-dialog title="Modify Attendance Event" v-model="showModifyAttendanceEventDialog">
+      <el-form ref="attendanceEvents" :model="attendanceEventForm" label-width="120px">
+        <el-form-item label="Name">
+          <el-input v-model="attendanceEventForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="Location">
+          <el-select v-model="attendanceEventForm.location_id" placeholder="Select">
+            <el-option v-for="location in locations" :key="location.value" :label="location.label"
+              :value="location.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Start Time">
+          <el-date-picker v-model="attendanceEventForm.start_time" type="datetime"
+            placeholder="Select start time"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="End Time">
+          <el-date-picker v-model="attendanceEventForm.end_time" type="datetime"
+            placeholder="Select end time"></el-date-picker>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showModifyAttendanceEventDialog = false">Cancel</el-button>
+        <el-button type="primary" @click="updateAttendanceEvent">Confirm</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -163,6 +193,7 @@ export default {
       },
       courseForm: {
       },
+      attendanceEventForm: {},
       createAttendanceEventForm: {
         name: '',
         location_id: '',
@@ -181,7 +212,8 @@ export default {
       isAddedValue: false,
       enrollments: [],
       newEnrolls: [],
-      newEnrollmentEmails: ''
+      newEnrollmentEmails: '',
+      currentEventID: '',
     };
   },
 
@@ -204,6 +236,7 @@ export default {
         this.course = response.data.data;
         // Copying the course object to courseForm
         this.courseForm = { ...this.course };
+        console.log(this.courseForm)
 
         // Deleting the id and enroll_identity keys from courseForm
         delete this.courseForm.id;
@@ -302,6 +335,7 @@ export default {
       });
     },
     createAttendanceEvent() {
+      console.log('Creating event:', this.createAttendanceEventForm);
       axios.post(`api/course/${this.course.id}/event`, this.createAttendanceEventForm, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
@@ -342,6 +376,7 @@ export default {
       });
     },
     deleteAttendanceEvent(eventId) {
+      console.log('Deleting event:', eventId);
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
@@ -352,6 +387,34 @@ export default {
         this.fetchAttendanceEvents(this.course.id);
       }).catch(error => {
         console.error('Error deleting attendance event:', error);
+      });
+    },
+    editAttendanceEvent(eventId) {
+      const event = this.attendanceEvents.find(e => e.id === eventId);
+      if (event) {
+        // Assuming `event` is already a reactive object, you might directly assign it
+        // Or use a spread operator for a shallow copy if modifications should not reflect back immediately
+        this.attendanceEventForm = { ...event };
+        delete this.attendanceEventForm.id;
+        this.showModifyAttendanceEventDialog = true;
+        this.currentEventID = eventId;
+      } else {
+        console.error('Event not found!');
+      }
+    },
+
+    updateAttendanceEvent() {
+      console.log('Updating event:', this.currentEventID);
+      console.log('Updated event:', this.attendanceEventForm);
+      axios.put(`api/course/${this.course.id}/event/${this.currentEventID}`, this.attendanceEventForm, {
+        headers: {
+          Authorization: `Bearer ${this.accountCredential}`,
+        },
+      }).then(() => {
+        this.showModifyAttendanceEventDialog = false;
+        this.fetchAttendanceEvents(); // Refresh the list after adding
+      }).catch(error => {
+        console.error('Error modifying attendance event:', error);
       });
     },
     onConfirm() {

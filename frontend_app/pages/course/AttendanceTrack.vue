@@ -39,6 +39,7 @@ export default {
             errMessage: '',
             latitude: 0,
             longitude: 0,
+            location: {},
         };
     },
     watch: {
@@ -123,19 +124,38 @@ export default {
         showPosition(position, loading) {
             this.locationText = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}, Accuracy: ${position.coords.accuracy}`;
 
-            const minLat = 24.0; // example min latitude
-            const maxLat = 25.0; // example max latitude
-            const minLng = 120.0; // example min longitude
-            const maxLng = 121.0; // example max longitude
-
             this.latitude = position.coords.latitude;
             this.longitude = position.coords.longitude;
+            console.log('Latitude:', this.latitude, 'Longitude:', this.longitude);
+
+            axios.get(`/api/location/${this.event.location_id}`, {
+                headers: {
+                    Authorization: `Bearer ${this.accountCredential}`,
+                },
+            }).then(response => {
+                console.log('Event Data Fetched Successfully:', response.data.data);
+                this.location = response.data.data;
+                this.isEventDataFetched = true;
+            }).catch(error => {
+                console.error('Error fetching event:', error);
+            });
+
+            const minLat = this.location.latitude - 0.1; // example min latitude
+            const maxLat = this.location.latitude + 1; // example max latitude
+            const minLng = this.location.longitude - 0.1
+            const maxLng = this.location.longitude + 1; // example max longitude
 
 
             // Check if the current position is within the range
             if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
                 // Call your API if within the range
                 this.postAttendance(loading);
+            } else {
+                ElMessageBox.alert('You are not in the right location', 'Failed', {
+                    confirmButtonText: 'OK',
+                    type: 'error',
+                })
+                loading.close();
             }
         },
         showError(error) {
@@ -179,7 +199,7 @@ export default {
                 .catch(error => {
                     // Handle error
                     console.error('Error recording attendance', error);
-                    ElMessageBox.alert('Attendance has already recorded', 'Failed', {
+                    ElMessageBox.alert('Attendance has already recorded', 'Warning', {
                         confirmButtonText: 'OK',
                         type: 'warning',
                     })
