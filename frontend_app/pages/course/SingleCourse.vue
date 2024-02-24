@@ -12,11 +12,24 @@
         <p>Occurrence: {{ course.occurrence || 'N/A' }}</p>
       </div>
     </el-card>
-    <div v-if="course.enroll_identity">
+    <div v-if="course.enroll_identity" style="margin-top: 1%;">
       <div v-if="course.enroll_identity != 'student'">
         <el-button type="primary" @click="showModifyCourseDialog = true">Modify Course</el-button>
         <el-button type="primary" @click="openPeopleManager()">Manage People</el-button>
         <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Attendance</el-button>
+
+        <h3 style="margin-top: 3%;">Attendance Events</h3>
+        <el-card v-for="event in attendanceEvents" :key="event.id" class="event-item" shadow="hover"
+          @click="showModifyAttendanceEventDialog = true">
+          <el-icon @click.stop="deleteAttendanceEvent(event.id)">
+            <Delete />
+          </el-icon>
+          <div style="padding: 14px">
+            <h3>{{ event.name }}</h3>
+            <!-- <p>Start Time: {{ event.start_time }}</p>
+        <p>End Time: {{ event.end_time }}</p> -->
+          </div>
+        </el-card>
       </div>
     </div>
 
@@ -101,7 +114,23 @@
           <el-input v-model="createAttendanceEventForm.name"></el-input>
         </el-form-item>
         <el-form-item label="Location">
-          <el-input v-model="createAttendanceEventForm.location_id"></el-input>
+          <el-select v-model="createAttendanceEventForm.location_id" placeholder="Select">
+            <el-option v-for="location in locations" :key="location.value" :label="location.label"
+              :value="location.value" />
+            <!-- Add Location, but need to figure out latitude and longitude -->
+            <!-- <span slot="footer">
+              <el-button v-if="isAddedValue" text bg size="small" @click="isAddedValue = true">
+                Add an option
+              </el-button>
+              <template v-else>
+                <el-input v-model="optionLocation" class="option-input" placeholder="input option name" size="small" />
+                <div style="text-align:center;"><el-button type="primary" size="small" @click="onConfirm">
+                  confirm
+                </el-button>
+                <el-button size="small" @click="clear">cancel</el-button></div>
+              </template>
+            </span> -->
+          </el-select>
         </el-form-item>
         <el-form-item label="Start Time">
           <el-date-picker v-model="createAttendanceEventForm.start_time" type="datetime"
@@ -111,19 +140,6 @@
           <el-date-picker v-model="createAttendanceEventForm.end_time" type="datetime"
             placeholder="Select end time"></el-date-picker>
         </el-form-item>
-
-        <!-- <el-form-item label="Repeat">
-          <el-select v-model="createCourseForm.repeat" placeholder="Select">
-            <el-option label="Do not repeat" value="no-repeat"></el-option>
-            <el-option label="Weekly" value="weekly"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item v-show="createCourseForm.repeat != 'no-repeat'" label="Repeat">
-          <el-input-number v-model="createCourseForm.occurrence" :step="1" step-strictly></el-input-number>
-        </el-form-item>
-        <el-form-item label="Logo">
-          <el-input v-model="createCourseForm.logo"></el-input>
-        </el-form-item> -->
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showCreateAttendanceEventDialog = false">Cancel</el-button>
@@ -136,6 +152,7 @@
 <script>
 import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
+
 
 export default {
   name: 'SingleCourse',
@@ -152,11 +169,16 @@ export default {
         start_time: '',
         end_time: '',
       },
+      attendanceEvents: [],
+      locations: [],
+      optionLocation: '',
       accountRoles: [],
       accountCredential: '',
       showModifyCourseDialog: false,
       showManagePeopleDialog: false,
       showCreateAttendanceEventDialog: false,
+      showModifyAttendanceEventDialog: false,
+      isAddedValue: false,
       enrollments: [],
       newEnrolls: [],
       newEnrollmentEmails: ''
@@ -168,6 +190,8 @@ export default {
     this.accountCredential = cookieManager.getCookie('account_credential');
     this.course.id = this.$route.params.id;
     this.fetchCourse(this.course.id);
+    this.fetchAttendanceEvents(this.course.id);
+    this.fetchLocations();
   },
 
   methods: {
@@ -278,20 +302,70 @@ export default {
       });
     },
     createAttendanceEvent() {
-      // if (this.createAttendanceForm.repeat == 'no-repeat') {
-      //     this.createAttendanceForm.occurrence = 1
-      // }
-
       axios.post(`api/course/${this.course.id}/event`, this.createAttendanceEventForm, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
         },
       }).then(() => {
         this.showCreateAttendanceEventDialog = false;
-        // this.fetchCourses(); // Refresh the list after adding
+        this.fetchAttendanceEvents(); // Refresh the list after adding
       }).catch(error => {
         console.error('Error creating attendance event:', error);
       });
+    },
+    fetchAttendanceEvents() {
+      axios.get(`api/course/${this.course.id}/event`, {
+        headers: {
+          Authorization: `Bearer ${this.accountCredential}`,
+        },
+      }).then(response => {
+        this.attendanceEvents = response.data.data;
+      }).catch(error => {
+        console.error('Error fetching attendance events:', error);
+      });
+    },
+    fetchLocations() {
+      axios.get(`api/location/list_all`, {
+        headers: {
+          Authorization: `Bearer ${this.accountCredential}`,
+        },
+      }).then(response => {
+        this.locations = response.data.data.map(location => {
+          return {
+            value: location.id,
+            label: location.name
+          }
+        });
+
+      }).catch(error => {
+        console.error('Error fetching locations:', error);
+      });
+    },
+    deleteAttendanceEvent(eventId) {
+      axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${this.accountCredential}`,
+        }
+      }).then(() => {
+        console.log(`Event ${eventId} deleted successfully.`);
+        // Refresh the attendance events list
+        this.fetchAttendanceEvents(this.course.id);
+      }).catch(error => {
+        console.error('Error deleting attendance event:', error);
+      });
+    },
+    onConfirm() {
+      if (this.optionLocation) {
+        this.locations.push({
+          label: this.optionLocation,
+          value: this.optionLocation,
+        })
+        this.clear()
+      }
+    },
+    clear() {
+      this.optionLocation = ''
+      this.isAddedValue = false
     }
   },
 };
@@ -299,5 +373,20 @@ export default {
 
 <style scoped>
 /* Add your styles here */
+.event-item {
+  border-bottom: 1px solid #eee;
+  padding: 20px 5px;
+  width: 200px;
+  margin: 20px;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 12px;
+}
+
+.option-input {
+  width: 90%;
+  margin-bottom: 8px;
+  margin-left: 5%;
+}
 </style>
 ``
