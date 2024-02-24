@@ -44,7 +44,7 @@ module Todo
               # POST api/course/:course_id/enroll - Update or add enrollments
               r.post do
                 request_body = JSON.parse(r.body.read)
-                enrolled_data = [request_body["enroll"]] # Expects an array of {email: "email", roles: "role1,role2"}
+                enrolled_data = request_body["enroll"] # Expects an array of {email: "email", roles: "role1,role2"}
                 CourseService.update_enrollments(requestor, course_id, enrolled_data)
                 response.status = 200
                 { success: true, message: 'Enrollments updated' }.to_json
