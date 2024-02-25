@@ -65,8 +65,6 @@ export default {
     },
     methods: {
         fetchEventData() {
-            console.log(`Authorization Token: Bearer ${this.accountCredential}`);
-
             axios.get(`/api/current_event/`, {
                 headers: {
                     Authorization: `Bearer ${this.accountCredential}`,
@@ -85,7 +83,6 @@ export default {
             });
         },
         getLocalDateString(utcStr) {
-            console.log('UTC String:', utcStr);
             // Manually parsing the date string to components
             const parts = utcStr.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) \+0000/);
             if (!parts) {
@@ -126,7 +123,6 @@ export default {
 
             this.latitude = position.coords.latitude;
             this.longitude = position.coords.longitude;
-            console.log('Latitude:', this.latitude, 'Longitude:', this.longitude);
 
             axios.get(`/api/course/${this.event.course_id}/location/${this.event.location_id}`, {
                 headers: {

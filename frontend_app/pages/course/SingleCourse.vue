@@ -236,7 +236,6 @@ export default {
         this.course = response.data.data;
         // Copying the course object to courseForm
         this.courseForm = { ...this.course };
-        console.log(this.courseForm)
 
         // Deleting the id and enroll_identity keys from courseForm
         delete this.courseForm.id;
@@ -335,7 +334,6 @@ export default {
       });
     },
     createAttendanceEvent() {
-      console.log('Creating event:', this.createAttendanceEventForm);
       axios.post(`api/course/${this.course.id}/event`, this.createAttendanceEventForm, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
@@ -376,7 +374,6 @@ export default {
       });
     },
     deleteAttendanceEvent(eventId) {
-      console.log('Deleting event:', eventId);
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
@@ -404,8 +401,6 @@ export default {
     },
 
     updateAttendanceEvent() {
-      console.log('Updating event:', this.currentEventID);
-      console.log('Updated event:', this.attendanceEventForm);
       axios.put(`api/course/${this.course.id}/event/${this.currentEventID}`, this.attendanceEventForm, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
