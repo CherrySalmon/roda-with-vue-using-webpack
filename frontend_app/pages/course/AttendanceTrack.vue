@@ -140,11 +140,10 @@ export default {
                 console.error('Error fetching event:', error);
             });
 
-            const minLat = this.location.latitude - 0.1; // example min latitude
-            const maxLat = this.location.latitude + 1; // example max latitude
-            const minLng = this.location.longitude - 0.1
-            const maxLng = this.location.longitude + 1; // example max longitude
-
+            const minLat = this.location.latitude - 0.0004;
+            const maxLat = this.location.latitude + 0.0004;
+            const minLng = this.location.longitude - 0.0005
+            const maxLng = this.location.longitude + 0.0005;
 
             // Check if the current position is within the range
             if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {

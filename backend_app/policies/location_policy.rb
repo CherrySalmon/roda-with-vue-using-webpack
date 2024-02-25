@@ -9,7 +9,7 @@ module Todo
     end
 
     # Only the course's teachers and staff can update a location
-    def can_create?
+    def can_create? #instructor/staff #expect student
       requestor_is_admin?
     end
 
@@ -19,12 +19,12 @@ module Todo
     end
 
     # Only the course's teachers and staff can update a location
-    def can_update?
+    def can_update? #instructor/staff #expect student
       requestor_is_admin?
     end
 
     # Only the course's teachers and staff can update a location
-    def can_delete?
+    def can_delete? #instructor/staff #expect student
       requestor_is_admin?
     end
 
