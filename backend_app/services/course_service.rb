@@ -49,7 +49,6 @@ module Todo
     def self.remove_enroll(requestor, course_id, account_id)
       course = find_course(course_id)
       verify_policy(requestor, :update, course)
-      puts account_id
       account = AccountCourse.first(account_id: account_id)
       account.delete
     end

@@ -36,7 +36,6 @@ module Todo
 
     # Check if the requestor is enrolled in the course
     def self_enrolled?
-      puts 'requestor id: ', @requestor
       @this_course&.accounts&.any? { |account| account.id == @requestor['account_id'] }
     end
   end

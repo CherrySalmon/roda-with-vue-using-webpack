@@ -38,7 +38,6 @@ module Todo
       end
 
       def all_courses(account)
-        puts account.owned_courses # + account.visitings
         account.owned_courses.map do |course|
           policy = DramalistPolicy.new(account, course)
           course.to_h.merge(policies: policy.summary)
