@@ -10,6 +10,7 @@ module Todo
     many_to_many :accounts, join_table: :account_course_roles
     one_to_many :attendances, class: :'Todo::Attendance', key: :course_id
     one_to_many :events, class: :'Todo::Event', key: :course_id
+    one_to_many :locations, class: :'Todo::Location', key: :course_id
     plugin :timestamps, update_on_create: true
 
     def validate

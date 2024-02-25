@@ -359,7 +359,7 @@ export default {
       });
     },
     fetchLocations() {
-      axios.get(`api/location/list_all`, {
+      axios.get(`api/course/${this.course.id}/location/list_all`, {
         headers: {
           Authorization: `Bearer ${this.accountCredential}`,
         },

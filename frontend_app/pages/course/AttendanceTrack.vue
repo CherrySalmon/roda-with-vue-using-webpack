@@ -128,7 +128,7 @@ export default {
             this.longitude = position.coords.longitude;
             console.log('Latitude:', this.latitude, 'Longitude:', this.longitude);
 
-            axios.get(`/api/location/${this.event.location_id}`, {
+            axios.get(`/api/course/${this.event.course_id}/location/${this.event.location_id}`, {
                 headers: {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
@@ -140,11 +140,10 @@ export default {
                 console.error('Error fetching event:', error);
             });
 
-            const minLat = this.location.latitude - 0.1; // example min latitude
-            const maxLat = this.location.latitude + 1; // example max latitude
-            const minLng = this.location.longitude - 0.1
-            const maxLng = this.location.longitude + 1; // example max longitude
-
+            const minLat = this.location.latitude - 0.0004;
+            const maxLat = this.location.latitude + 0.0004;
+            const minLng = this.location.longitude - 0.0005
+            const maxLng = this.location.longitude + 0.0005;
 
             // Check if the current position is within the range
             if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
