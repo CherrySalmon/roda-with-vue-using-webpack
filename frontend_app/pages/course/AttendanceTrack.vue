@@ -128,7 +128,7 @@ export default {
             this.longitude = position.coords.longitude;
             console.log('Latitude:', this.latitude, 'Longitude:', this.longitude);
 
-            axios.get(`/api/location/${this.event.location_id}`, {
+            axios.get(`/api/course/${this.event.course_id}/location/${this.event.location_id}`, {
                 headers: {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
