@@ -12,7 +12,7 @@ module Todo
     # Lists course's event, if authorized
     def self.list(requestor, course_id)
       course = find_course(course_id)
-      verify_policy(requestor, :view, course)
+      verify_policy(requestor, :view, course_id)
       events = Event.list_event(course_id)
       events || raise(ForbiddenError, 'You have no access to list events.')
     end
@@ -23,7 +23,7 @@ module Todo
       course = find_course(course_id)
       puts "course: #{course}"
 
-      verify_policy(requestor, :create, course)
+      verify_policy(requestor, :create, course_id)
       Event.add_event(course_id, event_data)
     end
 
@@ -33,13 +33,13 @@ module Todo
 
     def self.update(requestor, event_id, event_data)
       event = Event.first(id: event_id)
-      verify_policy(requestor, :update, event)
+      verify_policy(requestor, :update, event_data['course_id'])
       event.update(event_data) || raise("Failed to update event with ID #{event_id}.")
     end
 
-    def self.remove_event(requestor, event_id)
+    def self.remove_event(requestor, event_id, course_id)
       event = Event.first(id: event_id)
-      verify_policy(requestor, :delete, event)
+      verify_policy(requestor, :delete, course_id)
       event.delete
     end
 
@@ -49,8 +49,10 @@ module Todo
     end
 
     # Checks authorization for the requested action
-    def self.verify_policy(requestor, action = nil, course = nil)
-      policy = EventPolicy.new(requestor, course)
+    def self.verify_policy(requestor, action = nil, course_id = nil)
+      course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).select_map(:roles)
+      puts "course_roles: #{course_roles}"
+      policy = EventPolicy.new(requestor, course_roles)
       action_check = action ? policy.send("can_#{action}?") : true
       raise(ForbiddenError, 'You have no access to perform this action.') unless action_check
 

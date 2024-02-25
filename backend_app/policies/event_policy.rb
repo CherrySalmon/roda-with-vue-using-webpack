@@ -3,9 +3,9 @@
 module Todo
   # Policy to determine if an account can view, edit, or delete a particular course
   class EventPolicy
-    def initialize(requestor, course = nil)
+    def initialize(requestor, course_roles = nil)
       @requestor = requestor
-      @this_course = course
+      @course_roles = course_roles
     end
 
     # Instructor and staff can view all events;
@@ -15,21 +15,21 @@ module Todo
 
     # Instructor and staff can create a event;
     def can_create?
-      requestor_is_admin? || requestor_is_instructor? || requestor_is_staff?
+      requestor_is_not_student?
     end
 
     # Instructor and staff can view a event;
     def can_view?
-      requestor_is_admin? || requestor_is_instructor? || requestor_is_staff?
+      requestor_is_not_student?
     end
 
     # Student can update the attendance;
     def can_update?
-      requestor_is_admin? || requestor_is_instructor? || requestor_is_staff?
+      requestor_is_not_student?
     end
 
     def can_delete?
-      requestor_is_admin? || requestor_is_instructor? || requestor_is_staff?
+      requestor_is_not_student?
     end
 
     # Summary of permissions
@@ -46,7 +46,6 @@ module Todo
 
     # Check if the requestor is enrolled in the course
     def self_enrolled?
-      puts 'requestor id: ', @requestor
       @this_course&.accounts&.any? { |account| account.id == @requestor['account_id'] }
     end
 
@@ -54,18 +53,9 @@ module Todo
       @requestor['roles'].include?('admin')
     end
 
-    # Check if the requestor has an teacher role
-    def requestor_is_teacher?
-      @requestor['roles'].include?('teacher')
-    end
-
-    # Check if the requestor has an instructor role for the course
-    def requestor_is_instructor?
-      @requestor['roles'].include?('instructor')
-    end
-    # Check if the requestor has an staff role for the course
-    def requestor_is_staff?
-      @requestor['roles'].include?('staff')
+    def requestor_is_not_student?
+      puts @course_roles.include?('student')
+      !@course_roles.include?('student')
     end
   end
 end
