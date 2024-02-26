@@ -1,75 +1,103 @@
-
 <template>
-    <div>
-        <el-button type="primary" @click="handleGoogleAccessTokenLogin">
-            使用 Google 進行登入
-        </el-button>
+  <div>
+    <div class="signin-container">
+        <div id="g_id_onload"
+            :data-client_id="googleClientId"
+            data-context="signin"
+            data-ux_mode="popup"
+            data-callback="handleCallback"
+            data-itp_support="true">
+        </div>
 
+        <div class="g_id_signin"
+            data-type="standard"
+            data-shape="pill"
+            data-theme="outline"
+            data-text="signin_with"
+            data-size="large"
+            data-logo_alignment="left">
+        </div>
     </div>
+  </div>
 </template>
 
 <script>
-import { googleTokenLogin } from 'vue3-google-login';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-
 export default {
-    name: 'LoginPage',
+  name: 'LoginPage',
 
-    data() {
-        return {
-            data: null,
-            userData: null
-        };
+  data() {
+    return {
+      googleClientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+    };
+  },
+  mounted() {
+    // Attach handleCallback to window object when component mounts
+    window.handleCallback = this.handleCallbackGlobal;
+  },
+  beforeDestroy() {
+    // Clean up handleCallback from window object to avoid memory leaks
+    if (window.handleCallback === this.handleCallbackGlobal) {
+      delete window.handleCallback;
+    }
+  },
+  methods: {
+    handleCallbackGlobal(response) {
+      // Delegate to component method
+      this.handleCallback(response);
     },
 
-    methods: {
-        onLoginSuccess(account_info) {
-            let exp_day = 7
-            Cookies.set('account_id', account_info.id, { expires: exp_day });
-            Cookies.set('account_roles', account_info.roles.join(','), { expires: exp_day });
-            Cookies.set('account_credential', account_info.credential, { expires: exp_day });
-        },
-        async sendTokenToBackend(accessToken) {
-            try {
-                const response = await axios.post('/api/auth/verify_google_token', {
-                    sso_token: accessToken
-                });
-                if (response.status === 200 || response.status === 201) {
-                    return response.data;
-                } else {
-                    console.error('Error sending token to backend');
-                }
-            } catch (error) {
-                console.error('Error:', error.response || error);
-            }
-        },
-        async handleGoogleAccessTokenLogin() {
-            try {
-                const response = await googleTokenLogin({
-                    clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-                    scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
-                });
+    async handleCallback(response) {
+      const userData = this.parseJwt(response.credential);
+      await this.fetchLoginToken(userData);
+    },
 
-                this.data = response;
-                const userInfo = await this.sendTokenToBackend(response.access_token);
-                this.userData = userInfo;
-                if (userInfo) {
-                    this.onLoginSuccess(userInfo.user_info)
-                    this.$router.push('/home');
-                }
-            } catch (error) {
-                console.error('Login Failed:', error);
-            }
+    async fetchLoginToken(userData) {
+      try {
+        const { status, data } = await axios.post('/api/auth/verify_google_token', { user_data: userData });
+        if (status === 200 || status === 201) {
+          this.setUserInfoCookies(data.user_info);
+          location.assign(this.$route.query.redirect);
+        } else {
+          console.error('Error sending token to backend');
         }
-    }
+      } catch (error) {
+        console.error('Error:', error.response || error);
+      }
+    },
+
+    setUserInfoCookies(user_info) {
+      const expDay = 7;
+      Cookies.set('account_id', user_info.id, { expires: expDay });
+      Cookies.set('account_roles', user_info.roles.join(','), { expires: expDay });
+      Cookies.set('account_credential', user_info.credential, { expires: expDay });
+    },
+
+    parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => 
+        `%${('00' + c.charCodeAt(0).toString(16)).slice(-2)}`
+      ).join(''));
+
+      return JSON.parse(jsonPayload);
+    },
+  },
 };
 </script>
 
-
 <style scoped>
 p {
-    margin-top: 12px;
-    word-break: break-all;
+  margin-top: 12px;
+  word-break: break-all;
+}
+
+.signin-container {
+    width: 400px;
+    margin: auto;
+    display: flex;
+    justify-content: center;
+    margin-top: 200px;
 }
 </style>

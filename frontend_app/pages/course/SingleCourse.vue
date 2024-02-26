@@ -203,8 +203,10 @@ export default {
       attendanceEvents: [],
       locations: [],
       optionLocation: '',
-      accountRoles: [],
-      accountCredential: '',
+      account: {
+        roles: [],
+        credential: ''
+      },
       showModifyCourseDialog: false,
       showManagePeopleDialog: false,
       showCreateAttendanceEventDialog: false,
@@ -218,19 +220,24 @@ export default {
   },
 
   created() {
-    this.accountRoles = cookieManager.getCookie('account_roles') ? cookieManager.getCookie('account_roles').split(',') : [];
-    this.accountCredential = cookieManager.getCookie('account_credential');
     this.course.id = this.$route.params.id;
-    this.fetchCourse(this.course.id);
-    this.fetchAttendanceEvents(this.course.id);
-    this.fetchLocations();
+    this.account = cookieManager.getAccount()
+    if(this.account) {
+      this.fetchCourse(this.course.id);
+      this.fetchAttendanceEvents(this.course.id);
+      this.fetchLocations();
+    }
+    else {
+      console.log(this.$route)
+      this.$router.push({path: '/login', query: { redirect: this.$route.href }} )
+    }
   },
 
   methods: {
     fetchCourse(id) {
       axios.get(`/api/course/${id}`, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
         this.course = response.data.data;
@@ -251,7 +258,7 @@ export default {
 
       axios.put('api/course/' + this.course.id, this.courseForm, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(() => {
         this.showModifyCourseDialog = false;
@@ -277,7 +284,7 @@ export default {
     fetchEnrollments() {
       axios.get(`/api/course/${this.course.id}/enroll`, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
         this.enrollments = response.data.data;
@@ -293,7 +300,7 @@ export default {
     addEnrollments() {
       axios.post(`/api/course/${this.course.id}/enroll`, { enroll: this.newEnrolls }, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
         console.log(response)
@@ -312,7 +319,7 @@ export default {
       }
       axios.post(`/api/course/${this.course.id}/enroll`, entollList, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
         console.log(response)
@@ -324,7 +331,7 @@ export default {
     deleteEnrollments(enrollment) {
       axios.delete(`/api/course/${this.course.id}/enroll/${enrollment}`, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
         console.log(response)
@@ -336,7 +343,7 @@ export default {
     createAttendanceEvent() {
       axios.post(`api/course/${this.course.id}/event`, this.createAttendanceEventForm, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(() => {
         this.showCreateAttendanceEventDialog = false;
@@ -348,7 +355,7 @@ export default {
     fetchAttendanceEvents() {
       axios.get(`api/course/${this.course.id}/event`, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
         this.attendanceEvents = response.data.data;
@@ -359,7 +366,7 @@ export default {
     fetchLocations() {
       axios.get(`api/course/${this.course.id}/location/list_all`, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
         this.locations = response.data.data.map(location => {
@@ -376,7 +383,7 @@ export default {
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(() => {
         console.log(`Event ${eventId} deleted successfully.`);
@@ -403,7 +410,7 @@ export default {
     updateAttendanceEvent() {
       axios.put(`api/course/${this.course.id}/event/${this.currentEventID}`, this.attendanceEventForm, {
         headers: {
-          Authorization: `Bearer ${this.accountCredential}`,
+          Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(() => {
         this.showModifyAttendanceEventDialog = false;

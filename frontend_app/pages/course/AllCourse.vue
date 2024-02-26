@@ -1,12 +1,15 @@
 <template>
     <div>
-      <el-button v-if="accountRoles.includes('teacher')" @click="showCreateCourseDialog = true">Create Course</el-button>
+      <div class="page-title">Courses</div>
+      <template v-if="account">
+        <el-button v-if="account.roles.includes('teacher')" @click="showCreateCourseDialog = true" color="#824533" :dark="true">Start a New Course</el-button>
+      </template>
       <el-dialog title="Create Course" v-model="showCreateCourseDialog">
-        <el-form ref="createCourseForm" :model="createCourseForm" label-width="120px">
-          <el-form-item label="Name">
+        <el-form ref="createCourseForm" :model="createCourseForm" label-width="120px" :rules="rules" :status-icon="true">
+          <el-form-item label="Name" prop="name">
             <el-input v-model="createCourseForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="Semester">
+          <el-form-item label="Semester" prop="semester">
             <el-input v-model="createCourseForm.semester"></el-input>
           </el-form-item>
           <el-form-item label="Start Time">
@@ -29,21 +32,23 @@
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="showCreateCourseDialog = false">Cancel</el-button>
-          <el-button type="primary" @click="createCourse">Confirm</el-button>
+          <el-button @click="closeForm('createCourseForm')">Cancel</el-button>
+          <el-button type="primary" @click="submitForm('createCourseForm')">Confirm</el-button>
         </span>
       </el-dialog>
 
-      <el-card v-for="course in courses" :key="course.id" class="course-item" shadow="hover" @click="changeRoute('/course/'+course.id)">
-        <img
-          :src="course.icon"
-          class="image"
-        />
-        <div style="padding: 14px">
-            <h3>{{ course.name }}</h3>
-         <p>Semester: {{ course.semester }}</p>
-        </div>
-      </el-card>
+      <div class="course-container">
+        <el-card v-for="course in courses" :key="course.id" class="course-item" shadow="hover" @click="changeRoute('/course/'+course.id)">
+          <img
+            :src="course.icon"
+            class="image"
+          />
+          <div style="padding: 14px">
+              <h3>{{ course.name }}</h3>
+          <p>Semester: {{ course.semester }}</p>
+          </div>
+        </el-card>
+      </div>
     </div>
   </template>
   
@@ -57,9 +62,23 @@
   
     data() {
       return {
+        rules: {
+          name: [
+            { required: true, message: 'Please input course name', trigger: 'blur' }
+          ],
+          semester: [
+            {
+              required: true,
+              message: 'Please input semester',
+              trigger: 'change',
+            },
+          ]
+        },
         courses: [],
-        accountRoles: [],
-        accountCredential: '',
+        account: {
+          roles: [],
+          credential: ''
+        },
         showCreateCourseDialog: false,
         createCourseForm: {
           name: '',
@@ -73,9 +92,13 @@
       };
     },
     created() {
-        this.accountRoles = cookieManager.getCookie('account_roles') ? cookieManager.getCookie('account_roles').split(',') : [];
-        this.accountCredential = cookieManager.getCookie('account_credential');
-        this.fetchCourses();
+        this.account = cookieManager.getAccount()
+        if(this.account) {
+          this.fetchCourses()
+        }
+        else {
+          this.$router.push({path: '/login', query: { redirect: this.$route.href }} )
+        }
     },
     methods: {
         changeRoute(route) {
@@ -84,7 +107,7 @@
         fetchCourses() {
             axios.get('api/course', {
             headers: {
-                Authorization: `Bearer ${this.accountCredential}`,
+                Authorization: `Bearer ${this.account.credential}`,
             },
             }).then(response => {
             this.courses = response.data.data;
@@ -92,14 +115,30 @@
             console.error('Error fetching courses:', error);
             });
         },
-        createCourse() {
-            if (this.createCourseForm.repeat == 'no-repeat') {
-                this.createCourseForm.occurrence = 1
+        submitForm(formName) {
+          this.$refs[formName].validate((valid) => {
+            if (valid) {
+              this.createCourse()
+            } else {
+              return false;
             }
+          });
+        },
+        resetForm(formName) {
+          this.$refs[formName].resetFields();
+        },
+        closeForm(formName) {
+          this.$refs[formName].resetFields();
+          this.showCreateCourseDialog = false;
+        },
+        createCourse() {
+          if (this.createCourseForm.repeat == 'no-repeat') {
+              this.createCourseForm.occurrence = 1
+          }
 
-            axios.post('api/course', this.createCourseForm, {
+          axios.post('api/course', this.createCourseForm, {
             headers: {
-                Authorization: `Bearer ${this.accountCredential}`,
+                Authorization: `Bearer ${this.account.credential}`,
             },
             }).then(() => {
             this.showCreateCourseDialog = false;
@@ -107,7 +146,7 @@
             }).catch(error => {
             console.error('Error creating course:', error);
             });
-        },
+          },
         },
     };
 </script>
@@ -120,9 +159,16 @@ p {
 .course-item {
     border-bottom: 1px solid #eee;
     padding: 20px 0;
-    width: 300px;
+    width: 270px;
     margin: 20px;
     cursor: pointer;
+}
+.course-container {
+  display: flex;
+  justify-content: left;
+  width: 90%;
+  margin: 30px auto;
+  flex-wrap: wrap;
 }
 </style>
   

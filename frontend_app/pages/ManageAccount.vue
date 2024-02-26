@@ -1,5 +1,6 @@
 <template>
   <div class="page-container">
+    <div class="page-title">Accounts Management</div>
     <el-table style="width: 100%" :data="accounts">
         <el-table-column type="index" width="50" />
         <el-table-column width="70">

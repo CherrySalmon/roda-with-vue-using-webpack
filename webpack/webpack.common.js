@@ -30,7 +30,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Minimal Vue Webpack',
-            favicon: path.resolve(__src, 'static', 'favicon.ico'),
+            favicon: path.resolve(__src, 'static', 'favicon.png'),
             template: path.resolve(__src, 'templates', 'index.html'),
         }),
         new VueLoaderPlugin(),

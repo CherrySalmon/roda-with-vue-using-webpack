@@ -2,7 +2,7 @@
 <div class="not_found_page_container">
     <h1>Page not found</h1>
     <br>
-    <router-link to="/courses">Back to courses</router-link>
+    <router-link to="/course">Back to courses</router-link>
 </div>
 </template>
 
