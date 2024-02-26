@@ -16,7 +16,6 @@ module Todo
           # GET api/current_event/
           r.get do
             time = Time.now
-            puts "time: #{time}"
             events = EventService.find(requestor, time)
             response.status = 200
             { success: true, data: events }.to_json

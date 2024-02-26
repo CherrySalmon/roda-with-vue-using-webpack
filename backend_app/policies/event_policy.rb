@@ -54,7 +54,6 @@ module Todo
     end
 
     def requestor_is_not_student?
-      puts @course_roles.include?('student')
       !@course_roles.include?('student')
     end
   end

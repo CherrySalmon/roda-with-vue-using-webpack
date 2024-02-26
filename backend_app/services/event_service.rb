@@ -19,9 +19,7 @@ module Todo
 
     # Creates a new event, if authorized
     def self.create(requestor, event_data, course_id)
-      puts "event_data: #{event_data}"
       course = find_course(course_id)
-      puts "course: #{course}"
 
       verify_policy(requestor, :create, course_id)
       Event.add_event(course_id, event_data)
@@ -51,7 +49,6 @@ module Todo
     # Checks authorization for the requested action
     def self.verify_policy(requestor, action = nil, course_id = nil)
       course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).select_map(:roles)
-      puts "course_roles: #{course_roles}"
       policy = EventPolicy.new(requestor, course_roles)
       action_check = action ? policy.send("can_#{action}?") : true
       raise(ForbiddenError, 'You have no access to perform this action.') unless action_check
