@@ -148,18 +148,6 @@ module Todo
             end
 
             r.on 'location' do
-              # GET api/course/:course_id/location/list_all
-              r.on 'list_all' do
-                r.get do
-                  locations = LocationService.list_all(requestor, course_id)
-                  response.status = 200
-                  { success: true, data: locations }.to_json
-                rescue LocationService::ForbiddenError => e
-                  response.status = 403
-                  { error: 'Forbidden', details: e.message }.to_json
-                end
-              end
-
               r.on String do |location_id|
 
                 r.on do
@@ -206,7 +194,7 @@ module Todo
 
               # GET api/course/:course_id/location
               r.get do
-                locations = LocationService.list(requestor)
+                locations = LocationService.list_all(requestor, course_id)
                 response.status = 200
                 { success: true, data: locations }.to_json
               rescue LocationService::ForbiddenError => e

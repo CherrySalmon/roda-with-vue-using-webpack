@@ -29,12 +29,12 @@ const routes = [
         name: 'SingleCourse',
         component: SingleCourse
       },
+      {
+        path: ':id/attendance',
+        name: 'AttendanceTrack',
+        component: AttendanceTrack
+      },
     ]
-  },
-  {
-    path: '/attendance',
-    name: 'AttendanceTrack',
-    component: AttendanceTrack
   },
   {
     path: '/manage-account',

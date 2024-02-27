@@ -1,6 +1,6 @@
 <template>
     <div>
-        <!-- The card element will only be shown if `isAccountDataFetched` is true -->
+        <div v-loading.fullscreen.lock="fullscreenLoading"></div>
         <div v-if="event">
             <el-card class="box-card" style="width: 60%; margin-top: 10%; margin-left: 20%;">
                 <div slot="header" class="clearfix">
@@ -13,8 +13,6 @@
                 <br /><br />
                 <el-button @click="getLocation">Make Attendance</el-button>
                 <br /><br />
-                <!-- <div>{{ locationText }}</div><br />
-                <div>{{ errMessage }}</div> -->
             </el-card>
         </div>
     </div>
@@ -30,6 +28,7 @@ export default {
 
     data() {
         return {
+            fullscreenLoading: false,
             event: {},
             start_time: '',
             end_time: '',
@@ -49,9 +48,18 @@ export default {
                 // If event data is still not present after being fetched, redirect
                 if ((!newVal || Object.keys(newVal).length === 0) && this.isEventDataFetched) {
                     console.log('No event data found, redirecting...');
-                    this.$router.push('/course');
+                    ElNotification({
+                        title: 'Warning',
+                        message: 'No event data found, redirecting...',
+                        type: 'warning',
+                    })
+                    setTimeout(() => {
+                        this.fullscreenLoading = false;
+                        this.$router.push('/course/'+this.$route.params.id);
+                    }, 3000);
                 } else {
                     console.log('Event data found:', newVal);
+                    this.fullscreenLoading = false
                 }
             },
             deep: true, // This ensures the watcher reacts to changes in object properties
@@ -61,6 +69,7 @@ export default {
 
     created() {
         this.accountCredential = cookieManager.getCookie('account_credential');
+        this.fullscreenLoading = true;
         this.fetchEventData();
     },
     methods: {
@@ -132,26 +141,26 @@ export default {
                 console.log('Event Data Fetched Successfully:', response.data.data);
                 this.location = response.data.data;
                 this.isEventDataFetched = true;
+
+                const minLat = this.location.latitude - 0.0004;
+                const maxLat = this.location.latitude + 0.0004;
+                const minLng = this.location.longitude - 0.0005
+                const maxLng = this.location.longitude + 0.0005;
+
+                // Check if the current position is within the range
+                if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
+                    // Call your API if within the range
+                    this.postAttendance(loading);
+                } else {
+                    ElMessageBox.alert('You are not in the right location', 'Failed', {
+                        confirmButtonText: 'OK',
+                        type: 'error',
+                    })
+                    loading.close();
+                }
             }).catch(error => {
                 console.error('Error fetching event:', error);
             });
-
-            const minLat = this.location.latitude - 0.0004;
-            const maxLat = this.location.latitude + 0.0004;
-            const minLng = this.location.longitude - 0.0005
-            const maxLng = this.location.longitude + 0.0005;
-
-            // Check if the current position is within the range
-            if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
-                // Call your API if within the range
-                this.postAttendance(loading);
-            } else {
-                ElMessageBox.alert('You are not in the right location', 'Failed', {
-                    confirmButtonText: 'OK',
-                    type: 'error',
-                })
-                loading.close();
-            }
         },
         showError(error) {
             switch (error.code) {
@@ -206,8 +215,10 @@ export default {
 };
 </script>
   
-<style scoped>
-/* Add your styles here */
+<style>
+.el-loading-spinner {
+    filter: hue-rotate(180deg);
+}
 </style>
   ``
   

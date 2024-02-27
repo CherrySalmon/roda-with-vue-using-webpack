@@ -204,4 +204,5 @@ export default {
   font-weight: 700;
   padding: 10px 10px 30px 10px;
 }
+
 </style>

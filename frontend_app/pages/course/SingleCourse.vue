@@ -1,192 +1,84 @@
 <template>
   <div class="single-course-container">
-    <el-card class="box-card">
-      <div slot="header" class="clearfix">
-        <span>{{ course.name }}</span>
-      </div>
-      <div>
-        <p>Semester: {{ course.semester }}</p>
-        <p>Start Time: {{ course.start_time || 'N/A' }}</p>
-        <p>Duration: {{ course.duration ? course.duration + ' hours' : 'N/A' }}</p>
-        <p>Repeat: {{ course.repeat || 'N/A' }}</p>
-        <p>Occurrence: {{ course.occurrence || 'N/A' }}</p>
-      </div>
-    </el-card>
-    <div v-if="course.enroll_identity" style="margin-top: 1%;">
-      <div v-if="course.enroll_identity != 'student'">
-        <el-button type="primary" @click="showModifyCourseDialog = true">Modify Course</el-button>
-        <el-button type="primary" @click="openPeopleManager()">Manage People</el-button>
-        <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Attendance</el-button>
-
-        <h3 style="margin-top: 3%;">Attendance Events</h3>
-        <el-card v-for="event in attendanceEvents" :key="event.id" class="event-item" shadow="hover">
-          <div style="padding: 14px">
-            <h3>{{ event.name }}</h3>
-            <!-- <p>Start Time: {{ event.start_time }}</p>
-            <p>End Time: {{ event.end_time }}</p> -->
+    <div class="page-title">{{ course.name }}</div>
+    <el-row>
+      <el-col :xs="24" :sm="18">
+        <el-tabs tab-position="left" style="height: 100%; text-align: left;">
+          <el-tab-pane label="Attendance Events">
+            <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
+            <AttendanceEventCard
+              :attendance-events="attendanceEvents"
+              @edit-event="editAttendanceEvent"
+              @delete-event="deleteAttendanceEvent">
+            </AttendanceEventCard>
+          </el-tab-pane>
+          <el-tab-pane label="Locations">
+            <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
+            <LocationCard
+              :locations="locations"
+              @create-location="createNewLocation"
+            ></LocationCard>
+          </el-tab-pane>
+        </el-tabs>
+      </el-col>
+      <el-col :xs="24" :sm="6">
+        <div v-if="course.enroll_identity">
+          <div v-if="course.enroll_identity == 'student'">
+            <el-button type="primary" @click="changeRoute($route.params.id+'/attendance')">Check Attendance</el-button>
           </div>
-          <el-icon :size="18" @click="editAttendanceEvent(event.id)">
-            <Edit />
-          </el-icon>
-          <span style="margin-left: 10px;"></span> <!-- Add space between icons -->
-          <el-icon :size="18" @click.stop="deleteAttendanceEvent(event.id)">
-            <Delete />
-          </el-icon>
-        </el-card>
-      </div>
-    </div>
-
+          <div v-if="course.enroll_identity != 'student'">
+            <el-button type="primary" @click="openPeopleManager()">Manage People</el-button>
+            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Attendance</el-button>
+        </div>
+        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;"></CourseInfoCard>
+      </div></el-col>
+    </el-row>
     <!-- Modify Course Dialog -->
-    <el-dialog title="Modify Course" v-model="showModifyCourseDialog">
-      <el-form ref="course" :model="courseForm" label-width="120px">
-        <el-form-item label="Name">
-          <el-input v-model="courseForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="Semester">
-          <el-input v-model="courseForm.semester"></el-input>
-        </el-form-item>
-        <el-form-item label="Start Time">
-          <el-date-picker v-model="courseForm.start_time" type="datetime"
-            placeholder="Select start time"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="Duration (hours)">
-          <el-input-number v-model="courseForm.duration" :min="1"></el-input-number>
-        </el-form-item>
-        <el-form-item label="Repeat">
-          <el-select v-model="courseForm.repeat" placeholder="Select">
-            <el-option label="Do not repeat" value="no-repeat"></el-option>
-            <el-option label="Weekly" value="weekly"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item v-show="courseForm.repeat != 'no-repeat'" label="Repeat">
-          <el-input-number v-model="courseForm.occurrence" :step="1" step-strictly></el-input-number>
-        </el-form-item>
-        <el-form-item label="Logo">
-          <el-input v-model="courseForm.logo"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="showModifyCourseDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="updateCourse">Confirm</el-button>
-      </span>
-    </el-dialog>
+    <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog" @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
 
     <!-- Manage People Dialog -->
-    <el-dialog title="Manage People" v-model="showManagePeopleDialog" width="50%">
-      <div>
-        <el-input v-model="newEnrollmentEmails" placeholder="Enter email addresses (space-separated)"
-          class="input-with-select" @keyup.enter="handleEmailCreate()">
-        </el-input>
-        <el-button @click="handleEmailCreate()">Add Account</el-button>
-        <div>New enroll:</div>
-        <div v-for="enroll in newEnrolls" :key="enroll">{{ enroll }}</div>
-        <el-button @click="addEnrollments">Enroll Course</el-button>
-      </div>
+    <ManagePeopleDialog
+      :enrollments="enrollments"
+      :visible="showManagePeopleDialog"
+      @dialog-closed="showManagePeopleDialog = false"
+      @new-enrolls="addEnrollments"
+      @update-enrollment="updateEnrollment"
+      @delete-enrollment="deleteEnrollments">
+    </ManagePeopleDialog>
 
-      <el-table style="width: 100%" :data="enrollments">
-        <el-table-column type="index" width="50" />
-        <el-table-column width="70">
-          <template #default="scope">
-            <el-avatar shape="square" :size="40" :src="scope.row.avatar" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="name" label="Name" width="180" />
-        <el-table-column prop="email" label="Email" />
-        <el-table-column label="Role">
-          <template #default="scope">
-            <el-select v-model="scope.row.enrolls" placeholder="Select role" @change="updateEnrollment(scope.row)"
-              multiple :disabled="scope.row.enrolls.includes('owner')">
-              <el-option label="Instructor" value="instructor"></el-option>
-              <el-option label="Staff" value="staff"></el-option>
-              <el-option label="Student" value="student"></el-option>
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="Operations" width="180">
-          <template #default="scope">
-            <el-button type="danger" @click="deleteEnrollments(scope.row.account_id)" size="small">Delete</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-dialog>
+    <CreateAttendanceEventDialog
+      :visible="showCreateAttendanceEventDialog"
+      :locations="locations"
+      @dialog-closed="showCreateAttendanceEventDialog = false"
+      @create-event="createAttendanceEvent"
+    >
+    </CreateAttendanceEventDialog>
 
-    <!-- Create Attendance Event Dialog -->
-    <el-dialog title="Create Attendance Event" v-model="showCreateAttendanceEventDialog">
-      <el-form ref="createAttendanceEventForm" :model="createAttendanceEventForm" label-width="120px">
-        <el-form-item label="Name">
-          <el-input v-model="createAttendanceEventForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="Location">
-          <el-select v-model="createAttendanceEventForm.location_id" placeholder="Select">
-            <el-option v-for="location in locations" :key="location.value" :label="location.label"
-              :value="location.value" />
-            <!-- Add Location, but need to figure out latitude and longitude -->
-            <!-- <span slot="footer">
-              <el-button v-if="isAddedValue" text bg size="small" @click="isAddedValue = true">
-                Add an option
-              </el-button>
-              <template v-else>
-                <el-input v-model="optionLocation" class="option-input" placeholder="input option name" size="small" />
-                <div style="text-align:center;"><el-button type="primary" size="small" @click="onConfirm">
-                  confirm
-                </el-button>
-                <el-button size="small" @click="clear">cancel</el-button></div>
-              </template>
-            </span> -->
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Start Time">
-          <el-date-picker v-model="createAttendanceEventForm.start_time" type="datetime"
-            placeholder="Select start time"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="End Time">
-          <el-date-picker v-model="createAttendanceEventForm.end_time" type="datetime"
-            placeholder="Select end time"></el-date-picker>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="showCreateAttendanceEventDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="createAttendanceEvent">Confirm</el-button>
-      </span>
-    </el-dialog>
-
-    <!-- Modify Attendance Event Dialog -->
-    <el-dialog title="Modify Attendance Event" v-model="showModifyAttendanceEventDialog">
-      <el-form ref="attendanceEvents" :model="attendanceEventForm" label-width="120px">
-        <el-form-item label="Name">
-          <el-input v-model="attendanceEventForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="Location">
-          <el-select v-model="attendanceEventForm.location_id" placeholder="Select">
-            <el-option v-for="location in locations" :key="location.value" :label="location.label"
-              :value="location.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Start Time">
-          <el-date-picker v-model="attendanceEventForm.start_time" type="datetime"
-            placeholder="Select start time"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="End Time">
-          <el-date-picker v-model="attendanceEventForm.end_time" type="datetime"
-            placeholder="Select end time"></el-date-picker>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="showModifyAttendanceEventDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="updateAttendanceEvent">Confirm</el-button>
-      </span>
-    </el-dialog>
+    <ModifyAttendanceEventDialog
+      :eventForm="createAttendanceEventForm"
+      :visible="showModifyAttendanceEventDialog"
+      :locations="locations"
+      @dialog-closed="showModifyAttendanceEventDialog = false"
+      @update-event="updateAttendanceEvent"
+    >
+    </ModifyAttendanceEventDialog>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
-
+import CourseInfoCard from './components/CourseInfoCard.vue';
+import ModifyCourseDialog from './components/ModifyCourseDialog.vue';
+import ManagePeopleDialog from './components/ManagePeopleDialog.vue';
+import CreateAttendanceEventDialog from './components/CreateAttendanceEventDialog.vue';
+import ModifyAttendanceEventDialog from './components/ModifyAttendanceEventDialog.vue'
+import AttendanceEventCard from './components/AttendanceEventCard.vue';
+import LocationCard from './components/LocationCard.vue'
 
 export default {
   name: 'SingleCourse',
-
+  components: {CourseInfoCard, ModifyCourseDialog, ManagePeopleDialog, CreateAttendanceEventDialog, AttendanceEventCard, ModifyAttendanceEventDialog, LocationCard},
   data() {
     return {
       course: {
@@ -213,8 +105,6 @@ export default {
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
       enrollments: [],
-      newEnrolls: [],
-      newEnrollmentEmails: '',
       currentEventID: '',
     };
   },
@@ -234,6 +124,9 @@ export default {
   },
 
   methods: {
+    changeRoute(route) {
+      this.$router.push({path: route})
+    },
     fetchCourse(id) {
       axios.get(`/api/course/${id}`, {
         headers: {
@@ -251,11 +144,11 @@ export default {
         console.error('Error fetching course:', error);
       });
     },
-    updateCourse() {
+    updateCourse(form) {
+      this.courseForm = form
       if (this.courseForm.repeat == 'no-repeat') {
         this.courseForm.occurrence = 1
       }
-
       axios.put('api/course/' + this.course.id, this.courseForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
@@ -266,16 +159,6 @@ export default {
       }).catch(error => {
         console.error('Error creating course:', error);
       });
-    },
-    handleEmailCreate() {
-      // Split the input by commas to support comma-separated emails
-      let emails = this.newEnrollmentEmails.split(' ');
-      emails.forEach(email => {
-        if (email && !this.newEnrolls.some(user => user.email === email)) {
-          this.newEnrolls.push({ email: email, roles: 'student' });
-        }
-      })
-      this.newEnrollmentEmails = ''
     },
     openPeopleManager() {
       this.showManagePeopleDialog = true
@@ -297,8 +180,8 @@ export default {
       });
     },
 
-    addEnrollments() {
-      axios.post(`/api/course/${this.course.id}/enroll`, { enroll: this.newEnrolls }, {
+    addEnrollments(newEnrolls) {
+      axios.post(`/api/course/${this.course.id}/enroll`, { enroll: newEnrolls }, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         }
@@ -340,13 +223,14 @@ export default {
         console.error('Error fetching enrollments:', error);
       });
     },
-    createAttendanceEvent() {
-      axios.post(`api/course/${this.course.id}/event`, this.createAttendanceEventForm, {
+    createAttendanceEvent(eventForm) {
+      axios.post(`api/course/${this.course.id}/event`, eventForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(() => {
-        this.showCreateAttendanceEventDialog = false;
+        this.showCreateAttendanceEventDialog = false
+        this.createAttendanceEventForm = {}
         this.fetchAttendanceEvents(); // Refresh the list after adding
       }).catch(error => {
         console.error('Error creating attendance event:', error);
@@ -364,7 +248,7 @@ export default {
       });
     },
     fetchLocations() {
-      axios.get(`api/course/${this.course.id}/location/list_all`, {
+      axios.get(`api/course/${this.course.id}/location`, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
@@ -379,6 +263,19 @@ export default {
       }).catch(error => {
         console.error('Error fetching locations:', error);
       });
+    },
+    createNewLocation(locationData) {
+        let courseId = this.$route.params.id;
+        axios.post(`api/course/${courseId}/location`, locationData, {
+            headers: {
+                Authorization: `Bearer ${this.account.credential}`,
+            }})
+        .then(response => {
+            console.log('Location created successfully', response);
+        })
+        .catch(error => {
+            console.error('Error creating location', error);
+        });
     },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
@@ -401,6 +298,7 @@ export default {
         this.attendanceEventForm = { ...event };
         delete this.attendanceEventForm.id;
         this.showModifyAttendanceEventDialog = true;
+        this.createAttendanceEventForm = this.attendanceEventForm;
         this.currentEventID = eventId;
       } else {
         console.error('Event not found!');
@@ -436,8 +334,11 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Add your styles here */
+<style>
+.single-course-container {
+  width: 90%;
+}
+
 .event-item {
   border-bottom: 1px solid #eee;
   padding: 20px 5px;
@@ -452,6 +353,15 @@ export default {
   width: 90%;
   margin-bottom: 8px;
   margin-left: 5%;
+}
+.box-card {
+  text-align: left;
+  line-height: 2rem;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>
 ``

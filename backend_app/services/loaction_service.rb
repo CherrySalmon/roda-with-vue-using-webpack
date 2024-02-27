@@ -28,6 +28,7 @@ module Todo
     # Creates a new location, if authorized
     def self.create(requestor, location_data, course_id)
       verify_policy(requestor, :create, course_id)
+      location_data['course_id'] = course_id
       location = Location.create(location_data) || raise("Failed to create location.")
       location
     end
