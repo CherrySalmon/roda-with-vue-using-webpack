@@ -10,7 +10,7 @@ module Todo
 
     # Only the course's teachers and staff can update a location
     def can_create? #expect student
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     # Everyone can read a location
@@ -20,12 +20,12 @@ module Todo
 
     # Only the course's teachers and staff can update a location
     def can_update? #expect student
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     # Only the course's teachers and staff can update a location
     def can_delete? #expect student
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     def summary
@@ -44,8 +44,19 @@ module Todo
       @requestor['roles'].include?('admin')
     end
 
-    def requestor_is_not_student?
-      !@course_roles.include?('student')
+    def requestor_is_instructor?
+      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+      roles_array.include?('instructor')
+    end
+
+    def requestor_is_staff?
+      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+      roles_array.include?('staff')
+    end
+
+    def requestor_is_owner?
+      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+      roles_array.include?('owner')
     end
   end
 end

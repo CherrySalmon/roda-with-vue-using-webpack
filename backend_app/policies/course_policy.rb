@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class CoursePolicy
-  def initialize(requestor, course = nil)
+  def initialize(requestor, course = nil, course_roles = nil)
     @requestor = requestor
     @this_course = course
+    @course_roles = course_roles
   end
 
   # Admin can view any course;
@@ -23,12 +24,13 @@ class CoursePolicy
 
   # Admin can update any course;
   def can_update?
-    requestor_is_instructor? || requestor_is_staff? || requestor_is_admin?
+    puts "requestor_is_staff? #{requestor_is_staff?}"
+    requestor_is_instructor? || requestor_is_teacher? || requestor_is_admin? || requestor_is_staff?
   end
 
   # Admin can delete any course;
   def can_delete?
-    requestor_is_admin? || requestor_is_instructor?
+    requestor_is_admin? || requestor_is_instructor? || requestor_is_teacher?
   end
 
   # Summary of permissions
@@ -46,7 +48,7 @@ class CoursePolicy
 
   # Check if the requestor is enrolled in the course
   def self_enrolled?
-    enroll = @this_course&.accounts&.any? { |account| account.account_id == @requestor['account_id'] }
+    enroll = @this_course&.accounts&.any? { |account| account.id == @requestor['account_id'] }
     enroll
   end
 
@@ -60,12 +62,18 @@ class CoursePolicy
     @requestor['roles'].include?('teacher')
   end
 
-  # Check if the requestor has an instructor role for the course
   def requestor_is_instructor?
-    @requestor['roles'].include?('instructor')
+    roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+    roles_array.include?('instructor')
   end
-  # Check if the requestor has an staff role for the course
+
   def requestor_is_staff?
-    @requestor['roles'].include?('staff')
+    roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+    roles_array.include?('staff')
+  end
+
+  def requestor_is_owner?
+    roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+    roles_array.include?('owner')
   end
 end

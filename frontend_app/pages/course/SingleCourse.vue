@@ -4,63 +4,55 @@
     <el-row>
       <el-col :xs="24" :sm="18">
         <el-tabs tab-position="left" style="height: 100%; text-align: left;">
-          <el-tab-pane label="Attendance Events">
-            <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
-            <AttendanceEventCard
-              :attendance-events="attendanceEvents"
-              @edit-event="editAttendanceEvent"
-              @delete-event="deleteAttendanceEvent">
-            </AttendanceEventCard>
-          </el-tab-pane>
-          <el-tab-pane label="Locations">
-            <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-            <LocationCard
-              :locations="locations"
-              @create-location="createNewLocation"
-            ></LocationCard>
-          </el-tab-pane>
+          <div v-if="course.enroll_identity">
+            <div
+              v-if="course.enroll_identity.includes('owner') || course.enroll_identity.includes('instructor') || course.enroll_identity.includes('staff')">
+              <el-tab-pane label="Attendance Events">
+                <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
+                <AttendanceEventCard :attendance-events="attendanceEvents" @edit-event="editAttendanceEvent"
+                  @delete-event="deleteAttendanceEvent">
+                </AttendanceEventCard>
+              </el-tab-pane>
+              <el-tab-pane label="Locations">
+                <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
+                <LocationCard :locations="locations" @create-location="createNewLocation"></LocationCard>
+              </el-tab-pane>
+            </div>
+          </div>
         </el-tabs>
       </el-col>
       <el-col :xs="24" :sm="6">
         <div v-if="course.enroll_identity">
-          <div v-if="course.enroll_identity == 'student'">
-            <el-button type="primary" @click="changeRoute($route.params.id+'/attendance')">Check Attendance</el-button>
+          <div v-if="course.enroll_identity.includes('student')" style="margin-bottom: 10px;">
+            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Check Attendance</el-button>
           </div>
           <div v-if="course.enroll_identity != 'student'">
             <el-button type="primary" @click="openPeopleManager()">Manage People</el-button>
-            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Attendance</el-button>
+            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create
+              Attendance</el-button>
+          </div>
+          <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+          </CourseInfoCard>
         </div>
-        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;"></CourseInfoCard>
-      </div></el-col>
+      </el-col>
     </el-row>
     <!-- Modify Course Dialog -->
-    <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog" @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
+    <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
+      @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
 
     <!-- Manage People Dialog -->
-    <ManagePeopleDialog
-      :enrollments="enrollments"
-      :visible="showManagePeopleDialog"
-      @dialog-closed="showManagePeopleDialog = false"
-      @new-enrolls="addEnrollments"
-      @update-enrollment="updateEnrollment"
+    <ManagePeopleDialog :enrollments="enrollments" :visible="showManagePeopleDialog"
+      @dialog-closed="showManagePeopleDialog = false" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment"
       @delete-enrollment="deleteEnrollments">
     </ManagePeopleDialog>
 
-    <CreateAttendanceEventDialog
-      :visible="showCreateAttendanceEventDialog"
-      :locations="locations"
-      @dialog-closed="showCreateAttendanceEventDialog = false"
-      @create-event="createAttendanceEvent"
-    >
+    <CreateAttendanceEventDialog :visible="showCreateAttendanceEventDialog" :locations="locations"
+      @dialog-closed="showCreateAttendanceEventDialog = false" @create-event="createAttendanceEvent">
     </CreateAttendanceEventDialog>
 
-    <ModifyAttendanceEventDialog
-      :eventForm="createAttendanceEventForm"
-      :visible="showModifyAttendanceEventDialog"
-      :locations="locations"
-      @dialog-closed="showModifyAttendanceEventDialog = false"
-      @update-event="updateAttendanceEvent"
-    >
+    <ModifyAttendanceEventDialog :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
+      :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
+      @update-event="updateAttendanceEvent">
     </ModifyAttendanceEventDialog>
   </div>
 </template>
@@ -78,7 +70,7 @@ import LocationCard from './components/LocationCard.vue'
 
 export default {
   name: 'SingleCourse',
-  components: {CourseInfoCard, ModifyCourseDialog, ManagePeopleDialog, CreateAttendanceEventDialog, AttendanceEventCard, ModifyAttendanceEventDialog, LocationCard},
+  components: { CourseInfoCard, ModifyCourseDialog, ManagePeopleDialog, CreateAttendanceEventDialog, AttendanceEventCard, ModifyAttendanceEventDialog, LocationCard },
   data() {
     return {
       course: {
@@ -112,20 +104,20 @@ export default {
   created() {
     this.course.id = this.$route.params.id;
     this.account = cookieManager.getAccount()
-    if(this.account) {
+    if (this.account) {
       this.fetchCourse(this.course.id);
       this.fetchAttendanceEvents(this.course.id);
       this.fetchLocations();
     }
     else {
       console.log(this.$route)
-      this.$router.push({path: '/login', query: { redirect: this.$route.href }} )
+      this.$router.push({ path: '/login', query: { redirect: this.$route.href } })
     }
   },
 
   methods: {
     changeRoute(route) {
-      this.$router.push({path: route})
+      this.$router.push({ path: route })
     },
     fetchCourse(id) {
       axios.get(`/api/course/${id}`, {
@@ -265,16 +257,18 @@ export default {
       });
     },
     createNewLocation(locationData) {
-        let courseId = this.$route.params.id;
-        axios.post(`api/course/${courseId}/location`, locationData, {
-            headers: {
-                Authorization: `Bearer ${this.account.credential}`,
-            }})
+      let courseId = this.$route.params.id;
+      axios.post(`api/course/${courseId}/location`, locationData, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        }
+      })
         .then(response => {
-            console.log('Location created successfully', response);
+          console.log('Location created successfully', response);
+          this.fetchLocations();
         })
         .catch(error => {
-            console.error('Error creating location', error);
+          console.error('Error creating location', error);
         });
     },
     deleteAttendanceEvent(eventId) {
@@ -354,10 +348,12 @@ export default {
   margin-bottom: 8px;
   margin-left: 5%;
 }
+
 .box-card {
   text-align: left;
   line-height: 2rem;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;

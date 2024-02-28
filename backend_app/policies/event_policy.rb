@@ -3,7 +3,7 @@
 module Todo
   # Policy to determine if an account can view, edit, or delete a particular course
   class EventPolicy
-    def initialize(requestor, course_roles = nil)
+    def initialize(requestor, course_roles)
       @requestor = requestor
       @course_roles = course_roles
     end
@@ -15,21 +15,21 @@ module Todo
 
     # Instructor and staff can create a event;
     def can_create?
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     # Instructor and staff can view a event;
     def can_view?
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     # Student can update the attendance;
     def can_update?
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     def can_delete?
-      requestor_is_not_student?
+      requestor_is_owner? || requestor_is_instructor? || requestor_is_staff?
     end
 
     # Summary of permissions
@@ -53,8 +53,19 @@ module Todo
       @requestor['roles'].include?('admin')
     end
 
-    def requestor_is_not_student?
-      !@course_roles.include?('student')
+    def requestor_is_instructor?
+      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+      roles_array.include?('instructor')
+    end
+
+    def requestor_is_staff?
+      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+      roles_array.include?('staff')
+    end
+
+    def requestor_is_owner?
+      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
+      roles_array.include?('owner')
     end
   end
 end

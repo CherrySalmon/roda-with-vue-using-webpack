@@ -29,39 +29,40 @@ module Todo
 
     def self.get(requestor, course_id)
       course = Course.first(id: course_id)
+      verify_policy(requestor, :view, course, course_id)
       course.attributes(requestor['account_id'])
     end
 
     # Updates an existing course, if authorized
     def self.update(requestor, course_id, course_data)
       course = find_course(course_id)
-      verify_policy(requestor, :update, course)
+      verify_policy(requestor, :update, course, course_id)
       course.update(course_data) || raise("Failed to update course with ID #{course_id}.")
     end
 
     # Removes a course, if authorized
     def self.remove(requestor, course_id)
       course = find_course(course_id)
-      verify_policy(requestor, :delete, course)
+      verify_policy(requestor, :delete, course, course_id)
       course.delete
     end
 
     def self.remove_enroll(requestor, course_id, account_id)
       course = find_course(course_id)
-      verify_policy(requestor, :update, course)
+      verify_policy(requestor, :update, course, course_id)
       account = AccountCourse.first(account_id: account_id)
       account.delete
     end
 
     def self.get_enrollments(requestor, course_id)
       course = find_course(course_id)
-      verify_policy(requestor, :view, course)
+      verify_policy(requestor, :view, course, course_id)
       course.get_enrollments()
     end
 
     def self.update_enrollments(requestor, course_id, enrolled_data)
       course = find_course(course_id)
-      verify_policy(requestor, :update, course)
+      verify_policy(requestor, :update, course, course_id)
       course.add_or_update_enrollments(enrolled_data)
     end
 
@@ -72,8 +73,9 @@ module Todo
     end
 
     # Checks authorization for the requested action
-    def self.verify_policy(requestor, action = nil, course = nil)
-      policy = CoursePolicy.new(requestor, course)
+    def self.verify_policy(requestor, action = nil, course = nil, course_id = nil)
+      course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).select_map(:roles)
+      policy = CoursePolicy.new(requestor, course, course_roles)
       action_check = action ? policy.send("can_#{action}?") : true
       raise(ForbiddenError, 'You have no access to perform this action.') unless action_check
 

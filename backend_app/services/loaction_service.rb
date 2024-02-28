@@ -11,7 +11,7 @@ module Todo
 
     # Lists all locations, if authorized
     def self.list_all(requestor, course_id)
-      verify_policy(requestor, :view)
+      verify_policy(requestor, :view, course_id)
       locations = Location.where(course_id: course_id).all.map(&:attributes)
 
       locations || raise(ForbiddenError, 'You have no access to list locations.')
