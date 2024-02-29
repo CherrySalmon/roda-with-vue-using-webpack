@@ -24,6 +24,7 @@
 <script>
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { ElNotification } from 'element-plus'
 export default {
   name: 'LoginPage',
 
@@ -59,11 +60,14 @@ export default {
         if (status === 200 || status === 201) {
           this.setUserInfoCookies(data.user_info);
           location.assign(this.$route.query.redirect);
-        } else {
-          console.error('Error sending token to backend');
-        }
+        } 
       } catch (error) {
         console.error('Error:', error.response || error);
+        ElNotification({
+          title: 'Error',
+          message: 'Account not found, please contact your teaching staff.',
+          type: 'error',
+        })
       }
     },
 
