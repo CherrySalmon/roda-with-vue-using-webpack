@@ -24,8 +24,7 @@ class CoursePolicy
 
   # Admin can update any course;
   def can_update?
-    puts "requestor_is_staff? #{requestor_is_staff?}"
-    requestor_is_instructor? || requestor_is_teacher? || requestor_is_admin? || requestor_is_staff?
+    requestor_is_instructor? || requestor_is_owner? || requestor_is_admin? || requestor_is_staff?
   end
 
   # Admin can delete any course;
