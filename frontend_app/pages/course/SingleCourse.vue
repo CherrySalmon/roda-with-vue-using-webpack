@@ -19,9 +19,8 @@
               </el-tab-pane>
               <el-tab-pane label="People" name="people">
                 <h3 style="margin: 30px 20px 10px 20px;">People</h3>
-                <ManagePeopleCard :enrollments="enrollments"
-                  @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment"
-                  @delete-enrollment="deleteEnrollments">
+                <ManagePeopleCard :enrollments="enrollments" @new-enrolls="addEnrollments"
+                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments">
                 </ManagePeopleCard>
               </el-tab-pane>
             </div>
@@ -31,11 +30,10 @@
       <el-col :xs="24" :sm="6">
         <div v-if="course.enroll_identity">
           <div v-if="course.enroll_identity.includes('student')" style="margin-bottom: 10px;">
-            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Check Attendance</el-button>
+            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
           </div>
           <div v-if="course.enroll_identity != 'student'">
-            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create
-              Attendance</el-button>
+            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
           </div>
           <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
           </CourseInfoCard>
@@ -118,7 +116,7 @@ export default {
   methods: {
     changeTab(tab_name) {
       console.log(tab_name)
-      if(tab_name == 'people') {
+      if (tab_name == 'people') {
         this.fetchEnrollments()
       }
     },

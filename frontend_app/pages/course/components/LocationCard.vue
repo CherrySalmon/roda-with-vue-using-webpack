@@ -9,15 +9,16 @@
                 </el-form-item>
                 <el-form-item>
                     <el-button type="primary" @click="submitLocation">Submit Location</el-button>
+                    <p style="font-size: small; color: darkgrey;">( Your current location will be used )</p>
                 </el-form-item>
             </el-form>
         </div>
-        
+
     </div>
 </template>
   
 <script>
-  export default {
+export default {
     emits: ['create-location'],
     props: {
         locations: Array
@@ -74,5 +75,4 @@
     width: 400px;
     margin: 30px 20px;
 }
-
 </style>

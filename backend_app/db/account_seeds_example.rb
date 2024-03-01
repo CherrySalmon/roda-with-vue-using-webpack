@@ -4,7 +4,7 @@ require_relative '../models/role'
 require_relative '../models/account'
 
 # Define the role descriptions
-role_descriptions = ['admin', 'teacher', 'member']
+role_descriptions = ['admin', 'creator', 'member']
 
 # Iterate over the descriptions and create roles if they don't exist
 role_descriptions.each do |desc|

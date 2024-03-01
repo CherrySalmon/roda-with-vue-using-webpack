@@ -12,9 +12,9 @@ class CoursePolicy
     requestor_is_admin?
   end
 
-  # Teacher can create a course
+  # creator can create a course
   def can_create?
-    requestor_is_teacher?
+    requestor_is_creator?
   end
 
   # Admin can view any course;
@@ -24,12 +24,12 @@ class CoursePolicy
 
   # Admin can update any course;
   def can_update?
-    requestor_is_instructor? || requestor_is_owner? || requestor_is_admin? || requestor_is_staff?
+    requestor_is_instructor? || requestor_is_owner? || requestor_is_staff?
   end
 
   # Admin can delete any course;
   def can_delete?
-    requestor_is_admin? || requestor_is_instructor? || requestor_is_teacher?
+    requestor_is_admin? || requestor_is_owner?
   end
 
   # Summary of permissions
@@ -56,9 +56,9 @@ class CoursePolicy
     @requestor['roles'].include?('admin')
   end
 
-  # Check if the requestor has an teacher role
-  def requestor_is_teacher?
-    @requestor['roles'].include?('teacher')
+  # Check if the requestor has an creator role
+  def requestor_is_creator?
+    @requestor['roles'].include?('creator')
   end
 
   def requestor_is_instructor?
