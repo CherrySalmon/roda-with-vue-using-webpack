@@ -7,6 +7,7 @@
           <div v-if="course.enroll_identity">
             <div
               v-if="course.enroll_identity.includes('owner') || course.enroll_identity.includes('instructor') || course.enroll_identity.includes('staff')">
+
               <el-tab-pane label="Attendance Events" name="events">
                 <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
                 <AttendanceEventCard :attendance-events="attendanceEvents" @edit-event="editAttendanceEvent"
@@ -15,7 +16,8 @@
               </el-tab-pane>
               <el-tab-pane label="Locations" name="locations">
                 <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-                <LocationCard :locations="locations" @create-location="createNewLocation"></LocationCard>
+                <LocationCard :locations="locations" @create-location="createNewLocation"
+                  @delete-location="deleteLocation"></LocationCard>
               </el-tab-pane>
               <el-tab-pane label="People" name="people">
                 <h3 style="margin: 30px 20px 10px 20px;">People</h3>
@@ -27,19 +29,30 @@
           </div>
         </el-tabs>
       </el-col>
+
       <el-col :xs="24" :sm="6">
         <div v-if="course.enroll_identity">
-          <div v-if="course.enroll_identity.includes('student')" style="margin-bottom: 10px;">
+          <div v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length > 1">
             <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
+            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+            </CourseInfoCard>
           </div>
           <div v-if="course.enroll_identity != 'student'">
             <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
+            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+            </CourseInfoCard>
           </div>
-          <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
-          </CourseInfoCard>
         </div>
       </el-col>
     </el-row>
+    <div v-if="course.enroll_identity">
+      <div class="center-content"
+        v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length == 1">
+        <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
+        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+        </CourseInfoCard>
+      </div>
+    </div>
     <!-- Modify Course Dialog -->
     <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
@@ -111,6 +124,7 @@ export default {
       console.log(this.$route)
       this.$router.push({ path: '/login', query: { redirect: this.$route.href } })
     }
+    this.fetchEnrollments()
   },
 
   methods: {
@@ -271,6 +285,19 @@ export default {
           console.error('Error creating location', error);
         });
     },
+    deleteLocation(locationId) {
+      axios.delete(`/api/course/${this.course.id}/location/${locationId}`, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        }
+      }).then(() => {
+        console.log(`Location ${locationId} deleted successfully.`);
+        // Refresh the locations list
+        this.fetchLocations();
+      }).catch(error => {
+        console.error('Error deleting location:', error);
+      });
+    },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
         headers: {
@@ -330,7 +357,8 @@ export default {
 
 <style>
 .single-course-container {
-  width: 90%;
+  width: 100%;
+  padding: 15px 40px 85px;
 }
 
 .event-item {
@@ -358,6 +386,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.center-content {
+  margin: auto;
+  width: 50%;
+  /* Adjust as needed */
+  /* Space between the button and the CourseInfoCard */
 }
 </style>
 ``

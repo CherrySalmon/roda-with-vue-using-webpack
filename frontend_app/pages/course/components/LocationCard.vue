@@ -1,6 +1,12 @@
 <template>
     <div style="margin: 20px 40px;">
-        <div v-for="location in locations" :key="location.value">{{ location.value }}: {{ location.label }}</div>
+        <div v-for="location in locations" :key="location.value" class="location-item">
+            {{ location.value }}: {{ location.label }}
+            <el-icon :size="14" @click.stop="$emit('delete-location', location.value)" class="location-icon">
+                <Close />
+            </el-icon>
+        </div>
+
         <div class="form-container">
             <h1 style="margin-bottom: 10px;">Create new Location</h1>
             <el-form ref="locationForm" :model="locationForm" label-width="80px">
@@ -19,7 +25,7 @@
   
 <script>
 export default {
-    emits: ['create-location'],
+    emits: ['create-location', 'delete-location'],
     props: {
         locations: Array
     },
@@ -74,5 +80,18 @@ export default {
 .form-container {
     width: 400px;
     margin: 30px 20px;
+}
+
+.location-item {
+    display: flex;
+    align-items: center;
+    /* Ensures vertical alignment in case icon and text have different heights */
+}
+
+.location-icon {
+    cursor: pointer;
+    /* Changes the cursor to a pointer when hovering over the icon */
+    margin-left: 5px;
+    /* Optional: Adds a small space between the text and the icon */
 }
 </style>
