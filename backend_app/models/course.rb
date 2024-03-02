@@ -83,11 +83,10 @@ module Todo
 
     def add_or_find_account(email)
       account = Account.first(email: email)
-    
       unless account
         account = Account.create(email: email)
         role = Role.first(name: 'member')
-        account.roles << role
+        account.add_role(role)
       end
     
       account
