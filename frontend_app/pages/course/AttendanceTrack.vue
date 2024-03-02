@@ -1,17 +1,19 @@
 <template>
     <div>
         <div v-loading.fullscreen.lock="fullscreenLoading"></div>
-        <div v-if="event">
-            <el-card class="box-card" style="width: 60%; margin-top: 10%; margin-left: 20%;">
+        <div v-if="events">
+            <el-card v-for="event in events" :key="event.id" class="box-card"
+                style="width: 60%; margin-top: 10%; margin-left: 20%;">
+                <!-- <el-card class="box-card" style="width: 60%; margin-top: 10%; margin-left: 20%;"> -->
                 <div slot="header" class="clearfix">
                     <span>{{ event.name }}</span>
                 </div><br />
                 <div>
-                    <p>Start Time: {{ start_time || 'N/A' }}</p>
-                    <p>End Time: {{ end_time || 'N/A' }}</p>
+                    <p>Start Time: {{ event.start_time || 'N/A' }}</p>
+                    <p>End Time: {{ event.end_time || 'N/A' }}</p>
                 </div>
                 <br /><br />
-                <el-button @click="getLocation">Mark Attendance</el-button>
+                <el-button @click="getLocation(event)">Mark Attendance</el-button>
                 <br /><br />
             </el-card>
         </div>
@@ -29,7 +31,7 @@ export default {
     data() {
         return {
             fullscreenLoading: false,
-            event: {},
+            events: {},
             start_time: '',
             end_time: '',
             accountCredential: '',
@@ -43,7 +45,7 @@ export default {
     },
     watch: {
         // Watch the `event` object for changes
-        event: {
+        events: {
             handler(newVal) {
                 // If event data is still not present after being fetched, redirect
                 if ((!newVal || Object.keys(newVal).length === 0) && this.isEventDataFetched) {
@@ -79,13 +81,20 @@ export default {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
             }).then(response => {
-                console.log('Event Data Fetched Successfully:', response.data.data[0]);
-                this.event = response.data.data[0];
+                console.log('Event Data Fetched Successfully:', response.data.data);
+                this.events = response.data.data;
                 this.isEventDataFetched = true;
 
-                if (this.event) {
-                    this.start_time = this.getLocalDateString(this.event.start_time);
-                    this.end_time = this.getLocalDateString(this.event.end_time);
+                // if (this.events) {
+                //     this.event.start_time = this.getLocalDateString(this.event.start_time);
+                //     this.event.end_time = this.getLocalDateString(this.event.end_time);
+                // }
+                if (this.events && this.events.length) {
+                    this.events = this.events.map(event => ({
+                        ...event, // Spread operator to copy existing properties of the event
+                        start_time: this.getLocalDateString(event.start_time),
+                        end_time: this.getLocalDateString(event.end_time)
+                    }));
                 }
             }).catch(error => {
                 console.error('Error fetching event:', error);
@@ -110,7 +119,7 @@ export default {
                 + ' ' + String(date.getHours()).padStart(2, '0')
                 + ':' + String(date.getMinutes()).padStart(2, '0');
         },
-        getLocation() {
+        getLocation(event) {
             console.log("start getting location");
             // Start the loading screen
             const loading = ElLoading.service({
@@ -120,20 +129,23 @@ export default {
             });
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    position => this.showPosition(position, loading),
+                    position => this.showPosition(position, loading, event),
                     error => this.showError(error, loading)
                 );
             } else {
                 this.locationText = "Geolocation is not supported by this browser.";
             }
         },
-        showPosition(position, loading) {
+        showPosition(position, loading, event) {
             this.locationText = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}, Accuracy: ${position.coords.accuracy}`;
 
             this.latitude = position.coords.latitude;
             this.longitude = position.coords.longitude;
 
-            axios.get(`/api/course/${this.event.course_id}/location/${this.event.location_id}`, {
+            const course_id = event.course_id;
+            const location_id = event.location_id;
+
+            axios.get(`/api/course/${course_id}/location/${location_id}`, {
                 headers: {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
@@ -150,7 +162,7 @@ export default {
                 // Check if the current position is within the range
                 if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
                     // Call your API if within the range
-                    this.postAttendance(loading);
+                    this.postAttendance(loading, event);
                 } else {
                     ElMessageBox.alert('You are not in the right location', 'Failed', {
                         confirmButtonText: 'OK',
@@ -178,13 +190,13 @@ export default {
                     break;
             }
         },
-        postAttendance(loading) {
+        postAttendance(loading, event) {
             // Use your actual course ID here
-            const courseId = this.event.course_id; // Example course ID
+            const courseId = event.course_id; // Example course ID
             axios.post(`/api/course/${courseId}/attendance`, {
                 // Include any required data here
-                event_id: this.event.id,
-                name: this.event.name,
+                event_id: event.id,
+                name: event.name,
                 latitude: this.latitude,
                 longitude: this.longitude,
             }, {
