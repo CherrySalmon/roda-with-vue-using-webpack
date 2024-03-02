@@ -82,11 +82,17 @@ module Todo
     end
 
     def add_or_find_account(email)
-      account = Account.find_or_create(email:)
-      role = Role.first(name: 'member')
-      account.add_role(role)
+      account = Account.first(email: email)
+    
+      unless account
+        account = Account.create(email: email)
+        role = Role.first(name: 'member')
+        account.roles << role
+      end
+    
       account
     end
+    
 
     def update_course_account_roles(account, roles_string)
       # Find or create the join model entry
