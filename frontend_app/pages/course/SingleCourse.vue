@@ -33,9 +33,8 @@
       <el-col :xs="24" :sm="6">
         <div v-if="course.enroll_identity">
           <div v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length > 1">
-            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
-            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
-            </CourseInfoCard>
+            <el-button style="margin: 20px 0;" type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark
+              Attendance</el-button>
           </div>
           <div v-if="course.enroll_identity != 'student'">
             <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>

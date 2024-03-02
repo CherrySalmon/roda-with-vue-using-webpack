@@ -11,7 +11,7 @@
                     <p>End Time: {{ end_time || 'N/A' }}</p>
                 </div>
                 <br /><br />
-                <el-button @click="getLocation">Make Attendance</el-button>
+                <el-button @click="getLocation">Mark Attendance</el-button>
                 <br /><br />
             </el-card>
         </div>
@@ -55,7 +55,7 @@ export default {
                     })
                     setTimeout(() => {
                         this.fullscreenLoading = false;
-                        this.$router.push('/course/'+this.$route.params.id);
+                        this.$router.push('/course/' + this.$route.params.id);
                     }, 3000);
                 } else {
                     console.log('Event data found:', newVal);
