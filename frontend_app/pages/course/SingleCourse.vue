@@ -3,48 +3,58 @@
     <div class="page-title">{{ course.name }}</div>
     <el-row>
       <el-col :xs="24" :sm="18">
-        <el-tabs tab-position="left" style="height: 100%; text-align: left;">
+        <el-tabs tab-position="left" style="height: 100%; text-align: left;" @tab-change="changeTab" v-model="activeTab">
           <div v-if="course.enroll_identity">
             <div
               v-if="course.enroll_identity.includes('owner') || course.enroll_identity.includes('instructor') || course.enroll_identity.includes('staff')">
-              <el-tab-pane label="Attendance Events">
+
+              <el-tab-pane label="Attendance Events" name="events">
                 <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
                 <AttendanceEventCard :attendance-events="attendanceEvents" @edit-event="editAttendanceEvent"
                   @delete-event="deleteAttendanceEvent">
                 </AttendanceEventCard>
               </el-tab-pane>
-              <el-tab-pane label="Locations">
+              <el-tab-pane label="Locations" name="locations">
                 <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-                <LocationCard :locations="locations" @create-location="createNewLocation"></LocationCard>
+                <LocationCard :locations="locations" @create-location="createNewLocation"
+                  @delete-location="deleteLocation"></LocationCard>
+              </el-tab-pane>
+              <el-tab-pane label="People" name="people">
+                <h3 style="margin: 30px 20px 10px 20px;">People</h3>
+                <ManagePeopleCard :enrollments="enrollments" @new-enrolls="addEnrollments"
+                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments">
+                </ManagePeopleCard>
               </el-tab-pane>
             </div>
           </div>
         </el-tabs>
       </el-col>
+
       <el-col :xs="24" :sm="6">
         <div v-if="course.enroll_identity">
-          <div v-if="course.enroll_identity.includes('student')" style="margin-bottom: 10px;">
-            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Check Attendance</el-button>
-          </div>
-          <div v-if="course.enroll_identity != 'student'">
-            <el-button type="primary" @click="openPeopleManager()">Manage People</el-button>
-            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create
+          <div v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length > 1">
+            <el-button style="margin: 20px 0;" type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark
               Attendance</el-button>
           </div>
-          <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
-          </CourseInfoCard>
+          <div v-if="course.enroll_identity != 'student'">
+            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
+            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+            </CourseInfoCard>
+          </div>
         </div>
       </el-col>
     </el-row>
+    <div v-if="course.enroll_identity">
+      <div class="center-content"
+        v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length == 1">
+        <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
+        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+        </CourseInfoCard>
+      </div>
+    </div>
     <!-- Modify Course Dialog -->
     <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
-
-    <!-- Manage People Dialog -->
-    <ManagePeopleDialog :enrollments="enrollments" :visible="showManagePeopleDialog"
-      @dialog-closed="showManagePeopleDialog = false" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment"
-      @delete-enrollment="deleteEnrollments">
-    </ManagePeopleDialog>
 
     <CreateAttendanceEventDialog :visible="showCreateAttendanceEventDialog" :locations="locations"
       @dialog-closed="showCreateAttendanceEventDialog = false" @create-event="createAttendanceEvent">
@@ -62,7 +72,7 @@ import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
 import CourseInfoCard from './components/CourseInfoCard.vue';
 import ModifyCourseDialog from './components/ModifyCourseDialog.vue';
-import ManagePeopleDialog from './components/ManagePeopleDialog.vue';
+import ManagePeopleCard from './components/ManagePeopleCard.vue';
 import CreateAttendanceEventDialog from './components/CreateAttendanceEventDialog.vue';
 import ModifyAttendanceEventDialog from './components/ModifyAttendanceEventDialog.vue'
 import AttendanceEventCard from './components/AttendanceEventCard.vue';
@@ -70,7 +80,7 @@ import LocationCard from './components/LocationCard.vue'
 
 export default {
   name: 'SingleCourse',
-  components: { CourseInfoCard, ModifyCourseDialog, ManagePeopleDialog, CreateAttendanceEventDialog, AttendanceEventCard, ModifyAttendanceEventDialog, LocationCard },
+  components: { CourseInfoCard, ModifyCourseDialog, ManagePeopleCard, CreateAttendanceEventDialog, AttendanceEventCard, ModifyAttendanceEventDialog, LocationCard },
   data() {
     return {
       course: {
@@ -92,12 +102,12 @@ export default {
         credential: ''
       },
       showModifyCourseDialog: false,
-      showManagePeopleDialog: false,
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
       enrollments: [],
       currentEventID: '',
+      activeTab: 'people'
     };
   },
 
@@ -113,9 +123,16 @@ export default {
       console.log(this.$route)
       this.$router.push({ path: '/login', query: { redirect: this.$route.href } })
     }
+    this.fetchEnrollments()
   },
 
   methods: {
+    changeTab(tab_name) {
+      console.log(tab_name)
+      if (tab_name == 'people') {
+        this.fetchEnrollments()
+      }
+    },
     changeRoute(route) {
       this.$router.push({ path: route })
     },
@@ -151,10 +168,6 @@ export default {
       }).catch(error => {
         console.error('Error creating course:', error);
       });
-    },
-    openPeopleManager() {
-      this.showManagePeopleDialog = true
-      this.fetchEnrollments()
     },
     fetchEnrollments() {
       axios.get(`/api/course/${this.course.id}/enroll`, {
@@ -271,6 +284,19 @@ export default {
           console.error('Error creating location', error);
         });
     },
+    deleteLocation(locationId) {
+      axios.delete(`/api/course/${this.course.id}/location/${locationId}`, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        }
+      }).then(() => {
+        console.log(`Location ${locationId} deleted successfully.`);
+        // Refresh the locations list
+        this.fetchLocations();
+      }).catch(error => {
+        console.error('Error deleting location:', error);
+      });
+    },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
         headers: {
@@ -330,7 +356,8 @@ export default {
 
 <style>
 .single-course-container {
-  width: 90%;
+  width: 100%;
+  padding: 15px 40px 85px;
 }
 
 .event-item {
@@ -358,6 +385,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.center-content {
+  margin: auto;
+  width: 50%;
+  /* Adjust as needed */
+  /* Space between the button and the CourseInfoCard */
 }
 </style>
 ``

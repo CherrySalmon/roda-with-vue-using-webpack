@@ -15,7 +15,7 @@ Sequel.migration do
       DateTime :created_at
       DateTime :updated_at
 
-      unique %i[latitude longitude]
+      unique %i[course_id name]
     end
   end
 end

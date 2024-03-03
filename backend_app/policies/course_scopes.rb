@@ -18,7 +18,7 @@ module Todo
           @full_scope
         else
           @full_scope.select do |course|
-            teachers_include_account?(course, @current_account) ||
+            creators_include_account?(course, @current_account) ||
               staffs_include_account?(course, @current_account)
           end
         end
@@ -44,8 +44,8 @@ module Todo
         end
       end
 
-      def teachers_include_account?(course, account)
-        course.teachers.include? account
+      def creators_include_account?(course, account)
+        course.creators.include? account
       end
 
       def staffs_include_account?(course, account)
