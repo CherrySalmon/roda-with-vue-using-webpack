@@ -40,10 +40,8 @@
       <el-table-column label="Role">
         <template #default="scope">
           <el-select v-model="scope.row.enrolls" placeholder="Select role" @change="$emit('update-enrollment', scope.row)"
-            multiple :disabled="scope.row.enrolls.includes('owner')">
-            <el-option label="Instructor" value="instructor"></el-option>
-            <el-option label="Staff" value="staff"></el-option>
-            <el-option label="Student" value="student"></el-option>
+            multiple>
+            <el-option v-for="role in peopleRoleList" :key="role" :label="role" :value="role" :disabled="checkIsModifable(role)"></el-option>
           </el-select>
         </template>
       </el-table-column>
@@ -64,6 +62,9 @@ export default {
     enrollments: {
       type: Object,
       default: () => ({})
+    },
+    currentRole: {
+      type: String
     }
   },
   data() {
@@ -71,7 +72,13 @@ export default {
       localEnrollments: [],
       newEnrollmentEmails: '',
       newEnrolls: [],
-      enrollStep: 1
+      enrollStep: 1,
+      peopleform: {
+        owner: ['owner', 'instructor', 'staff', 'student'],
+        instructor: ['staff', 'student'],
+        staff: ['student']
+      },
+      peopleRoleList: ['owner', 'instructor', 'staff', 'student']
     }
   },
   watch: {
@@ -83,6 +90,10 @@ export default {
     }
   },
   methods: {
+    checkIsModifable(role) {
+      const availableRoles = this.peopleform[this.currentRole]
+      return !availableRoles.includes(role)
+    },
     onDialogClose() {
       this.$emit('dialog-closed')
     },

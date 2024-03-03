@@ -21,7 +21,8 @@
               <el-tab-pane label="People" name="people">
                 <h3 style="margin: 30px 20px 10px 20px;">People</h3>
                 <ManagePeopleCard :enrollments="enrollments" @new-enrolls="addEnrollments"
-                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments">
+                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments"
+                  :currentRole="currentRole">
                 </ManagePeopleCard>
               </el-tab-pane>
             </div>
