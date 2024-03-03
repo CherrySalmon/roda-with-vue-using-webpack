@@ -16,7 +16,7 @@ RUN bundle install
 RUN npm install
 
 # Build your Vue.js application
-RUN npm run build
+RUN npm run prod
 
 # Command to run your Roda application
 RUN puma config.ru
