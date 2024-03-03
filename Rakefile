@@ -31,7 +31,7 @@ namespace :db do
 
   desc 'Seed the database with data from root seed.rb on production environment'
   task root_seed: [:config] do
-    root_seed_path = File.expand_path('account_seeds.rb', __dir__)
+    root_seed_path = '/etc/secrets/account_seeds.rb'
 
     # Load and execute the root seed script
     load(root_seed_path)
