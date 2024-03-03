@@ -19,7 +19,8 @@ export default {
         try{
             account.roles = Cookies.get('account_roles') ? Cookies.get('account_roles').split(',') : [];
             account.credential = Cookies.get('account_credential') ? Cookies.get('account_credential') : false
-            
+            account.img = Cookies.get('account_img') ? Cookies.get('account_img') : false
+            account.name = Cookies.get('account_name') ? Cookies.get('account_name') : false
             if(account.credential) {
                 return account
             }
@@ -31,10 +32,14 @@ export default {
             console.log(e)
         }
     },
-
-    onLogout(redirect) {
+    isLogout() {
+        return Cookies.get('account_credential') ? Cookies.get('account_credential') : false
+    },
+    onLogout() {
         Cookies.remove("account_id");
         Cookies.remove("account_roles");
         Cookies.remove("account_credential");
+        Cookies.remove("account_img");
+        Cookies.remove("account_name");
     }
 };
