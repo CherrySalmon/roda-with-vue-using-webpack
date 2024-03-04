@@ -30,11 +30,6 @@ module Todo
       r.public
       # Nesting todos and auth under the 'api' route
       r.on 'api' do
-        # All todo-related routes are under 'api/todo'
-        r.on 'todos' do
-          r.run Routes::Todos # Routes::Todos is defined in 'routes/todos.rb'
-        end
-
         # All authentication-related routes are under 'api/auth'
         r.on 'auth' do
           r.run Routes::Authentication # Routes::Authentication is defined in 'routes/authentication.rb'
@@ -69,13 +64,10 @@ module Todo
       #   puts "runs!!,#{_parsed_request}, #{_index_number}"
       #   File.read(File.join('dist', 'index.html'))
       # end
-      r.get [String,true], [String,true], [true] do |_parsed_request|
+      r.get [String, true], [String, true], [true] do |_parsed_request|
         puts "runs!!,#{_parsed_request}"
         File.read(File.join('dist', 'index.html'))
       end
-
-      
-
     end
   end
 end
