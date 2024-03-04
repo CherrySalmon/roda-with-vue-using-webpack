@@ -28,6 +28,30 @@ module Todo
           r.on String do |course_id|
 
             r.on 'enroll' do
+              r.on String do |account_id|
+                # POST api/course/:course_id/enroll/:enroll_id
+                r.post do
+                  request_body = JSON.parse(r.body.read)
+                  enrolled_data = request_body["enroll"]
+                  CourseService.update_enrollment(requestor, course_id, account_id, enrolled_data)
+                  response.status = 200
+                  { success: true, message: 'Enroll update' }.to_json
+                rescue CourseService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+
+                # DELETE api/course/:course_id/enroll/:enroll_id
+                r.delete do
+                  CourseService.remove_enroll(requestor, course_id, account_id)
+                  response.status = 200
+                  { success: true, message: 'Course deleted' }.to_json
+                rescue CourseService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+              end
+
               # GET api/course/:course_id/enroll - Retrieve enrollment information
               r.get do
                 enrollments = CourseService.get_enrollments(requestor, course_id)
@@ -54,18 +78,6 @@ module Todo
               rescue CourseService::CourseNotFoundError => e
                 response.status = 404
                 { error: 'Course not found', details: e.message }.to_json
-              end
-
-              r.on String do |account_id|
-                # DELETE api/course/:course_id/enroll/:enroll_id
-                r.delete do
-                  CourseService.remove_enroll(requestor, course_id, account_id)
-                  response.status = 200
-                  { success: true, message: 'Course deleted' }.to_json
-                rescue CourseService::ForbiddenError => e
-                  response.status = 403
-                  { error: 'Forbidden', details: e.message }.to_json
-                end
               end
             end
 

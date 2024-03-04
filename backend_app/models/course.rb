@@ -60,6 +60,12 @@ module Todo
       end
     end
 
+    def update_single_enrollment(account_id, enrolled_data)
+      account = Account.first(id: account_id)
+      account.update(email: enrolled_data['email'])
+      update_course_account_roles(account, enrolled_data['roles'])
+    end
+
     def get_enrollments
       # Assuming AccountCourse model exists and represents the account_course_roles table
       AccountCourse.where(course_id: self.id).map do |enrollment|
@@ -91,7 +97,6 @@ module Todo
     
       account
     end
-    
 
     def update_course_account_roles(account, roles_string)
       # Find or create the join model entry

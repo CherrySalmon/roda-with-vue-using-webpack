@@ -77,6 +77,7 @@
 </template>
 
 <script>
+console.log("load this pages");
 import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
 import CourseInfoCard from './components/CourseInfoCard.vue';
@@ -237,17 +238,18 @@ export default {
 
     updateEnrollment(enrollment) {
       let entollList = {
-        enroll: [{
+        enroll: {
           email: enrollment.email,
           roles: enrollment.enrolls.join(',')
-        }]
+        }
       }
-      axios.post(`/api/course/${this.course.id}/enroll`, entollList, {
+      axios.post(`/api/course/${this.course.id}/enroll/${enrollment.account_id}`, entollList, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
         console.log(response)
+        this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
       });

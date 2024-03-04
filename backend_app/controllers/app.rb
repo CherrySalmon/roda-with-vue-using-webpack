@@ -66,8 +66,15 @@ module Todo
       end
 
       r.get String do |_parsed_request|
+        puts "runs!!,#{_parsed_request}"
         File.read(File.join('dist', 'index.html'))
       end
+
+      r.get String,String do |_parsed_request,_index_number|
+        puts "runs!!,#{_parsed_request}, #{_index_number}"
+        File.read(File.join('dist', 'index.html'))
+      end
+
     end
   end
 end
