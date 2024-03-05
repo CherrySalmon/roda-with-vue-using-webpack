@@ -12,7 +12,7 @@
       </template>
       <div>
         <p>Semester: {{ course.semester }}</p>
-        <p>Start Time: {{ formatDateTime(course.start_time) || 'N/A' }}</p>
+        <p>Start Time: {{ getLocalDateString(course.start_time) || 'N/A' }}</p>
         <p>Duration: {{ course.duration ? course.duration + ' hours' : 'N/A' }}</p>
         <p>Repeat: {{ course.repeat || 'N/A' }}</p>
         <p>Occurrence: {{ course.occurrence || 'N/A' }}</p>
@@ -28,21 +28,24 @@
         return {}
     },
     methods: {
-        formatDateTime(datestring) {
-            let date = new Date(datestring)
-            const year = date.getFullYear();
+      getLocalDateString(utcStr) {
+        // Manually parsing the date string to components
+        const parts = utcStr.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) \+0000/);
+        if (!parts) {
+            console.error('Invalid date format:', utcStr);
+            return 'Invalid Date';
+        }
 
-            // getMonth() returns month from 0-11; add 1 to make it 1-12
-            const month = ('0' + (date.getMonth() + 1)).slice(-2);
-            
-            const day = ('0' + date.getDate()).slice(-2);
-            
-            const hours = ('0' + date.getHours()).slice(-2);
-            
-            const minutes = ('0' + date.getMinutes()).slice(-2);
-            
-            // Combine the parts
-            return `${year}/${month}/${day} ${hours}:${minutes}`;
+        // Creating a Date object using the parsed components
+        // Note: Months are 0-indexed in JavaScript Date, hence the -1 on month part
+        const date = new Date(Date.UTC(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]));
+
+        // Formatting the Date object to a local date string
+        return date.getFullYear()
+            + '-' + String(date.getMonth() + 1).padStart(2, '0')
+            + '-' + String(date.getDate()).padStart(2, '0')
+            + ' ' + String(date.getHours()).padStart(2, '0')
+            + ':' + String(date.getMinutes()).padStart(2, '0');
         }
     }
 }

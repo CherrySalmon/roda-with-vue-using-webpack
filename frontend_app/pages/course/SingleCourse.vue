@@ -77,7 +77,6 @@
 </template>
 
 <script>
-console.log("load this pages");
 import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
 import CourseInfoCard from './components/CourseInfoCard.vue';
