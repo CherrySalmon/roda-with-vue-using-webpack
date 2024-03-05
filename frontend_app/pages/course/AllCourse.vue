@@ -1,9 +1,5 @@
 <template>
   <div>
-    <div style="margin: 40px">
-      <h2>Welcome Back, {{account.name}}!</h2>
-      <p>We're thrilled to have you back! As {{ account.roles.join(' & ') }}, you have access to features including {{ getFeatures(account.roles) }}.</p>
-    </div>
     <div class="page-title">Courses</div>
     <template v-if="account">
       <el-button v-if="account.roles.includes('creator')" @click="showCreateCourseDialog = true" color="#824533"
@@ -78,11 +74,6 @@ export default {
           },
         ]
       },
-      features: {
-        admin: 'manage accounts',
-        creator: 'create courses',
-        member: 'mark attendance'
-      },
       courses: [],
       account: {
         roles: [],
@@ -110,12 +101,6 @@ export default {
     }
   },
   methods: {
-    getFeatures(roles) {
-      let features = roles.map((role) => {
-        return this.features[role]
-      })
-      return features.join(', ')
-    },
     changeRoute(route) {
       this.$router.push(route)
     },

@@ -23,14 +23,13 @@ module.exports = {
     output: {
         filename: '[name].bundle.js',
         path: path.resolve(__base, 'dist'),
-        clean: true,
-        publicPath: '/',
+        clean: true
     },
 
     //Plugins to help and include additionals functionalities to webpack
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'TYTO',
+            title: 'Minimal Vue Webpack',
             favicon: path.resolve(__src, 'static', 'favicon.png'),
             template: path.resolve(__src, 'templates', 'index.html'),
         }),

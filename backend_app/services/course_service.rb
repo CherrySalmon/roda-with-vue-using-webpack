@@ -66,12 +66,6 @@ module Todo
       course.add_or_update_enrollments(enrolled_data)
     end
 
-    def self.update_enrollment(requestor, course_id, account_id, enrolled_data)
-      course = find_course(course_id)
-      verify_policy(requestor, :update, course, course_id)
-      course.update_single_enrollment(account_id, enrolled_data)
-    end
-
     private
 
     def self.find_course(course_id)

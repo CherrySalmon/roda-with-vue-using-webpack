@@ -4,9 +4,10 @@
     <el-row>
       <el-col :xs="24" :sm="18">
         <el-tabs tab-position="left" style="height: 100%; text-align: left;" @tab-change="changeTab" v-model="activeTab">
-          <div v-if="currentRole">
+          <div v-if="course.enroll_identity">
             <div
-              v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
+              v-if="course.enroll_identity.includes('owner') || course.enroll_identity.includes('instructor') || course.enroll_identity.includes('staff')">
+
               <el-tab-pane label="Attendance Events" name="events">
                 <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
                 <AttendanceEventCard :attendance-events="attendanceEvents" @edit-event="editAttendanceEvent"
@@ -21,8 +22,7 @@
               <el-tab-pane label="People" name="people">
                 <h3 style="margin: 30px 20px 10px 20px;">People</h3>
                 <ManagePeopleCard :enrollments="enrollments" @new-enrolls="addEnrollments"
-                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments"
-                  :currentRole="currentRole">
+                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments">
                 </ManagePeopleCard>
               </el-tab-pane>
             </div>
@@ -31,36 +31,27 @@
       </el-col>
 
       <el-col :xs="24" :sm="6">
-        <div v-if="currentRole">
-          <div v-if="currentRole != 'student'">
+        <div v-if="course.enroll_identity">
+          <div v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length > 1">
+            <el-button style="margin: 20px 0;" type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark
+              Attendance</el-button>
+          </div>
+          <div v-if="course.enroll_identity != 'student'">
             <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
+            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+            </CourseInfoCard>
           </div>
-          <div v-if="currentRole =='student'">
-            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
-          </div>
-          <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
-          </CourseInfoCard>
-        </div>
-        <div class="selecor-role-container">
-          <span style="margin: 0 10px;">View</span>
-          <el-select
-            v-model="selectRole"
-            placeholder="Select"
-            size="large"
-            style="width: 100%;"
-            @change="changeRole"
-          >
-            <el-option
-              v-for="role in selectableRoles"
-              :key="role"
-              :label="role"
-              :value="role"
-            />
-          </el-select>
         </div>
       </el-col>
     </el-row>
-
+    <div v-if="course.enroll_identity">
+      <div class="center-content"
+        v-if="course.enroll_identity.includes('student') && course.enroll_identity.split(',').length == 1">
+        <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
+        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+        </CourseInfoCard>
+      </div>
+    </div>
     <!-- Modify Course Dialog -->
     <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
@@ -77,7 +68,6 @@
 </template>
 
 <script>
-console.log("load this pages");
 import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
 import CourseInfoCard from './components/CourseInfoCard.vue';
@@ -111,16 +101,13 @@ export default {
         roles: [],
         credential: ''
       },
-      selectableRoles: [],
-      currentRole: 'student',
-      selectRole: 'student',
       showModifyCourseDialog: false,
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
       enrollments: [],
       currentEventID: '',
-      activeTab: 'events'
+      activeTab: 'people'
     };
   },
 
@@ -133,38 +120,15 @@ export default {
       this.fetchLocations();
     }
     else {
+      console.log(this.$route)
       this.$router.push({ path: '/login', query: { redirect: this.$route.href } })
     }
     this.fetchEnrollments()
   },
 
   methods: {
-    changeRole(role) {
-      ElMessageBox.confirm(
-        'page will change to '+role+' view. Continue?',
-        'Warning',
-        {
-          confirmButtonText: 'OK',
-          cancelButtonText: 'Cancel',
-          type: 'warning',
-        }
-      )
-        .then(() => {
-          this.currentRole = role
-          ElMessage({
-            type: 'success',
-            message: 'Change to '+role+' view',
-          })
-        })
-        .catch(() => {
-          this.selectRole = this.currentRole
-          ElMessage({
-            type: 'info',
-            message: 'Change canceled',
-          })
-        })
-    },
     changeTab(tab_name) {
+      console.log(tab_name)
       if (tab_name == 'people') {
         this.fetchEnrollments()
       }
@@ -181,9 +145,7 @@ export default {
         this.course = response.data.data;
         // Copying the course object to courseForm
         this.courseForm = { ...this.course };
-        this.selectableRoles = this.course.enroll_identity.split(',')
-        this.selectRole = this.selectableRoles[0]
-        this.currentRole = this.selectRole
+
         // Deleting the id and enroll_identity keys from courseForm
         delete this.courseForm.id;
         delete this.courseForm.enroll_identity;
@@ -196,7 +158,7 @@ export default {
       if (this.courseForm.repeat == 'no-repeat') {
         this.courseForm.occurrence = 1
       }
-      axios.put('/api/course/' + this.course.id, this.courseForm, {
+      axios.put('api/course/' + this.course.id, this.courseForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
@@ -238,18 +200,17 @@ export default {
 
     updateEnrollment(enrollment) {
       let entollList = {
-        enroll: {
+        enroll: [{
           email: enrollment.email,
           roles: enrollment.enrolls.join(',')
-        }
+        }]
       }
-      axios.post(`/api/course/${this.course.id}/enroll/${enrollment.account_id}`, entollList, {
+      axios.post(`/api/course/${this.course.id}/enroll`, entollList, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
         console.log(response)
-        this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
       });
@@ -268,7 +229,7 @@ export default {
       });
     },
     createAttendanceEvent(eventForm) {
-      axios.post(`/api/course/${this.course.id}/event`, eventForm, {
+      axios.post(`api/course/${this.course.id}/event`, eventForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
@@ -281,7 +242,7 @@ export default {
       });
     },
     fetchAttendanceEvents() {
-      axios.get(`/api/course/${this.course.id}/event`, {
+      axios.get(`api/course/${this.course.id}/event`, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
@@ -292,7 +253,7 @@ export default {
       });
     },
     fetchLocations() {
-      axios.get(`/api/course/${this.course.id}/location`, {
+      axios.get(`api/course/${this.course.id}/location`, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
@@ -310,7 +271,7 @@ export default {
     },
     createNewLocation(locationData) {
       let courseId = this.$route.params.id;
-      axios.post(`/api/course/${courseId}/location`, locationData, {
+      axios.post(`api/course/${courseId}/location`, locationData, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         }
@@ -365,7 +326,7 @@ export default {
     },
 
     updateAttendanceEvent() {
-      axios.put(`/api/course/${this.course.id}/event/${this.currentEventID}`, this.attendanceEventForm, {
+      axios.put(`api/course/${this.course.id}/event/${this.currentEventID}`, this.attendanceEventForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         },
@@ -431,11 +392,6 @@ export default {
   width: 50%;
   /* Adjust as needed */
   /* Space between the button and the CourseInfoCard */
-}
-.selecor-role-container {
-  justify-content: space-between;
-  display: flex;
-  line-height: 40px;
 }
 </style>
 ``

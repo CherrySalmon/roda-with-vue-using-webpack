@@ -27,6 +27,7 @@
 
     <h1 class="people-title">Manage People</h1>
 
+
     <el-table style="width: 100%" :data="enrollments">
       <el-table-column type="index" width="50" />
       <el-table-column width="70">
@@ -36,32 +37,23 @@
       </el-table-column>
       <el-table-column prop="name" label="Name" width="180" />
       <el-table-column prop="email" label="Email" />
-      <el-table-column prop="enroll_identity" label="Role"></el-table-column>
+      <el-table-column label="Role">
+        <template #default="scope">
+          <el-select v-model="scope.row.enrolls" placeholder="Select role" @change="$emit('update-enrollment', scope.row)"
+            multiple :disabled="scope.row.enrolls.includes('owner')">
+            <el-option label="Instructor" value="instructor"></el-option>
+            <el-option label="Staff" value="staff"></el-option>
+            <el-option label="Student" value="student"></el-option>
+          </el-select>
+        </template>
+      </el-table-column>
       <el-table-column label="Operations" width="180">
         <template #default="scope">
-          <el-button @click="openEditDialog(scope.row)" size="small">Edit</el-button>
           <el-button type="danger" @click="$emit('delete-enrollment', scope.row.account_id)"
             size="small">Delete</el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <el-dialog title="Edit Account" v-model="editDialogVisible" center>
-      <el-form :model="selectedAccount" label-width="80px">
-          <el-form-item label="Email">
-              <el-input class="editor-input-box" v-model="selectedAccount.email" autocomplete="off"></el-input>
-          </el-form-item>
-          <el-form-item label="Roles">
-            <el-select v-model="selectedAccount.enrolls" placeholder="Select role" multiple>
-              <el-option v-for="role in peopleRoleList" :key="role" :label="role" :value="role" :disabled="checkIsModifable(role)"></el-option>
-            </el-select>
-          </el-form-item>
-      </el-form>
-      <template #footer>
-          <el-button @click="editDialogVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="updateEnroll(selectedAccount)">Confirm</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
   
@@ -72,9 +64,6 @@ export default {
     enrollments: {
       type: Object,
       default: () => ({})
-    },
-    currentRole: {
-      type: String
     }
   },
   data() {
@@ -82,15 +71,7 @@ export default {
       localEnrollments: [],
       newEnrollmentEmails: '',
       newEnrolls: [],
-      enrollStep: 1,
-      peopleform: {
-        owner: ['owner', 'instructor', 'staff', 'student'],
-        instructor: ['staff', 'student'],
-        staff: ['student']
-      },
-      peopleRoleList: ['owner', 'instructor', 'staff', 'student'],
-      editDialogVisible: false,
-      selectedAccount: {}
+      enrollStep: 1
     }
   },
   watch: {
@@ -102,18 +83,6 @@ export default {
     }
   },
   methods: {
-    updateEnroll(account) {
-      this.$emit('update-enrollment', account)
-      this.editDialogVisible = false;
-    },
-    openEditDialog(account) {
-      this.selectedAccount = account;
-      this.editDialogVisible = true;
-    },
-    checkIsModifable(role) {
-      const availableRoles = this.peopleform[this.currentRole]
-      return !availableRoles.includes(role)
-    },
     onDialogClose() {
       this.$emit('dialog-closed')
     },
