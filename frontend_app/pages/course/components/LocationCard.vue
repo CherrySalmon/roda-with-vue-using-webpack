@@ -13,10 +13,11 @@
                 <el-form-item label="Name">
                     <el-input v-model="locationForm.name"></el-input>
                 </el-form-item>
-                <el-form-item>
+                <!-- <el-form-item>
                     <el-button type="primary" @click="submitLocation">Submit Location</el-button>
                     <p style="font-size: small; color: darkgrey;">( Your current location will be used )</p>
-                </el-form-item>
+                </el-form-item> -->
+                <div id="map" style="height: 400px; width: 200%"></div>
             </el-form>
         </div>
 
@@ -29,6 +30,13 @@ export default {
     props: {
         locations: Array
     },
+    name: 'GoogleMapComponent',
+
+    async mounted() {
+        await this.loadGoogleMapsApi();
+        this.initMap();
+    },
+
     data() {
         return {
             locationForm: {
@@ -42,6 +50,76 @@ export default {
 
     },
     methods: {
+        async loadGoogleMapsApi() {
+            if (typeof google === "undefined" || typeof google.maps === "undefined") {
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VUE_APP_GOOGLE_MAP_KEY}`;
+                document.head.appendChild(script);
+                await new Promise((resolve) => {
+                    script.onload = resolve;
+                });
+            }
+        },
+
+        initMap() {
+            // Assuming google.maps has been loaded in the global scope
+            // You might need to handle loading the Google Maps script if it's not already loaded
+            const myLatlng = { lat: 24.786649006188867, lng: 120.98830606413748 };
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 16,
+                center: myLatlng,
+            });
+
+            // Create the initial InfoWindow.
+            let infoWindow = new google.maps.InfoWindow({
+                content: "Click the map to get Lat/Lng!",
+                position: myLatlng,
+            });
+
+            infoWindow.open(map);
+
+            // Configure the click listener.
+            map.addListener("click", (mapsMouseEvent) => {
+                const latLng = mapsMouseEvent.latLng.toJSON();
+
+                // Close the current InfoWindow.
+                infoWindow.close();
+
+                const contentString =
+                    `<div style="text-align: center;">
+                        <p style="margin-bottom: 5px;">Click the map to get Lat/Lng!</p>
+                        <p style="margin-bottom: 5px;">Latitude: ${latLng.lat}</p>
+                        <p style="margin-bottom: 10px;">Longitude: ${latLng.lng}</p>
+                        <button id="saveLocationBtn" class="info-button">Save Location</button>
+                    </div>`;
+
+                // Create a new InfoWindow.
+                infoWindow = new google.maps.InfoWindow({
+                    position: mapsMouseEvent.latLng,
+                    content: contentString,
+                });
+                // infoWindow.setContent(
+                //     JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2),
+                // );
+                infoWindow.addListener('domready', () => {
+                    document.getElementById("saveLocationBtn").addEventListener("click", () => {
+                        this.saveLocation(latLng);
+                    });
+                });
+                infoWindow.open(map);
+            });
+        },
+        saveLocation(latLng) {
+            console.log('saveLocationName', this.locationForm.name);
+            const locationData = {
+                name: this.locationForm.name, // Use the name from the form
+                latitude: latLng.lat,
+                longitude: latLng.lng
+            };
+            this.$emit('create-location', locationData);
+            alert('Location saved: ' + JSON.stringify(locationData));
+            // Optionally reset the form or infoWindow here
+        },
         getLocation() {
             // Check if Geolocation is supported
             if ("geolocation" in navigator) {
@@ -52,7 +130,8 @@ export default {
                         latitude: latitude,
                         longitude: longitude
                     };
-                    this.$emit('create-location', locationData)
+
+                    // this.$emit('create-location', locationData)
                     this.resetForm()
                 }, (error) => {
                     // Handle location 
