@@ -12,10 +12,10 @@ role_descriptions.each do |desc|
 end
 
 admin_user_data = {
-  "name": "..",
-  "email": "..",
+  "name": " ",
+  "email": ENV['ADMIN_EMAIL'],
   "roles": [
-    "admin"
+    "admin", "creator"
     ],
   "sso_token": ".."
 }

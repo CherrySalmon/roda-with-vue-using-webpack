@@ -1,7 +1,6 @@
 .bundle/
 node_modules/
 **/config/secrets.yml
-**/db/account_seeds.rb
 *.db
 
 # local env files
