@@ -1,22 +1,8 @@
 <template>
   <div>
-    <div class="signin-container">
-        <div id="g_id_onload"
-            :data-client_id="googleClientId"
-            data-context="signin"
-            data-ux_mode="popup"
-            data-callback="handleCallback"
-            data-itp_support="true">
-        </div>
-
-        <div class="g_id_signin"
-            data-type="standard"
-            data-shape="pill"
-            data-theme="outline"
-            data-text="signin_with"
-            data-size="large"
-            data-logo_alignment="left">
-        </div>
+    <div class="login-container">Login</div>
+    <div style="display: flex;justify-content: center;">
+      <div id="google-sign-in-button"></div>
     </div>
   </div>
 </template>
@@ -34,14 +20,18 @@ export default {
     };
   },
   mounted() {
-    // Attach handleCallback to window object when component mounts
-    window.handleCallback = this.handleCallbackGlobal;
-  },
-  beforeDestroy() {
-    // Clean up handleCallback from window object to avoid memory leaks
-    if (window.handleCallback === this.handleCallbackGlobal) {
-      delete window.handleCallback;
-    }
+    window.google.accounts.id.initialize({
+        client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+        callback: this.handleCallback
+      })
+      window.google.accounts.id.renderButton(
+        document.getElementById("google-sign-in-button"),
+        {
+          theme: "outline",
+          size: "large",
+          shape: "pill",
+        }
+      )
   },
   methods: {
     async fetchLoginToken(userData) {
@@ -64,10 +54,6 @@ export default {
           type: 'error',
         })
       }
-    },
-    handleCallbackGlobal(response) {
-      // Delegate to component method
-      this.handleCallback(response);
     },
     async handleCallback(response) {
       let userData = this.parseJwt(response.credential);
@@ -102,10 +88,16 @@ p {
 }
 
 .signin-container {
-    width: 400px;
-    margin: auto;
-    display: flex;
-    justify-content: center;
-    margin-top: 200px;
+  width: 400px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  margin-top: 200px;
+}
+
+.login-container {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 40px 0;
 }
 </style>
