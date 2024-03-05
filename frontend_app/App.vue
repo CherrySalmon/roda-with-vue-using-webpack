@@ -32,7 +32,19 @@
           <div class="icon-container" @click="changeRoute('/course')">
             <img class="icon-img" src="./static/icon.png" width="50" height="50"/>
             <span class="icon-text">TYTO</span>
-            <div class="logout-btn" @click="logout()">Logout</div>
+            <span class="avatar-name" v-if="!account.img == ''">{{ account.name }} - {{ account.roles.join(", ") }}</span>
+            <template v-if="!account.img == ''">
+              <el-popover
+                trigger="hover"
+                >
+                <template #reference>
+                  <el-avatar class="avatar-btn" :src="account.img"/>
+                </template>
+                <template #default>
+                  <el-button class="logout-btn" @click="logout()" text>Logout</el-button>
+                </template>
+              </el-popover>
+            </template>
           </div>
         </el-header>
         <el-container>
@@ -86,26 +98,34 @@ export default {
           ],
           account: {
             roles: [],
-            credential: ''
+            credential: '',
+            img: ''
           }
         };
     },
     created() {
       this.account = cookieManager.getAccount()
-      if(!this.account) {
+      if(!this.account && !cookieManager.isLogout) {
         this.logout()
+      }
+    },
+    watch: {
+      $route(to, from) {
+        if (from.name == 'Login' || to.name == 'Login') {
+          this.account = cookieManager.getAccount()
+        }
       }
     },
     methods: {
       handleSelect(key, keyPath) {
-        console.log(key, keyPath)
         this.$router.push(key)
       },
       changeRoute(route) {
         this.$router.push(route)
       },
       logout() {
-        cookieManager.onLogout(this.$route.fullPath)
+        cookieManager.onLogout()
+        this.$router.push('/login?redirect='+this.$route.fullPath)
       }
     }
   }
@@ -174,20 +194,22 @@ export default {
   -webkit-filter: drop-shadow(3px 3px 3px #ffe8a472);
   filter: drop-shadow(3px 3px 3px #b6a77b72);
 }
-
-.logout-btn {
-  line-height: 80px;
+.avatar-btn {
+  margin: 20px;
   cursor: pointer;
-  font-weight: 900;
-  transition: 0.4s;
-  color: #fff;
-  margin-left: auto;
-  padding-right: 20px;
 }
-
-.logout-btn:hover {
+.avatar-btn:hover {
   -webkit-filter: drop-shadow(3px 3px 5px #ffcb47);
   filter: drop-shadow(3px 3px 5px #b8a671fa);
+}
+.logout-btn {
+  width: 100%;
+}
+.avatar-name {
+  color: #fff;
+  font-weight: 900;
+  line-height: 80px;
+  margin-left: auto;
 }
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */

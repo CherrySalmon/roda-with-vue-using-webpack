@@ -44,22 +44,17 @@ export default {
     }
   },
   methods: {
-    handleCallbackGlobal(response) {
-      // Delegate to component method
-      this.handleCallback(response);
-    },
-
-    async handleCallback(response) {
-      const userData = this.parseJwt(response.credential);
-      await this.fetchLoginToken(userData);
-    },
-
     async fetchLoginToken(userData) {
       try {
         const { status, data } = await axios.post('/api/auth/verify_google_token', { user_data: userData });
         if (status === 200 || status === 201) {
           this.setUserInfoCookies(data.user_info);
-          location.assign(this.$route.query.redirect);
+          if (this.$route.query.redirect) {
+            this.$router.push(this.$route.query.redirect)
+          }
+          else {
+            this.$router.push('/course')
+          }
         } 
       } catch (error) {
         console.error('Error:', error.response || error);
@@ -70,14 +65,15 @@ export default {
         })
       }
     },
-
-    setUserInfoCookies(user_info) {
-      const expDay = 7;
-      Cookies.set('account_id', user_info.id, { expires: expDay });
-      Cookies.set('account_roles', user_info.roles.join(','), { expires: expDay });
-      Cookies.set('account_credential', user_info.credential, { expires: expDay });
+    handleCallbackGlobal(response) {
+      // Delegate to component method
+      this.handleCallback(response);
     },
-
+    async handleCallback(response) {
+      let userData = this.parseJwt(response.credential);
+      userData['sso_token'] = response.access_token
+      await this.fetchLoginToken(userData);
+    },
     parseJwt(token) {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -86,6 +82,14 @@ export default {
       ).join(''));
 
       return JSON.parse(jsonPayload);
+    },
+    setUserInfoCookies(user_info) {
+      const expDay = 7;
+      Cookies.set('account_id', user_info.id, { expires: expDay });
+      Cookies.set('account_roles', user_info.roles.join(','), { expires: expDay });
+      Cookies.set('account_credential', user_info.credential, { expires: expDay });
+      Cookies.set('account_img', user_info.avatar, { expires: expDay })
+      Cookies.set('account_name', user_info.name, { expires: expDay })
     },
   },
 };
