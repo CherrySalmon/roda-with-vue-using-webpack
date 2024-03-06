@@ -105,9 +105,6 @@ export default {
     if (this.account) {
       this.fetchCourses()
     }
-    else {
-      this.$router.push({ path: '/login', query: { redirect: this.$route.href } })
-    }
   },
   methods: {
     getFeatures(roles) {
