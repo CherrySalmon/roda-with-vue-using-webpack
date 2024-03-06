@@ -131,9 +131,6 @@ export default {
       this.fetchAttendanceEvents(this.course.id);
       this.fetchLocations();
     }
-    else {
-      this.$router.push({ path: '/login', query: { redirect: this.$route.href } })
-    }
     this.fetchEnrollments()
   },
 

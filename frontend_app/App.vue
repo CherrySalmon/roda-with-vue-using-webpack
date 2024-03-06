@@ -29,7 +29,7 @@
       
       <el-container class="app-container">
         <el-header height="80" style="background-color: #EFCD76;" class="noselect">
-          <div class="icon-container" @click="changeRoute('/course')">
+          <div class="icon-container">
             <img class="icon-img" src="./static/icon.png" width="50" height="50"/>
             <span class="icon-text">TYTO</span>
             <span class="avatar-name" v-if="!account.img == ''">{{ account.name }} - {{ account.roles.join(", ") }}</span>
@@ -103,10 +103,16 @@ export default {
           }
         };
     },
-    created() {
+    beforeCreated() {
       this.account = cookieManager.getAccount()
       if(!this.account && !cookieManager.isLogout) {
         this.logout()
+      }
+      
+      if(!this.account && window.location.pathname!='/login') {
+        console.log(window.location.pathname)
+        console.log(this.$route)
+        this.$router.push({ path: '/login', query: { redirect: window.location.pathname } })
       }
     },
     watch: {
