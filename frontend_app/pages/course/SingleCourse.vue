@@ -313,10 +313,12 @@ export default {
       })
         .then(response => {
           console.log('Location created successfully', response);
+          alert('Location created successfully');
           this.fetchLocations();
         })
         .catch(error => {
           console.error('Error creating location', error);
+          alert('Error creating location');
         });
     },
     deleteLocation(locationId) {
