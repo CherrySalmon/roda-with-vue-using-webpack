@@ -34,7 +34,7 @@
         <div v-if="currentRole">
           <div v-if="currentRole != 'student'">
             <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
-            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+            <CourseInfoCard :course="course" :currentRole="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
             </CourseInfoCard>
             <div class="selecor-role-container">
               <span style="margin: 0 10px;">View</span>
@@ -60,7 +60,7 @@
     <div v-if="currentRole">
       <div class="center-content" v-if="currentRole =='student'">
         <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
-        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+        <CourseInfoCard :course="course" :role="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
         </CourseInfoCard>
         <div class="selecor-role-container">
           <span style="margin: 0 10px;">View</span>

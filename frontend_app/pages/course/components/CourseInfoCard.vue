@@ -3,8 +3,8 @@
     <template #header>
       <div class="card-header">
         <span>Course Information</span>
-        <template v-if="course.enroll_identity">
-          <template v-if="course.enroll_identity != 'student'">
+        <template v-if="currentRole">
+          <template v-if="currentRole != 'student'">
             <el-button type="warning" @click="$emit('show-modify-dialog')" text style="font-weight: 700;">Modify
               Course</el-button>
           </template>
@@ -23,7 +23,7 @@
   
 <script>
 export default {
-  props: ['course'],
+  props: ['course', 'currentRole'],
   emits: ['show-modify-dialog'],
   data() {
     return {}
