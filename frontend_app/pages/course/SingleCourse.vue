@@ -131,7 +131,7 @@ export default {
         credential: ''
       },
       selectableRoles: [],
-      currentRole: 'student',
+      currentRole: '',
       selectRole: 'student',
       showModifyCourseDialog: false,
       showCreateAttendanceEventDialog: false,
