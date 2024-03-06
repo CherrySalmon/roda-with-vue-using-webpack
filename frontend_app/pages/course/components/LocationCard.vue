@@ -11,13 +11,13 @@
             <h1 style="margin-bottom: 10px;">Create new Location</h1>
             <el-form ref="locationForm" :model="locationForm" label-width="80px">
                 <el-form-item label="Name">
-                    <el-input v-model="locationForm.name"></el-input>
+                    <el-input placeholder="Enter a name of the location" v-model="locationForm.name"></el-input>
                 </el-form-item>
                 <!-- <el-form-item>
                     <el-button type="primary" @click="submitLocation">Submit Location</el-button>
                     <p style="font-size: small; color: darkgrey;">( Your current location will be used )</p>
                 </el-form-item> -->
-                <div id="map" style="height: 400px; width: 200%"></div>
+                <div id="map" style="height: 400px; width: 150%"></div>
             </el-form>
         </div>
 
@@ -87,8 +87,7 @@ export default {
 
                 const contentString =
                     `<div style="text-align: center;">
-                        <p style="margin-bottom: 5px;">Click the map to get Lat/Lng!</p>
-                        <p style="margin-bottom: 5px;">Latitude: ${latLng.lat}</p>
+                        <p style="margin: 10px 15px 5px;">Latitude: ${latLng.lat}</p>
                         <p style="margin-bottom: 10px;">Longitude: ${latLng.lng}</p>
                         <button id="saveLocationBtn" class="info-button">Save Location</button>
                     </div>`;
@@ -117,7 +116,6 @@ export default {
                 longitude: latLng.lng
             };
             this.$emit('create-location', locationData);
-            alert('Location saved: ' + JSON.stringify(locationData));
             // Optionally reset the form or infoWindow here
         },
         getLocation() {
