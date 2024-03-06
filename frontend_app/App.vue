@@ -92,7 +92,6 @@ export default {
           isCollapse: true,
           menuItems: [
             { index: '/manage-account', icon: 'UserFilled', title: 'Account Management' },
-            // { index: '/manage-course', icon: 'setting', title: 'Course Management' },
             { index: '/course', icon: 'document', title: 'Course' },
             { index: '/login', icon: '', title: 'Login' }, // only for test, to be delete before publish
           ],
@@ -103,23 +102,11 @@ export default {
           }
         };
     },
-    // beforeCreated() {
-    //   if(!cookieManager.isLogout) {
-    //     this.logout()
-    //     if (window.location.pathname!='/login') {
-    //       console.log(window.location.pathname)
-    //       console.log(this.$route)
-    //       this.$router.push({ path: '/login', query: { redirect: window.location.pathname } })
-    //     }
-    //   }
-    // },
     created() {
       this.account = cookieManager.getAccount()
-      if(!this.accountt) {
+      if(!this.account) {
         this.logout()
         if (window.location.pathname!='/login') {
-          console.log(window.location.pathname)
-          console.log(this.$route)
           this.$router.push({ path: '/login', query: { redirect: window.location.pathname } })
         }
       }
