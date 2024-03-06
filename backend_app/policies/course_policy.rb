@@ -19,7 +19,7 @@ class CoursePolicy
 
   # Admin can view any course;
   def can_view?
-    requestor_is_admin? || self_enrolled?
+    self_enrolled?
   end
 
   # Admin can update any course;
