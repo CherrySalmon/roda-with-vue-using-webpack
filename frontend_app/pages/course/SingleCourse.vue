@@ -34,13 +34,34 @@
         <div v-if="currentRole">
           <div v-if="currentRole != 'student'">
             <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
+            <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+            </CourseInfoCard>
+            <div class="selecor-role-container">
+              <span style="margin: 0 10px;">View</span>
+              <el-select
+                v-model="selectRole"
+                placeholder="Select"
+                size="large"
+                style="width: 100%;"
+                @change="changeRole"
+              >
+                <el-option
+                  v-for="role in selectableRoles"
+                  :key="role"
+                  :label="role"
+                  :value="role"
+                />
+              </el-select>
+            </div>
           </div>
-          <div v-if="currentRole =='student'">
-            <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
-          </div>
-          <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
-          </CourseInfoCard>
         </div>
+      </el-col>
+    </el-row>
+    <div v-if="currentRole">
+      <div class="center-content" v-if="currentRole =='student'">
+        <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
+        <CourseInfoCard :course="course" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+        </CourseInfoCard>
         <div class="selecor-role-container">
           <span style="margin: 0 10px;">View</span>
           <el-select
@@ -58,9 +79,8 @@
             />
           </el-select>
         </div>
-      </el-col>
-    </el-row>
-
+      </div>
+    </div>
     <!-- Modify Course Dialog -->
     <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
