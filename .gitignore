@@ -2,3 +2,7 @@
 node_modules/
 **/config/secrets.yml
 *.db
+
+# local env files
+**/.env*.local
+dist/
