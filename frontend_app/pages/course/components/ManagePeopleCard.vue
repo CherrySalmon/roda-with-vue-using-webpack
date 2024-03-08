@@ -4,8 +4,8 @@
     <div class="input-email-container">
       <div style="height: 100px">
         <el-steps direction="vertical" :active="enrollStep">
-          <el-step title="Step 1" :icon="Edit" />
-          <el-step title="Step 2" :icon="Upload" />
+          <el-step title="Step 1" />
+          <el-step title="Step 2" />
         </el-steps>
       </div>
       <div v-if="enrollStep == 1" class="input-email-item">
@@ -127,7 +127,14 @@ export default {
     },
     handleEmailCreate() {
       // Split the input by commas to support comma-separated emails
-      let emails = this.newEnrollmentEmails.split(' ');
+      let emails
+      if(this.newEnrollmentEmails.indexOf(' ')>=0) {
+        emails = this.newEnrollmentEmails.split(' ');
+      }
+      else {
+        emails = this.newEnrollmentEmails.split(',');
+      }
+       
       emails.forEach(email => {
         if (email && !this.newEnrolls.some(user => user.email === email)) {
           this.newEnrolls.push({ email: email, roles: 'student' });

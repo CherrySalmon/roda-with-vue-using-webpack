@@ -30,8 +30,10 @@
       <el-container class="app-container">
         <el-header height="80" style="background-color: #EFCD76;" class="noselect">
           <div class="icon-container">
-            <img class="icon-img" src="./static/icon.png" width="50" height="50" @click="changeRoute('/course')"/>
-            <span class="icon-text" @click="changeRoute('/course')">TYTO</span>
+            <div @click="changeRoute('/course')">
+              <img class="icon-img" src="./static/icon.png" width="50" height="50"/>
+              <span class="icon-text">TYTO</span>
+            </div>
             <span class="avatar-name" v-if="!account.img == ''">{{ account.name }} - {{ account.roles.join(", ") }}</span>
             <template v-if="!account.img == ''">
               <el-popover
@@ -41,6 +43,7 @@
                   <el-avatar class="avatar-btn" :src="account.img"/>
                 </template>
                 <template #default>
+                  <span class="avatar-mobile-name" v-if="!account.img == ''">{{ account.name }} <br> {{ account.roles.join(", ") }}</span>
                   <el-button class="logout-btn" @click="logout()" text>Logout</el-button>
                 </template>
               </el-popover>
@@ -93,7 +96,7 @@ export default {
           menuItems: [
             { index: '/manage-account', icon: 'UserFilled', title: 'Account Management' },
             { index: '/course', icon: 'document', title: 'Course' },
-            { index: '/login', icon: '', title: 'Login' }, // only for test, to be delete before publish
+            // { index: '/login', icon: '', title: 'Login' }, // only for test, to be delete before publish
           ],
           account: {
             roles: [],
@@ -123,7 +126,9 @@ export default {
         this.$router.push(key)
       },
       changeRoute(route) {
-        this.$router.push(route)
+        if(this.account) {
+          this.$router.push(route)
+        }
       },
       logout() {
         cookieManager.onLogout()
@@ -170,6 +175,25 @@ export default {
 
 .icon-container {
   display: flex;
+  flex-wrap: wrap;
+}
+@media screen and (max-width: 640px) {
+  .icon-container {
+    justify-content: space-between;
+  }
+  .avatar-name {
+    display: none;
+  }
+  .avatar-mobile-name {
+    display: block;
+    text-align: center;
+    color: #afafaf !important;
+  }
+}
+@media screen and (min-width: 640px) {
+  .avatar-mobile-name {
+    display: none;
+  }
 }
 
 .icon-text {
@@ -183,6 +207,7 @@ export default {
   -webkit-text-stroke: 3px #fff;
   cursor: pointer;
   transition: 0.8s;
+  position: absolute;
 }
 
 .icon-img {
@@ -206,6 +231,7 @@ export default {
 }
 .logout-btn {
   width: 100%;
+  font-weight: 800 !important;
 }
 .avatar-name {
   color: #fff;
@@ -213,6 +239,7 @@ export default {
   line-height: 80px;
   margin-left: auto;
 }
+
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */

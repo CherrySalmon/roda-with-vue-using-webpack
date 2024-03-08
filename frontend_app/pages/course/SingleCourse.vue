@@ -9,14 +9,16 @@
               v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
               <el-tab-pane label="Attendance Events" name="events">
                 <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
-                <AttendanceEventCard :attendance-events="attendanceEvents" @edit-event="editAttendanceEvent"
+                <AttendanceEventCard :attendance-events="attendanceEvents" :locations="locations" @edit-event="editAttendanceEvent"
                   @delete-event="deleteAttendanceEvent">
                 </AttendanceEventCard>
               </el-tab-pane>
               <el-tab-pane label="Locations" name="locations">
                 <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-                <LocationCard :locations="locations" @create-location="createNewLocation"
-                  @delete-location="deleteLocation"></LocationCard>
+                <div v-if="isGetCurrentLocation">
+                  <LocationCard :locations="locations" :currentLocationData="currentLocationData" @create-location="createNewLocation"
+                    @delete-location="deleteLocation"></LocationCard>
+                </div>
               </el-tab-pane>
               <el-tab-pane label="People" name="people">
                 <h3 style="margin: 30px 20px 10px 20px;">People</h3>
@@ -125,6 +127,7 @@ export default {
       },
       attendanceEvents: [],
       locations: [],
+      currentLocationData: {},
       optionLocation: '',
       account: {
         roles: [],
@@ -132,11 +135,12 @@ export default {
       },
       selectableRoles: [],
       currentRole: '',
-      selectRole: 'student',
+      selectRole: '',
       showModifyCourseDialog: false,
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
+      isGetCurrentLocation: false,
       enrollments: [],
       currentEventID: '',
       activeTab: 'events'
@@ -148,12 +152,18 @@ export default {
     this.account = cookieManager.getAccount()
     if (this.account) {
       this.fetchCourse(this.course.id);
-      this.fetchAttendanceEvents(this.course.id);
-      this.fetchLocations();
     }
-    this.fetchEnrollments()
   },
-
+  watch: {
+    currentRole(newRole) {
+      if(newRole == 'owner' || newRole == 'instructor' || newRole == 'staff') {
+        this.fetchAttendanceEvents(this.course.id);
+        this.fetchLocations();
+        this.getCurrentLocation();
+        this.fetchEnrollments();
+      }
+    }
+  },
   methods: {
     changeRole(role) {
       ElMessageBox.confirm(
@@ -245,7 +255,6 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
-        console.log(response)
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
@@ -264,7 +273,6 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
-        console.log(response)
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
@@ -277,7 +285,6 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
-        console.log(response)
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
@@ -332,8 +339,7 @@ export default {
         }
       })
         .then(response => {
-          console.log('Location created successfully', response);
-          alert('Location created successfully');
+          alert('Location created successfully', response);
           this.fetchLocations();
         })
         .catch(error => {
@@ -353,6 +359,25 @@ export default {
       }).catch(error => {
         console.error('Error deleting location:', error);
       });
+    },
+    getCurrentLocation() {
+            // Check if Geolocation is supported
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const { latitude, longitude } = position.coords
+                    this.currentLocationData = {
+                        latitude: latitude,
+                        longitude: longitude
+                    };
+                    this.isGetCurrentLocation = true;
+                }, (error) => {
+                    // Handle location 
+                    console.error('Error getting location', error);
+                });
+            } else {
+                // Geolocation is not supported by this browser
+                console.error('Geolocation is not supported by this browser.');
+            }
     },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
@@ -414,17 +439,19 @@ export default {
 <style>
 .single-course-container {
   width: 100%;
-  padding: 15px 40px 85px;
+  padding: 15px 30px;
 }
 
 .event-item {
   border-bottom: 1px solid #eee;
-  padding: 20px 5px;
+  text-align: center;
+  padding: 10px 5px;
   width: 200px;
   margin: 20px;
   cursor: pointer;
   display: inline-block;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 2.5rem;
 }
 
 .option-input {
@@ -447,8 +474,7 @@ export default {
 .center-content {
   margin: auto;
   width: 50%;
-  /* Adjust as needed */
-  /* Space between the button and the CourseInfoCard */
+  min-width: 280px;
 }
 .selecor-role-container {
   justify-content: space-between;

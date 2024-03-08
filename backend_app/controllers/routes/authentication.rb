@@ -12,7 +12,9 @@ module Todo
           end
           r.post do
             request_body = JSON.parse(r.body.read)
-            user_data = request_body['user_data']
+            access_token = request_body['accessToken']
+            user_info = SSOAuth.fetch_user_info(access_token)
+            user_data = JSON.parse(user_info)
             # Check if the account exists
             account = Account.first(email: user_data['email'])
             if account

@@ -8,9 +8,6 @@
         <el-form-item label="Name">
           <el-input v-model="localCourseForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="Semester">
-          <el-input v-model="localCourseForm.semester"></el-input>
-        </el-form-item>
         <el-form-item label="Start Time">
           <el-date-picker
             v-model="localCourseForm.start_time"

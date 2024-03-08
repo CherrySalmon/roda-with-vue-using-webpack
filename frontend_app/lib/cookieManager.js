@@ -16,19 +16,20 @@ export default {
     getAccount() {
         let account = {}
 
-        try{
+        try {
+            account.id = Cookies.get('account_id') ? Cookies.get('account_id') : false
             account.roles = Cookies.get('account_roles') ? Cookies.get('account_roles').split(',') : [];
             account.credential = Cookies.get('account_credential') ? Cookies.get('account_credential') : false
             account.img = Cookies.get('account_img') ? Cookies.get('account_img') : false
             account.name = Cookies.get('account_name') ? Cookies.get('account_name') : false
-            if(account.credential) {
+            if (account.credential) {
                 return account
             }
             else {
                 return false
             }
         }
-        catch(e) {
+        catch (e) {
             console.log(e)
         }
     },

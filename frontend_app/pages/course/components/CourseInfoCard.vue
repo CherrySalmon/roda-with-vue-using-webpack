@@ -12,7 +12,6 @@
       </div>
     </template>
     <div>
-      <p>Semester: {{ course.semester }}</p>
       <p>Start Time: {{ getLocalDateString(course.start_time) || 'N/A' }}</p>
       <p>Duration: {{ course.duration ? course.duration + ' hours' : 'N/A' }}</p>
       <p>Repeat: {{ course.repeat || 'N/A' }}</p>
@@ -29,16 +28,15 @@ export default {
     return {}
   },
   methods: {
-    getLocalDateString(utcStr) {
+    getLocalDateString(utcStr=null) {
       if (typeof utcStr !== 'string') {
-        console.error('getLocalDateString called with non-string input:', utcStr);
-        return 'Invalid Date'; // Or any other default/fallback value you see fit
+        return false;
       }
       // Manually parsing the date string to components
       const parts = utcStr.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}) \+0000/);
       if (!parts) {
         console.error('Invalid date format:', utcStr);
-        return 'Invalid Date';
+        return false;
       }
 
       // Creating a Date object using the parsed components
