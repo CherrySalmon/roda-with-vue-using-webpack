@@ -80,6 +80,7 @@ export default {
     created() {
         this.accountCredential = cookieManager.getCookie('account_credential');
         this.account = cookieManager.getAccount();
+        this.course_id = this.$route.params.id;
         this.fullscreenLoading = true;
         this.fetchEventData();
     },
@@ -94,7 +95,10 @@ export default {
                 console.log('Event Data Fetched Successfully:', response.data.data);
                 this.isEventDataFetched = true;
 
-                this.events = await Promise.all(response.data.data.map(async (event) => {
+                const matchingAttendancesEvents = response.data.data.filter(attendance => 
+                    parseInt(attendance.course_id) == this.course_id);
+
+                this.events = await Promise.all(matchingAttendancesEvents.map(async (event) => {
                     // Use getCourseName to fetch the course name asynchronously
                     const course_name = await this.getCourseName(event.course_id);
                     const location_name = await this.getLocationName(event);
