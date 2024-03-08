@@ -9,7 +9,7 @@
               v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
               <el-tab-pane label="Attendance Events" name="events">
                 <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
-                <AttendanceEventCard :attendance-events="attendanceEvents" @edit-event="editAttendanceEvent"
+                <AttendanceEventCard :attendance-events="attendanceEvents" :locations="locations" @edit-event="editAttendanceEvent"
                   @delete-event="deleteAttendanceEvent">
                 </AttendanceEventCard>
               </el-tab-pane>
@@ -419,12 +419,14 @@ export default {
 
 .event-item {
   border-bottom: 1px solid #eee;
-  padding: 20px 5px;
+  text-align: center;
+  padding: 10px 5px;
   width: 200px;
   margin: 20px;
   cursor: pointer;
   display: inline-block;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 2.5rem;
 }
 
 .option-input {

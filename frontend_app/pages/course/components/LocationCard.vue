@@ -109,7 +109,6 @@ export default {
             });
         },
         saveLocation(latLng) {
-            console.log('saveLocationName', this.locationForm.name);
             const locationData = {
                 name: this.locationForm.name, // Use the name from the form
                 latitude: latLng.lat,

@@ -15,9 +15,7 @@
                     <p>End Time: {{ event.end_time || 'N/A' }}</p>
                     <!-- <p>Location: {{ event.location_name || 'N/A' }}</p> -->
                 </div>
-                <br /><br />
-                
-                <br /><br />
+                <br />
                 <div v-if="event.isAttendanceExisted">
                     <el-button type="success" disabled>Attendance Recorded</el-button>
                 </div>
