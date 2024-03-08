@@ -28,7 +28,11 @@
 export default {
     emits: ['create-location', 'delete-location'],
     props: {
-        locations: Array
+        locations: Array,
+        currentLocationData:{
+            type: Object,
+            default: () => ({})
+        }
     },
     name: 'GoogleMapComponent',
 
@@ -43,7 +47,8 @@ export default {
                 name: '',
                 latitude: '',
                 longitude: ''
-            }
+            },
+            locationData: {}
         }
     },
     watch: {
@@ -64,7 +69,7 @@ export default {
         initMap() {
             // Assuming google.maps has been loaded in the global scope
             // You might need to handle loading the Google Maps script if it's not already loaded
-            const myLatlng = { lat: 24.786649006188867, lng: 120.98830606413748 };
+            const myLatlng = { lat: this.currentLocationData.latitude, lng: this.currentLocationData.longitude };
             const map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 16,
                 center: myLatlng,
@@ -117,38 +122,6 @@ export default {
             this.$emit('create-location', locationData);
             // Optionally reset the form or infoWindow here
         },
-        getLocation() {
-            // Check if Geolocation is supported
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const { latitude, longitude } = position.coords
-                    const locationData = {
-                        name: this.locationForm.name,
-                        latitude: latitude,
-                        longitude: longitude
-                    };
-
-                    // this.$emit('create-location', locationData)
-                    this.resetForm()
-                }, (error) => {
-                    // Handle location 
-                    console.error('Error getting location', error);
-                });
-            } else {
-                // Geolocation is not supported by this browser
-                console.error('Geolocation is not supported by this browser.');
-            }
-        },
-        submitLocation() {
-            if (this.locationForm.name.trim() === '') {
-                alert('Please enter a location name.');
-                return;
-            }
-            this.getLocation(); // Get location coords then create new location
-        },
-        resetForm() {
-            this.locationForm = { name: '', latitude: '', longitude: '' };
-        }
     }
 }
 </script>

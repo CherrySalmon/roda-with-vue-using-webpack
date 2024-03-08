@@ -15,8 +15,10 @@
               </el-tab-pane>
               <el-tab-pane label="Locations" name="locations">
                 <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-                <LocationCard :locations="locations" @create-location="createNewLocation"
-                  @delete-location="deleteLocation"></LocationCard>
+                <div v-if="isGetCurrentLocation">
+                  <LocationCard :locations="locations" :currentLocationData="currentLocationData" @create-location="createNewLocation"
+                    @delete-location="deleteLocation"></LocationCard>
+                </div>
               </el-tab-pane>
               <el-tab-pane label="People" name="people">
                 <h3 style="margin: 30px 20px 10px 20px;">People</h3>
@@ -125,6 +127,7 @@ export default {
       },
       attendanceEvents: [],
       locations: [],
+      currentLocationData: {},
       optionLocation: '',
       account: {
         roles: [],
@@ -137,6 +140,7 @@ export default {
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
+      isGetCurrentLocation: false,
       enrollments: [],
       currentEventID: '',
       activeTab: 'events'
@@ -150,8 +154,10 @@ export default {
       this.fetchCourse(this.course.id);
       this.fetchAttendanceEvents(this.course.id);
       this.fetchLocations();
+      this.getCurrentLocation();
     }
-    this.fetchEnrollments()
+    this.fetchEnrollments();
+    
   },
 
   methods: {
@@ -353,6 +359,26 @@ export default {
       }).catch(error => {
         console.error('Error deleting location:', error);
       });
+    },
+    getCurrentLocation() {
+            // Check if Geolocation is supported
+            console.log('getCurrentLocation...');
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const { latitude, longitude } = position.coords
+                    this.currentLocationData = {
+                        latitude: latitude,
+                        longitude: longitude
+                    };
+                    this.isGetCurrentLocation = true;
+                }, (error) => {
+                    // Handle location 
+                    console.error('Error getting location', error);
+                });
+            } else {
+                // Geolocation is not supported by this browser
+                console.error('Geolocation is not supported by this browser.');
+            }
     },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
