@@ -152,14 +152,18 @@ export default {
     this.account = cookieManager.getAccount()
     if (this.account) {
       this.fetchCourse(this.course.id);
-      this.fetchAttendanceEvents(this.course.id);
-      this.fetchLocations();
-      this.getCurrentLocation();
     }
-    this.fetchEnrollments();
-    
   },
-
+  watch: {
+    currentRole(newRole) {
+      if(newRole == 'owner' || newRole == 'instructor' || newRole == 'staff') {
+        this.fetchAttendanceEvents(this.course.id);
+        this.fetchLocations();
+        this.getCurrentLocation();
+        this.fetchEnrollments();
+      }
+    }
+  },
   methods: {
     changeRole(role) {
       ElMessageBox.confirm(
@@ -358,7 +362,6 @@ export default {
     },
     getCurrentLocation() {
             // Check if Geolocation is supported
-            console.log('getCurrentLocation...');
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition((position) => {
                     const { latitude, longitude } = position.coords
