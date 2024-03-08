@@ -85,10 +85,6 @@ export default {
                 this.events = response.data.data;
                 this.isEventDataFetched = true;
 
-                // if (this.events) {
-                //     this.event.start_time = this.getLocalDateString(this.event.start_time);
-                //     this.event.end_time = this.getLocalDateString(this.event.end_time);
-                // }
                 if (this.events && this.events.length) {
                     this.events = this.events.map(event => ({
                         ...event, // Spread operator to copy existing properties of the event

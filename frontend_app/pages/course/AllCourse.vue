@@ -196,7 +196,7 @@ p {
   display: flex;
   justify-content: left;
   width: 90%;
-  margin: 30px auto;
+  margin: 1% auto;
   flex-wrap: wrap;
 }
 .course-option-container {

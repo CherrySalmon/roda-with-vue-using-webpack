@@ -28,9 +28,8 @@ export default {
     return {}
   },
   methods: {
-    getLocalDateString(utcStr) {
+    getLocalDateString(utcStr=null) {
       if (typeof utcStr !== 'string') {
-        console.error('getLocalDateString called with non-string input:', utcStr);
         return false;
       }
       // Manually parsing the date string to components

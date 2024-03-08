@@ -39,7 +39,7 @@ export default {
         const { status, data } = await axios.post('/api/auth/verify_google_token', { user_data: userData });
         if (status === 200 || status === 201) {
           this.setUserInfoCookies(data.user_info);
-          if (this.$route.query.redirect) {
+          if (this.$route.query.redirect && this.$route.query.redirect!='/' ) {
             this.$router.push(this.$route.query.redirect)
           }
           else {

@@ -414,7 +414,7 @@ export default {
 <style>
 .single-course-container {
   width: 100%;
-  padding: 15px 40px 85px;
+  padding: 15px 30px;
 }
 
 .event-item {
@@ -447,8 +447,7 @@ export default {
 .center-content {
   margin: auto;
   width: 50%;
-  /* Adjust as needed */
-  /* Space between the button and the CourseInfoCard */
+  min-width: 280px;
 }
 .selecor-role-container {
   justify-content: space-between;
