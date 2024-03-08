@@ -12,7 +12,6 @@
       </div>
     </template>
     <div>
-      <p>Semester: {{ course.semester }}</p>
       <p>Start Time: {{ getLocalDateString(course.start_time) || 'N/A' }}</p>
       <p>Duration: {{ course.duration ? course.duration + ' hours' : 'N/A' }}</p>
       <p>Repeat: {{ course.repeat || 'N/A' }}</p>

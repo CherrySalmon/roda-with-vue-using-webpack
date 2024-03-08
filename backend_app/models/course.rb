@@ -15,7 +15,7 @@ module Todo
 
     def validate
       super
-      validates_presence %i[name semester]
+      validates_presence %i[name]
     end
 
     def self.listByAccountID(account_id)
@@ -41,7 +41,6 @@ module Todo
       {
         id: id,
         name: name,
-        semester: semester,
         created_at: created_at,
         updated_at: updated_at,
         logo: logo,

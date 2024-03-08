@@ -6,7 +6,7 @@ Sequel.migration do
   change do
     create_table(:events) do
       primary_key :id
-      foreign_key :course_id, :courses # Links attendance to a specific course
+      foreign_key :course_id, :courses, on_delete: :cascade
 
       Integer :location_id
       String :name, null: false

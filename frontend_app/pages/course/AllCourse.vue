@@ -14,9 +14,6 @@
         <el-form-item label="Name" prop="name">
           <el-input v-model="createCourseForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="Semester" prop="semester">
-          <el-input v-model="createCourseForm.semester"></el-input>
-        </el-form-item>
         <el-form-item label="Start Time">
           <el-date-picker v-model="createCourseForm.start_time" type="datetime"
             placeholder="Select start time"></el-date-picker>
@@ -44,14 +41,19 @@
     </el-dialog>
 
     <div class="course-container">
-      <el-card v-for="course in courses" :key="course.id" class="course-item" shadow="hover"
-        @click="changeRoute('/course/' + course.id)">
-        <img :src="course.icon" class="image" />
-        <div style="padding: 14px">
-          <h3>{{ course.name }}</h3>
-          <p>Semester: {{ course.semester }}</p>
-        </div>
-      </el-card>
+      <template v-for="course in courses" :key="course.id">
+        <el-card class="course-item" shadow="hover">
+          <div @click="changeRoute('/course/' + course.id)">
+            <img :src="course.icon" class="image" />
+            <div style="padding: 14px">
+              <h3>{{ course.name }}</h3>
+            </div>
+          </div>
+          <div v-if="account.roles.includes('creator')" class="course-option-container" @click="deleteCourse(course.id)">
+            <el-icon><Delete /></el-icon>
+          </div>
+        </el-card>
+      </template>
     </div>
   </div>
 </template>
@@ -59,7 +61,7 @@
 <script>
 import axios from 'axios';
 import cookieManager from '../../lib/cookieManager';
-
+import { ElNotification } from 'element-plus'
 
 export default {
   name: 'Courses',
@@ -69,13 +71,6 @@ export default {
       rules: {
         name: [
           { required: true, message: 'Please input course name', trigger: 'blur' }
-        ],
-        semester: [
-          {
-            required: true,
-            message: 'Please input semester',
-            trigger: 'change',
-          },
         ]
       },
       features: {
@@ -91,7 +86,6 @@ export default {
       showCreateCourseDialog: false,
       createCourseForm: {
         name: '',
-        semester: '',
         start_time: '',
         duration: 1,
         repeat: '',
@@ -115,6 +109,27 @@ export default {
     },
     changeRoute(route) {
       this.$router.push(route)
+    },
+    deleteCourse(course_id) {
+      axios.delete('api/course/'+course_id, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        },
+      }).then(response => {
+        ElNotification({
+          title: 'Success',
+          message: 'Delete success!',
+          type: 'success',
+        })
+        this.fetchCourses()
+      }).catch(error => {
+        console.error('Error fetching courses:', error);
+        ElNotification({
+          title: 'Error',
+          message: error.message,
+          type: 'error',
+        })
+      });
     },
     fetchCourses() {
       axios.get('api/course', {
@@ -183,6 +198,16 @@ p {
   width: 90%;
   margin: 30px auto;
   flex-wrap: wrap;
+}
+.course-option-container {
+  background-color: #f56c6c;
+  width: 35px;
+  height: 35px;
+  color: #fff;
+  padding: 9px 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  float: right;
 }
 </style>
   
