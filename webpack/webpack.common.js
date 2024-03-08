@@ -42,7 +42,9 @@ module.exports = {
             resolvers: [ElementPlusResolver()],
         }),
         new webpack.DefinePlugin({
-            'process.env': JSON.stringify(process.env)
+            'process.env': JSON.stringify(process.env),
+            __VUE_OPTIONS_API__: true,
+            __VUE_PROD_DEVTOOLS__: false,
         })
     ],
 
