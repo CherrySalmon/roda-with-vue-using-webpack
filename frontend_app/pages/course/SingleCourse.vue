@@ -132,7 +132,7 @@ export default {
       },
       selectableRoles: [],
       currentRole: '',
-      selectRole: 'student',
+      selectRole: '',
       showModifyCourseDialog: false,
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
@@ -245,7 +245,6 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
-        console.log(response)
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
@@ -264,7 +263,6 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
-        console.log(response)
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
@@ -277,7 +275,6 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         }
       }).then(response => {
-        console.log(response)
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
@@ -332,8 +329,7 @@ export default {
         }
       })
         .then(response => {
-          console.log('Location created successfully', response);
-          alert('Location created successfully');
+          alert('Location created successfully', response);
           this.fetchLocations();
         })
         .catch(error => {

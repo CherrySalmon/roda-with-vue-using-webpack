@@ -4,8 +4,8 @@
     <div class="input-email-container">
       <div style="height: 100px">
         <el-steps direction="vertical" :active="enrollStep">
-          <el-step title="Step 1" :icon="Edit" />
-          <el-step title="Step 2" :icon="Upload" />
+          <el-step title="Step 1" />
+          <el-step title="Step 2" />
         </el-steps>
       </div>
       <div v-if="enrollStep == 1" class="input-email-item">
