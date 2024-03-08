@@ -4,6 +4,27 @@
       <h2>Welcome Back, {{account.name}}!</h2>
       <p>We're thrilled to have you back! As {{ account.roles.join(' & ') }}, you have access to features including {{ getFeatures(account.roles) }}.</p>
     </div>
+    <div v-if="events.length > 0">
+      <div class="page-title">Events</div>
+      <div class="course-container">
+        <el-card v-for="event in events" :key="event.id" class="course-item" shadow="hover">
+              <div slot="header" class="clearfix">
+              <span>{{ event.name }}</span>
+              </div><br />
+              <div>
+                  <p>Course: {{  event.course_name || 'N/A' }}</p>
+                  <p>Location: {{ event.location_name || 'N/A' }}</p>
+              </div>
+              <br />
+              <div v-if="event.isAttendanceExisted">
+                  <el-button type="success" disabled>Attendance Recorded</el-button>
+              </div>
+              <div v-else>
+                  <el-button type="info" @click="getLocation(event)">Mark Attendance</el-button>
+              </div>
+        </el-card>
+      </div>
+    </div>
     <div class="page-title">Courses</div>
     <template v-if="account">
       <el-button v-if="account.roles.includes('creator')" @click="showCreateCourseDialog = true" color="#824533"
@@ -92,15 +113,206 @@ export default {
         occurrence: 1,
         logo: '',
       },
+      events: {},
     };
   },
   created() {
+    this.accountCredential = cookieManager.getCookie('account_credential');
     this.account = cookieManager.getAccount()
     if (this.account) {
       this.fetchCourses()
+      this.fetchEventData()
     }
   },
   methods: {
+    async fetchEventData() { // Mark the method as async
+        try {
+            const response = await axios.get(`/api/current_event/`, {
+                headers: {
+                    Authorization: `Bearer ${this.accountCredential}`,
+                },
+            });
+            console.log('Event Data Fetched Successfully:', response.data.data);
+            // this.isEventDataFetched = true;
+
+            this.events = await Promise.all(response.data.data.map(async (event) => {
+                // Use getCourseName to fetch the course name asynchronously
+                const course_name = await this.getCourseName(event.course_id);
+                const location_name = await this.getLocationName(event);
+                return {
+                    ...event,
+                    course_name: course_name,
+                    location_name: location_name,
+                    isAttendanceExisted: false,
+                };
+            }));
+        } catch (error) {
+            console.error('Error fetching event data:', error);
+        }
+    },
+    getCourseName(course_id) {
+        return axios.get(`/api/course/${course_id}`, {
+            headers: {
+                Authorization: `Bearer ${this.accountCredential}`,
+            },
+        }).then(response => response.data.data.name) // Assuming the response has this structure
+        .catch(error => {
+            console.error('Error fetching course name:', error);
+            return 'Error fetching course name'; // Provide a fallback or error message
+        });
+    },
+    getLocationName(event) {
+        return axios.get(`/api/course/${event.course_id}/location/${event.location_id}`, {
+            headers: {
+                Authorization: `Bearer ${this.accountCredential}`,
+            },
+        }).then(response => response.data.data.name) // Assuming the response has this structure
+        .catch(error => {
+            console.error('Error fetching location name:', error);
+            return 'Error fetching location name'; // Provide a fallback or error message
+        });
+    },
+    getLocation(event) {
+        console.log("start getting location");
+        // Start the loading screen
+        const loading = ElLoading.service({
+            lock: true,
+            text: 'Loading',
+            background: 'rgba(0, 0, 0, 0.7)',
+        });
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => this.showPosition(position, loading, event),
+                error => this.showError(error, loading)
+            );
+        } else {
+            this.locationText = "Geolocation is not supported by this browser.";
+        }
+    },
+    showPosition(position, loading, event) {
+        this.locationText = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}, Accuracy: ${position.coords.accuracy}`;
+
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.longitude;
+
+        console.log('Latitude:', this.latitude, 'Longitude:', this.longitude);
+
+        const course_id = event.course_id;
+        const location_id = event.location_id;
+
+        axios.get(`/api/course/${course_id}/location/${location_id}`, {
+            headers: {
+                Authorization: `Bearer ${this.accountCredential}`,
+            },
+        }).then(response => {
+            console.log('Event Data Fetched Successfully:', response.data.data);
+            this.location = response.data.data;
+            this.isEventDataFetched = true;
+
+            const minLat = this.location.latitude - 0.0005;
+            const maxLat = this.location.latitude + 0.0005;
+            const minLng = this.location.longitude - 0.0005
+            const maxLng = this.location.longitude + 0.0005;
+
+            console.log('minLat:', minLat, 'maxLat:', maxLat, 'minLng:', minLng, 'maxLng:', maxLng);
+
+            // Check if the current position is within the range
+            if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
+                // Call your API if within the range
+                this.postAttendance(loading, event);
+            } else {
+                ElMessageBox.alert('You are not in the right location', 'Failed', {
+                    confirmButtonText: 'OK',
+                    type: 'error',
+                })
+                loading.close();
+            }
+        }).catch(error => {
+            console.error('Error fetching event:', error);
+        });
+    },
+    showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                this.errMessage = "User denied the request for Geolocation.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                this.errMessage = "Location information is unavailable.";
+                break;
+            case error.TIMEOUT:
+                this.errMessage = "The request to get user location timed out.";
+                break;
+            default:
+                this.errMessage = "An unknown error occurred.";
+                break;
+        }
+    },
+    postAttendance(loading, event) {
+        // Use your actual course ID here
+        const courseId = event.course_id; // Example course ID
+        axios.post(`/api/course/${courseId}/attendance`, {
+            // Include any required data here
+            event_id: event.id,
+            name: event.name,
+            latitude: this.latitude,
+            longitude: this.longitude,
+        }, {
+            headers: {
+                Authorization: `Bearer ${this.accountCredential}`,
+            }
+        })
+            .then(response => {
+                // Handle success
+                console.log('Attendance recorded successfully', response.data);
+                this.updateEventAttendanceStatus(event.id, true);
+                ElMessageBox.alert('Attendance recorded successfully', 'Success', {
+                    confirmButtonText: 'OK',
+                    type: 'success',
+                })
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error recording attendance', error);
+                this.updateEventAttendanceStatus(event.id, true);
+                ElMessageBox.alert('Attendance has already recorded', 'Warning', {
+                    confirmButtonText: 'OK',
+                    type: 'warning',
+                })
+            }).finally(() => {
+                loading.close();
+            });
+    },
+    findAttendance(event){ // need to be fixed...
+        axios.get(`/api/course/${event.course_id}/attendance`, {
+            headers: {
+                Authorization: `Bearer ${this.accountCredential}`,
+            },
+        }).then(response => {
+            console.log('Attendance Data Fetched Successfully:', response.data.data);
+
+            const accountId = this.account.id; // Replace with the actual account_id
+            const eventId = event.id;
+            console.log('accountId:', this.account.id, 'eventId:', eventId);
+            const matchingAttendances = response.data.data.filter(attendance => attendance.account_id === accountId && attendance.event_id === eventId);
+
+            // Do something with the matching attendances
+            console.log('Matching Attendances:', matchingAttendances); 
+            return true;               
+            
+        }).catch(error => {
+            console.error('Error fetching attendance data:', error);
+        });
+    },
+
+    updateEventAttendanceStatus(eventId, status) {
+        const eventIndex = this.events.findIndex(event => event.id === eventId);
+        if (eventIndex !== -1) {
+            // Vue 2 reactivity caveat workaround
+            // this.$set(this.events[eventIndex], 'isAttendanceExisted', status);
+            // For Vue 3, you can directly assign the value:
+            this.events[eventIndex].isAttendanceExisted = status;
+        }
+    },
     getFeatures(roles) {
       let features = roles.map((role) => {
         return this.features[role]
