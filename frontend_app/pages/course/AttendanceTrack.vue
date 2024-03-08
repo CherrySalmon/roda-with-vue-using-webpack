@@ -16,14 +16,11 @@
                     <!-- <p>Location: {{ event.location_name || 'N/A' }}</p> -->
                 </div>
                 <br />
-                <div v-if="findAttendance(event)">
-                    <el-button type="success" disabled>Attendance Recorded</el-button>
-                </div>
                 <div v-if="event.isAttendanceExisted">
-                    <el-button type="success" disabled>Attendance Recorded</el-button>
+                  <el-button type="success" disabled>Attendance Recorded</el-button>
                 </div>
                 <div v-else>
-                    <el-button @click="getLocation(event)">Mark Attendance</el-button>
+                  <el-button type="info" @click="getLocation(event)">Mark Attendance</el-button>
                 </div>
             </el-card>
         </div>
@@ -101,13 +98,14 @@ export default {
                     // Use getCourseName to fetch the course name asynchronously
                     const course_name = await this.getCourseName(event.course_id);
                     const location_name = await this.getLocationName(event);
+                    const isAttendanceExisted = await this.findAttendance(event);
                     return {
                         ...event,
                         start_time: this.getLocalDateString(event.start_time),
                         end_time: this.getLocalDateString(event.end_time),
                         course_name: course_name,
                         location_name: location_name,
-                        isAttendanceExisted: false,
+                        isAttendanceExisted: isAttendanceExisted,
                     };
                 }));
             } catch (error) {
@@ -178,7 +176,6 @@ export default {
             this.latitude = position.coords.latitude;
             this.longitude = position.coords.longitude;
 
-            console.log('Latitude:', this.latitude, 'Longitude:', this.longitude);
 
             const course_id = event.course_id;
             const location_id = event.location_id;
@@ -197,7 +194,6 @@ export default {
                 const minLng = this.location.longitude - 0.0005
                 const maxLng = this.location.longitude + 0.0005;
 
-                console.log('minLat:', minLat, 'maxLat:', maxLat, 'minLng:', minLng, 'maxLng:', maxLng);
 
                 // Check if the current position is within the range
                 if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
@@ -265,25 +261,27 @@ export default {
                     loading.close();
                 });
         },
-        findAttendance(event){ // need to be fixed...
-            axios.get(`/api/course/${event.course_id}/attendance`, {
-                headers: {
-                    Authorization: `Bearer ${this.accountCredential}`,
-                },
-            }).then(response => {
-                console.log('Attendance Data Fetched Successfully:', response.data.data);
+        findAttendance(event) {
+            // Return a new promise that resolves with the boolean result
+            return new Promise((resolve, reject) => {
+                axios.get(`/api/course/${event.course_id}/attendance`, {
+                    headers: {
+                        Authorization: `Bearer ${this.accountCredential}`,
+                    },
+                }).then(response => {
+                    const accountId = this.account.id; // Ensure this is set correctly
+                    const eventId = event.id;
+                    const matchingAttendances = response.data.data.filter(attendance => 
+                        parseInt(attendance.account_id) == accountId && parseInt(attendance.event_id) == eventId
+                    );
 
-                const accountId = this.account.id; // Replace with the actual account_id
-                const eventId = event.id;
-                console.log('accountId:', this.account.id, 'eventId:', eventId);
-                const matchingAttendances = response.data.data.filter(attendance => attendance.account_id === accountId && attendance.event_id === eventId);
-
-                // Do something with the matching attendances
-                console.log('Matching Attendances:', matchingAttendances); 
-                return true;               
-                
-            }).catch(error => {
-                console.error('Error fetching attendance data:', error);
+                    // Resolve the promise with true if any attendances match, otherwise false
+                    resolve(matchingAttendances.length > 0);
+                }).catch(error => {
+                    console.error('Error fetching attendance data:', error);
+                    // Reject the promise in case of an error
+                    reject(error);
+                });
             });
         },
 
