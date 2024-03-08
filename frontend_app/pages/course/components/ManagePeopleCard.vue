@@ -127,7 +127,14 @@ export default {
     },
     handleEmailCreate() {
       // Split the input by commas to support comma-separated emails
-      let emails = this.newEnrollmentEmails.split(' ');
+      let emails
+      if(this.newEnrollmentEmails.indexOf(' ')>=0) {
+        emails = this.newEnrollmentEmails.split(' ');
+      }
+      else {
+        emails = this.newEnrollmentEmails.split(',');
+      }
+       
       emails.forEach(email => {
         if (email && !this.newEnrolls.some(user => user.email === email)) {
           this.newEnrolls.push({ email: email, roles: 'student' });
