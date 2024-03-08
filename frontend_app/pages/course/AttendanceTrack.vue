@@ -16,6 +16,9 @@
                     <!-- <p>Location: {{ event.location_name || 'N/A' }}</p> -->
                 </div>
                 <br />
+                <div v-if="findAttendance(event)">
+                    <el-button type="success" disabled>Attendance Recorded</el-button>
+                </div>
                 <div v-if="event.isAttendanceExisted">
                     <el-button type="success" disabled>Attendance Recorded</el-button>
                 </div>
@@ -43,12 +46,12 @@ export default {
             location_name: '',
             accountCredential: '',
             isEventDataFetched: false,
-            isAttendanceExisted: false,
             locationText: '', // Initialize location text
             errMessage: '',
             latitude: 0,
             longitude: 0,
             location: {},
+            account: {},
         };
     },
     watch: {
@@ -79,6 +82,7 @@ export default {
 
     created() {
         this.accountCredential = cookieManager.getCookie('account_credential');
+        this.account = cookieManager.getAccount();
         this.fullscreenLoading = true;
         this.fetchEventData();
     },
@@ -261,12 +265,31 @@ export default {
                     loading.close();
                 });
         },
+        findAttendance(event){ // need to be fixed...
+            axios.get(`/api/course/${event.course_id}/attendance`, {
+                headers: {
+                    Authorization: `Bearer ${this.accountCredential}`,
+                },
+            }).then(response => {
+                console.log('Attendance Data Fetched Successfully:', response.data.data);
+
+                const accountId = this.account.id; // Replace with the actual account_id
+                const eventId = event.id;
+                console.log('accountId:', this.account.id, 'eventId:', eventId);
+                const matchingAttendances = response.data.data.filter(attendance => attendance.account_id === accountId && attendance.event_id === eventId);
+
+                // Do something with the matching attendances
+                console.log('Matching Attendances:', matchingAttendances); 
+                return true;               
+                
+            }).catch(error => {
+                console.error('Error fetching attendance data:', error);
+            });
+        },
+
         updateEventAttendanceStatus(eventId, status) {
             const eventIndex = this.events.findIndex(event => event.id === eventId);
             if (eventIndex !== -1) {
-                // Vue 2 reactivity caveat workaround
-                // this.$set(this.events[eventIndex], 'isAttendanceExisted', status);
-                // For Vue 3, you can directly assign the value:
                 this.events[eventIndex].isAttendanceExisted = status;
             }
         }
