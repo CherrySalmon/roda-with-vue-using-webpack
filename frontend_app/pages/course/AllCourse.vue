@@ -147,6 +147,9 @@ export default {
                     isAttendanceExisted: isAttendanceExisted,
                 };
             }));
+            console.log('isAttendanceExisted:', this.events[0].isAttendanceExisted);
+            console.log('isAttendanceExisted:', this.events[1].isAttendanceExisted);
+            console.log('isAttendanceExisted:', this.events[2].isAttendanceExisted);
         } catch (error) {
             console.error('Error fetching event data:', error);
         }
@@ -292,6 +295,7 @@ export default {
                 const matchingAttendances = response.data.data.filter(attendance => 
                     parseInt(attendance.account_id) == accountId && parseInt(attendance.event_id) == eventId
                 );
+                console.log('Matching attendances:', matchingAttendances);
 
                 // Resolve the promise with true if any attendances match, otherwise false
                 resolve(matchingAttendances.length > 0);
