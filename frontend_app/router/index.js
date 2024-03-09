@@ -11,7 +11,7 @@ import AttendanceTrack from '../pages/course/AttendanceTrack.vue'
 const routes = [
   {
     path: "/",
-    component: PageNotFound,
+    component: AllCourses,
   },
   {
     path: '/login',
