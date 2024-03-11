@@ -44,14 +44,14 @@ module Todo
     def self.remove(requestor, course_id)
       course = find_course(course_id)
       verify_policy(requestor, :delete, course, course_id)
-      course.delete
+      course.destroy
     end
 
     def self.remove_enroll(requestor, course_id, account_id)
       course = find_course(course_id)
       verify_policy(requestor, :update, course, course_id)
       account = AccountCourse.first(account_id: account_id)
-      account.delete
+      account.destroy
     end
 
     def self.get_enrollments(requestor, course_id)

@@ -38,7 +38,7 @@ module Todo
     def self.remove_event(requestor, event_id, course_id)
       event = Event.first(id: event_id)
       verify_policy(requestor, :delete, course_id)
-      event.delete
+      event.destroy
     end
 
 

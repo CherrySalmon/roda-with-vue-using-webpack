@@ -45,7 +45,7 @@ module Todo
     def self.remove(requestor, target_id, course_id)
       verify_policy(requestor, :delete, course_id)
       location = Location.first(id: target_id) || raise(LocationNotFoundError, "Laction with ID #{target_id} not found.")
-      location.delete
+      location.destroy
     end
 
     private

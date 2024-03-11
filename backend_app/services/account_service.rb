@@ -25,7 +25,7 @@ module Todo
     # Updates an existing account, if authorized
     def self.update(requestor, target_id, user_data)
       verify_policy(requestor, :update, target_id)
-      
+
       account = Account.first(id: target_id) || raise(AccountNotFoundError, "Account with ID #{target_id} not found.")
       account.update_account(user_data) || raise("Failed to update account with ID #{target_id}.")
     end
@@ -35,7 +35,7 @@ module Todo
       verify_policy(requestor, :delete, target_id)
 
       account = Account.first(id: target_id) || raise(AccountNotFoundError, "Account with ID #{target_id} not found.")
-      account.delete
+      account.destroy
     end
 
     private
