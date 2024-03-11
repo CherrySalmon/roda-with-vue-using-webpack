@@ -9,6 +9,8 @@ module Todo
     plugin :validation_helpers
 
     many_to_one :course, class: :'Todo::Course'
+    many_to_one :location, class: :'Todo::Location'
+    one_to_many :attendances, class: :'Todo::Attendance', key: :event_id
 
     plugin :timestamps, update_on_create: true
 

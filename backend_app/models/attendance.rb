@@ -9,7 +9,8 @@ module Todo
     plugin :validation_helpers
 
     many_to_one :course, class: :'Todo::Course'
-    many_to_one :account_course_role, class: :'Todo::AccountCourse', key: :account_course_role_id
+    many_to_one :account_course_role, class: :'Todo::AccountCourse'
+    many_to_one :event, class: :'Todo::Event'
 
     plugin :timestamps, update_on_create: true
 

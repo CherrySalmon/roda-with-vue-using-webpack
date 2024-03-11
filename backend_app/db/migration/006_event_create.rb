@@ -7,8 +7,8 @@ Sequel.migration do
     create_table(:events) do
       primary_key :id
       foreign_key :course_id, :courses, on_delete: :cascade
+      foreign_key :location_id, :locations, on_delete: :cascade
 
-      Integer :location_id
       String :name, null: false
       DateTime :start_time
       DateTime :end_time

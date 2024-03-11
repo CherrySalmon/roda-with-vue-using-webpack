@@ -7,9 +7,9 @@ Sequel.migration do
     create_table(:attendances) do
       primary_key :id
       foreign_key :course_id, :courses, on_delete: :cascade
-      foreign_key :account_id, :account_course_roles, on_delete: :cascade
+      foreign_key :account_course_role_id, :account_course_roles, on_delete: :cascade
+      foreign_key :event_id, :events, on_delete: :cascade
 
-      Integer :event_id
       String :name, null: false
       Float :latitude
       Float :longitude
