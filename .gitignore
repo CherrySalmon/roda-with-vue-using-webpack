@@ -1,6 +1,7 @@
 .bundle/
 node_modules/
 **/config/secrets.yml
+**/config/service-account-file.json
 *.db
 
 # local env files
