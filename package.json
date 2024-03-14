@@ -13,6 +13,8 @@
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.3",
+    "dotenv": "^16.4.1",
+    "google-auth-library": "^9.4.2",
     "html-webpack-plugin": "^5.5.1",
     "unplugin-auto-import": "^0.16.7",
     "unplugin-vue-components": "^0.25.2",
@@ -20,15 +22,18 @@
     "vue-loader": "^17.1.0",
     "vue-style-loader": "^4.1.3",
     "vue-template-compiler": "^2.7.14",
-    "webpack": "^5.82.0",
+    "webpack": "^5.90.0",
     "webpack-cli": "^5.0.2",
     "webpack-dev-server": "^4.13.3",
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "ajv": "^8.12.0",
+    "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.6.0",
     "element-plus": "^2.4.2",
-    "vue-router": "^4.2.5"
+    "js-cookie": "^3.0.5",
+    "vue-google-oauth2": "^1.5.10",
+    "vue-router": "^4.2.5",
+    "vue3-google-login": "^2.0.25"
   }
 }

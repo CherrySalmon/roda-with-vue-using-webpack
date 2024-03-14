@@ -2,4 +2,4 @@
 
 require './require_app'
 require_app
-run BackendApp::App.freeze.app
+run Todo::Api.freeze.app

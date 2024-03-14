@@ -1,50 +1,64 @@
-// import { createRouter, createMemoryHistory, createWebHistory } from 'vue-router';
-// import Home from '../pages/HomePage.vue';
-// import About from '../pages/AboutPage.vue';
-
-
-// const isServer = typeof window === 'undefined';
-// const history = isServer ? createMemoryHistory() : createWebHistory();
-// const routes = [
-//   {
-//     path: '/',
-//     name: 'Home',
-//     component: Home,
-//   },
-//   {
-//     path: '/about',
-//     name: 'About',
-//     component: About,
-//   },
-// ];
-
-// const router = createRouter({
-//   history,
-//   routes,
-// });
-
-// export default router;
-
 import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '../pages/HomePage.vue';
-import AboutPage from '../pages/AboutPage.vue';
+import LoginPage from '../pages/Login.vue';
+import ManageAccount from '../pages/ManageAccount.vue';
+import Course from '../pages/course/index.vue';
+import AllCourses from '../pages/course/AllCourse.vue'
+import SingleCourse from '../pages/course/SingleCourse.vue'
+import ManageCourse from '../pages/ManageCourse.vue';
+import PageNotFound from '../pages/404.vue'
+import AttendanceTrack from '../pages/course/AttendanceTrack.vue'
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: HomePage
+    path: "/",
+    component: AllCourses,
   },
   {
-    path: '/about', 
-    name: 'About',
-    component: AboutPage
+    path: '/login',
+    name: 'Login',
+    component: LoginPage
+  },
+  {
+    path: '/course',
+    name: 'Course',
+    component: Course,
+    children: [
+      {
+        path: '',
+        name: 'Courses',
+        component: AllCourses,
+      },
+      {
+        path: ':id',
+        name: 'SingleCourse',
+        component: SingleCourse
+      },
+      {
+        path: ':id/attendance',
+        name: 'AttendanceTrack',
+        component: AttendanceTrack
+      },
+    ]
+  },
+  {
+    path: '/manage-account',
+    name: 'ManageAccount',
+    component: ManageAccount
+  },
+  {
+    path: '/manage-course',
+    name: 'ManageCourse',
+    component: ManageCourse
+  },
+  {
+    path: "/:notFound",
+    component: PageNotFound,
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes 
+  routes
 })
 
 export default router

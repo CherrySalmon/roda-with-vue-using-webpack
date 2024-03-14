@@ -14,11 +14,19 @@ namespace :db do
 
     # Set up the migration path
     migration_path = File.expand_path('backend_app/db/migration', __dir__)
-    print('migration_path:', migration_path)
 
     # Run the migrations
     Dir.glob("#{migration_path}/*.rb").each { |file| require file }
     Sequel::Migrator.run(BackendApp::Api.db, migration_path)
+  end
+
+  desc 'Seed the database with default data'
+  task seed: [:config] do
+    seed_path = File.expand_path('backend_app/db/account_seeds.rb')
+
+    # Load and execute the seed script
+    load(seed_path)
+    puts 'Database has been seeded.'
   end
 
   desc 'Delete dev or test database file'
@@ -32,5 +40,16 @@ namespace :db do
     db_filename = "backend_app/db/store/#{@app.environment}.db"
     FileUtils.rm(db_filename)
     puts "Deleted #{db_filename}"
+  end
+end
+
+task :load_lib do
+  require_app('lib')
+end
+
+namespace :generate do
+  desc 'Create rbnacl key'
+  task :msg_key => :load_lib do
+    puts "New MSG_KEY (base64): #{Todo::JWTCredential.generate_key}"
   end
 end
