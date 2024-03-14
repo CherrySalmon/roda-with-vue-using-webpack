@@ -11,8 +11,8 @@
                 <div>
                     <p>Course: {{  event.course_name || 'N/A' }}</p>
                     <p>Location: {{ event.location_name || 'N/A' }}</p>
-                    <p>Start Time: {{ event.start_time || 'N/A' }}</p>
-                    <p>End Time: {{ event.end_time || 'N/A' }}</p>
+                    <p>Start Time: {{ event.start_at || 'N/A' }}</p>
+                    <p>End Time: {{ event.end_at || 'N/A' }}</p>
                     <!-- <p>Location: {{ event.location_name || 'N/A' }}</p> -->
                 </div>
                 <br />
@@ -105,8 +105,8 @@ export default {
                     const isAttendanceExisted = await this.findAttendance(event);
                     return {
                         ...event,
-                        start_time: this.getLocalDateString(event.start_time),
-                        end_time: this.getLocalDateString(event.end_time),
+                        start_at: this.getLocalDateString(event.start_at),
+                        end_at: this.getLocalDateString(event.end_at),
                         course_name: course_name,
                         location_name: location_name,
                         isAttendanceExisted: isAttendanceExisted,
@@ -189,15 +189,14 @@ export default {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
             }).then(response => {
-                console.log('Event Data Fetched Successfully:', response.data.data);
                 this.location = response.data.data;
                 this.isEventDataFetched = true;
 
-                const minLat = this.location.latitude - 0.0005;
-                const maxLat = this.location.latitude + 0.0005;
-                const minLng = this.location.longitude - 0.0005
-                const maxLng = this.location.longitude + 0.0005;
-
+                const range = 4.0005
+                const minLat = this.location.latitude - range
+                const maxLat = this.location.latitude + range
+                const minLng = this.location.longitude - range
+                const maxLng = this.location.longitude + range
 
                 // Check if the current position is within the range
                 if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {

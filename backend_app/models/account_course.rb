@@ -6,6 +6,22 @@ module Todo
   class AccountCourse < Sequel::Model(:account_course_roles)
     many_to_one :account
     many_to_one :course
-    one_to_many :attendances, class: :'Todo::Attendance', key: :account_course_role_id
+    many_to_one :role
+
+    plugin :validation_helpers
+    
+    def validate
+      super
+      validates_presence [:account_id, :course_id, :role]
+    end
+
+    def attributes()
+      {
+        id: id,
+        account: account,
+        course: course,
+        role: role
+      }
+    end
   end
 end

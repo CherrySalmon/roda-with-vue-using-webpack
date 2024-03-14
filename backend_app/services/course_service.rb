@@ -44,14 +44,14 @@ module Todo
     def self.remove(requestor, course_id)
       course = find_course(course_id)
       verify_policy(requestor, :delete, course, course_id)
-      course.delete
+      course.destroy
     end
 
     def self.remove_enroll(requestor, course_id, account_id)
       course = find_course(course_id)
       verify_policy(requestor, :update, course, course_id)
       account = AccountCourse.first(account_id: account_id)
-      account.delete
+      account.destroy
     end
 
     def self.get_enrollments(requestor, course_id)
@@ -80,7 +80,9 @@ module Todo
 
     # Checks authorization for the requested action
     def self.verify_policy(requestor, action = nil, course = nil, course_id = nil)
-      course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).select_map(:roles)
+      course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).map do |role|
+        role.role.name
+      end
       policy = CoursePolicy.new(requestor, course, course_roles)
       action_check = action ? policy.send("can_#{action}?") : true
       raise(ForbiddenError, 'You have no access to perform this action.') unless action_check

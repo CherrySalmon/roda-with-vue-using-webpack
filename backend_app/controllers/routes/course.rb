@@ -161,7 +161,6 @@ module Todo
 
             r.on 'location' do
               r.on String do |location_id|
-
                 r.on do
                   # GET api/course/:course_id/location/:id
                   r.get do
