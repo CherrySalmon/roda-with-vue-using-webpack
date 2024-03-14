@@ -9,7 +9,7 @@ module Todo
     plugin :validation_helpers
     many_to_many :events
     one_to_many :locations
-  
+
     many_to_many :attendances, join_table: :account_course_roles
     many_to_many :roles, join_table: :account_course_roles
     many_to_many :accounts, join_table: :account_course_roles
@@ -65,12 +65,17 @@ module Todo
     def update_single_enrollment(account_id, enrolled_data)
       account = Account.first(id: account_id)
       account.update(email: enrolled_data['email'])
+
       update_course_account_roles(account, enrolled_data['roles'])
     end
 
     def get_enrollments
       AccountCourse.where(course_id: self.id).map do |enrollment|
-        account = Account.first(id: enrollment.account_id).attributes
+        account = Account.first(id: enrollment.account_id)
+        {
+          account: account.attributes,
+          enroll_identity: get_enroll_identity(enrollment.account_id)
+        }
       end
     end
 
@@ -96,28 +101,25 @@ module Todo
     def update_course_account_roles(account, roles_string)
       # Split the roles_string into an array of role names
       role_names = roles_string.split(',')
-    
+
       # Find existing roles for the account in the context of the course
       existing_roles = AccountCourse.where(account_id: account.id, course_id: self.id).map(&:role)
-    
+
       # Delete any roles not included in the new list
       existing_roles.each do |existing_role|
         unless role_names.include?(existing_role.name)
           AccountCourse.where(account_id: account.id, course_id: self.id, role_id: existing_role.id).delete
         end
       end
-    
+
       # Add or update roles from the roles_string
       role_names.each do |role_name|
-        role = Role.first(name: role_name)
-        next unless role
-    
-        # Find or create the AccountCourse entry for each role
-        account_course_entry = AccountCourse.find_or_create(account_id: account.id, course_id: self.id, role_id: role.id)
-    
-        # Assuming you might need to update additional attributes in AccountCourse, you can do it here
-        # account_course_entry.update(...)
+        role_id = Role.first(name: role_name).id
+        next unless AccountCourse.where(account_id: account.id, course_id: self.id, role_id: role_id)
+
+        account_course_entry = AccountCourse.find_or_create(account_id: account.id, course_id: self.id, role_id: role_id)
+
       end
-    end    
+    end
   end
 end

@@ -248,7 +248,7 @@ export default {
       }).then(response => {
         this.enrollments = response.data.data;
         this.enrollments.forEach((enrollment) => {
-          enrollment.enrolls = enrollment.enroll_identity
+          enrollment.enrolls = response.data.data.enroll_identity
         });
 
       }).catch(error => {
