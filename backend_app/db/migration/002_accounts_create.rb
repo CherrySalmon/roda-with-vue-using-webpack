@@ -7,9 +7,9 @@ Sequel.migration do
     create_table(:accounts) do
       primary_key :id
       String :name
-      foreign_key :role_id, :roles
       String :email, null: false
-      String :sso_token
+      String :access_token
+      String :refresh_token
       String :avatar
     end
   end

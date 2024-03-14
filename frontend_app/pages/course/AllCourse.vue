@@ -36,20 +36,12 @@
           <el-input v-model="createCourseForm.name"></el-input>
         </el-form-item>
         <el-form-item label="Start Time">
-          <el-date-picker v-model="createCourseForm.start_time" type="datetime"
-            placeholder="Select start time"></el-date-picker>
+          <el-date-picker v-model="createCourseForm.start_at" type="datetime"
+            placeholder="Select start time" time-format="HH:mm"></el-date-picker>
         </el-form-item>
-        <el-form-item label="Duration (hours)">
-          <el-input-number v-model="createCourseForm.duration" :min="1"></el-input-number>
-        </el-form-item>
-        <el-form-item label="Repeat">
-          <el-select v-model="createCourseForm.repeat" placeholder="Select">
-            <el-option label="Do not repeat" value="no-repeat"></el-option>
-            <el-option label="Weekly" value="weekly"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item v-show="createCourseForm.repeat != 'no-repeat'" label="Repeat">
-          <el-input-number v-model="createCourseForm.occurrence" :step="1" step-strictly></el-input-number>
+        <el-form-item label="End Time">
+          <el-date-picker v-model="createCourseForm.end_at" type="datetime"
+            placeholder="Select end time" time-format="HH:mm"></el-date-picker>
         </el-form-item>
         <el-form-item label="Logo">
           <el-input v-model="createCourseForm.logo"></el-input>
@@ -107,10 +99,8 @@ export default {
       showCreateCourseDialog: false,
       createCourseForm: {
         name: '',
-        start_time: '',
-        duration: 1,
-        repeat: '',
-        occurrence: 1,
+        start_at: '',
+        end_at: '',
         logo: '',
       },
       events: {},
@@ -132,14 +122,12 @@ export default {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
             });
-            console.log('Event Data Fetched Successfully:', response.data.data);
-            // this.isEventDataFetched = true;
 
             this.events = await Promise.all(response.data.data.map(async (event) => {
                 // Use getCourseName to fetch the course name asynchronously
-                const course_name = await this.getCourseName(event.course_id);
-                const location_name = await this.getLocationName(event);
-                const isAttendanceExisted = await this.findAttendance(event);
+                let course_name = await this.getCourseName(event.course_id)
+                let location_name = await this.getLocationName(event)
+                let isAttendanceExisted = await this.findAttendance(event)
                 return {
                     ...event,
                     course_name: course_name,
@@ -208,10 +196,11 @@ export default {
             this.location = response.data.data;
             this.isEventDataFetched = true;
 
-            const minLat = this.location.latitude - 0.0005;
-            const maxLat = this.location.latitude + 0.0005;
-            const minLng = this.location.longitude - 0.0005
-            const maxLng = this.location.longitude + 0.0005;
+            let range = 1.0005
+            const minLat = this.location.latitude - range;
+            const maxLat = this.location.latitude + range;
+            const minLng = this.location.longitude - range
+            const maxLng = this.location.longitude + range;
 
             // Check if the current position is within the range
             if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
@@ -370,10 +359,6 @@ export default {
       this.showCreateCourseDialog = false;
     },
     createCourse() {
-      if (this.createCourseForm.repeat == 'no-repeat') {
-        this.createCourseForm.occurrence = 1
-      }
-
       axios.post('api/course', this.createCourseForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
@@ -410,6 +395,13 @@ p {
   margin: 1% auto;
   flex-wrap: wrap;
 }
+
+@media screen and (max-width: 640px) {
+  .course-container {
+    justify-content: center;
+  }
+}
+
 .course-option-container {
   background-color: #f56c6c;
   width: 35px;

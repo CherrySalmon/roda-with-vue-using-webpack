@@ -48,7 +48,9 @@ module Todo
 
     # Checks authorization for the requested action
     def self.verify_policy(requestor, action = nil, course_id = nil)
-      course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).select_map(:roles)
+      course_roles = AccountCourse.where(account_id: requestor['account_id'], course_id: course_id).map do |role|
+        role.role.name
+      end
       policy = EventPolicy.new(requestor, course_roles)
       action_check = action ? policy.send("can_#{action}?") : true
       raise(ForbiddenError, 'You have no access to perform this action.') unless action_check
