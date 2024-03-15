@@ -2,8 +2,8 @@
   <div class="single-course-container">
     <div class="page-title">{{ course.name }}</div>
     <el-row>
-      <el-col :xs="24" :sm="18">
-        <el-tabs tab-position="left" style="height: 100%; text-align: left;" @tab-change="changeTab" v-model="activeTab">
+      <el-col :xs="24" :md="18">
+        <el-tabs :tab-position="tabStyle" style="height: 100%; text-align: left;" @tab-change="changeTab" v-model="activeTab">
           <div v-if="currentRole">
             <div
               v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
@@ -32,7 +32,7 @@
         </el-tabs>
       </el-col>
 
-      <el-col :xs="24" :sm="6">
+      <el-col :xs="24" :md="6">
         <div v-if="currentRole">
           <div v-if="currentRole != 'student'">
             <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
@@ -108,6 +108,7 @@ import CreateAttendanceEventDialog from './components/CreateAttendanceEventDialo
 import ModifyAttendanceEventDialog from './components/ModifyAttendanceEventDialog.vue'
 import AttendanceEventCard from './components/AttendanceEventCard.vue';
 import LocationCard from './components/LocationCard.vue'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'SingleCourse',
@@ -146,7 +147,14 @@ export default {
       activeTab: 'events'
     };
   },
-
+  computed: {
+    tabStyle() {
+      if (window.innerWidth < 992) {
+        return "top"
+      }
+      return "left"
+    }
+  },
   created() {
     this.course.id = this.$route.params.id;
     this.account = cookieManager.getAccount()
@@ -207,7 +215,7 @@ export default {
         this.course = response.data.data;
         // Copying the course object to courseForm
         this.courseForm = { ...this.course };
-        this.selectableRoles = this.course.enroll_identity.split(',')
+        this.selectableRoles = this.course.enroll_identity
         this.selectRole = this.selectableRoles[0]
         this.currentRole = this.selectRole
         // Deleting the id and enroll_identity keys from courseForm
@@ -241,7 +249,7 @@ export default {
       }).then(response => {
         this.enrollments = response.data.data;
         this.enrollments.forEach((enrollment) => {
-          enrollment.enrolls = enrollment.enroll_identity.split(',')
+          enrollment.enrolls = response.data.data.enroll_identity
         });
 
       }).catch(error => {
@@ -258,17 +266,18 @@ export default {
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
+        ElMessage.error(error.message)
       });
     },
 
     updateEnrollment(enrollment) {
       let entollList = {
         enroll: {
-          email: enrollment.email,
-          roles: enrollment.enrolls.join(',')
+          email: enrollment.account.email,
+          roles: enrollment.enroll_identity.join(',')
         }
       }
-      axios.post(`/api/course/${this.course.id}/enroll/${enrollment.account_id}`, entollList, {
+      axios.post(`/api/course/${this.course.id}/enroll/${enrollment.account.id}`, entollList, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         }
@@ -276,6 +285,7 @@ export default {
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
+        ElMessage.error(error.message)
       });
     },
 

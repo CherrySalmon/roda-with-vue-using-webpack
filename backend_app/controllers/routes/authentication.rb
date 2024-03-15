@@ -21,7 +21,7 @@ module Todo
               account.update(
                 name: user_data['name'].force_encoding('UTF-8'),
                 avatar: user_data['picture'],
-                sso_token: user_data['sso_token']
+                access_token: user_data['access_token']
               )
               jwt = JWTCredential.generate_jwt(account.attributes[:id], account.attributes[:roles])
               account_data = account.attributes

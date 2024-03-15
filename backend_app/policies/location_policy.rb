@@ -45,18 +45,15 @@ module Todo
     end
 
     def requestor_is_instructor?
-      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
-      roles_array.include?('instructor')
+      @course_roles.include?('instructor')
     end
 
     def requestor_is_staff?
-      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
-      roles_array.include?('staff')
+      @course_roles.include?('staff')
     end
 
     def requestor_is_owner?
-      roles_array = Array(@course_roles).flatten.map(&:to_s).flat_map { |role| role.split(',') }
-      roles_array.include?('owner')
+      @course_roles.include?('owner')
     end
   end
 end
