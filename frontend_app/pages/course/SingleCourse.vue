@@ -123,8 +123,8 @@ export default {
       createAttendanceEventForm: {
         name: '',
         location_id: '',
-        start_time: '',
-        end_time: '',
+        atart_at: '',
+        end_at: '',
       },
       attendanceEvents: [],
       locations: [],

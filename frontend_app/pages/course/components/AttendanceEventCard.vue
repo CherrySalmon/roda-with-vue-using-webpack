@@ -3,8 +3,8 @@
       <div style="">
         <h3>{{ event.name }}</h3>
         <p>Location: {{ getEventLocationName(event.location_id) }}</p>
-        <!-- <p>Start Time: {{ event.start_time }}</p>
-        <p>End Time: {{ event.end_time }}</p> -->
+        <!-- <p>Start Time: {{ event.start_at }}</p>
+        <p>End Time: {{ event.end_at }}</p> -->
         <el-icon :size="18" @click="$emit('edit-event', event.id)">
           <Edit />
         </el-icon>

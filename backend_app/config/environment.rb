@@ -2,7 +2,7 @@ require 'sequel'
 require 'figaro'
 require 'roda'
 require 'logger'
-module Todo
+module BackendApp
   # Configuration for the API
   class Api < Roda
     plugin :environments
@@ -17,7 +17,8 @@ module Todo
     # Make the environment variables accessible to other classes
     def self.config = Figaro.env
     db_url = ENV['DATABASE_URL']
-    @db = Sequel.connect(db_url, logger: Logger.new($stderr))
+    # @db = Sequel.connect(db_url, logger: Logger.new($stderr))
+    @db = Sequel.connect(db_url)
     def self.db = @db # rubocop:disable Style/TrivialAccessors
-  end
+    end
 end

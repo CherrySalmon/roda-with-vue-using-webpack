@@ -107,7 +107,7 @@ export default {
     },
     created() {
       this.account = cookieManager.getAccount()
-      if(!this.account) {
+      if(!this.account && window.location.pathname!='/privacy') {
         this.logout()
         if (window.location.pathname!='/login') {
           this.$router.push({ path: '/login', query: { redirect: window.location.pathname } })
