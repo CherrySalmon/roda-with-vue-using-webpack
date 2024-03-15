@@ -26,21 +26,20 @@
 
 
     <h1 class="people-title">Manage People</h1>
-
     <el-table style="width: 100%" :data="enrollments">
       <el-table-column type="index" width="50" />
       <el-table-column width="70">
         <template #default="scope">
-          <el-avatar shape="square" :size="40" :src="scope.row.avatar" />
+          <el-avatar shape="square" :size="40" :src="scope.row.account.avatar" />
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="Name" width="180" />
-      <el-table-column prop="email" label="Email" />
+      <el-table-column prop="account.name" label="Name" width="180" />
+      <el-table-column prop="account.email" label="Email" />
       <el-table-column prop="enroll_identity" label="Role"></el-table-column>
       <el-table-column label="Operations" width="180">
         <template #default="scope">
           <el-button @click="openEditDialog(scope.row)" size="small">Edit</el-button>
-          <el-button type="danger" @click="$emit('delete-enrollment', scope.row.account_id)"
+          <el-button type="danger" @click="$emit('delete-enrollment', scope.row.account.id)"
             size="small">Delete</el-button>
         </template>
       </el-table-column>
@@ -49,10 +48,10 @@
     <el-dialog title="Edit Account" v-model="editDialogVisible" center>
       <el-form :model="selectedAccount" label-width="80px">
           <el-form-item label="Email">
-              <el-input class="editor-input-box" v-model="selectedAccount.email" autocomplete="off"></el-input>
+              <el-input class="editor-input-box" v-model="selectedAccount.account.email" autocomplete="off"></el-input>
           </el-form-item>
           <el-form-item label="Roles">
-            <el-select v-model="selectedAccount.enrolls" placeholder="Select role" multiple>
+            <el-select v-model="selectedAccount.enroll_identity" placeholder="Select role" multiple>
               <el-option v-for="role in peopleRoleList" :key="role" :label="role" :value="role" :disabled="checkIsModifable(role)"></el-option>
             </el-select>
           </el-form-item>
@@ -107,7 +106,8 @@ export default {
       this.editDialogVisible = false;
     },
     openEditDialog(account) {
-      this.selectedAccount = account;
+      this.selectedAccount = JSON.parse(JSON.stringify(account))
+      
       this.editDialogVisible = true;
     },
     checkIsModifable(role) {
