@@ -7,11 +7,16 @@ import SingleCourse from '../pages/course/SingleCourse.vue'
 import ManageCourse from '../pages/ManageCourse.vue';
 import PageNotFound from '../pages/404.vue'
 import AttendanceTrack from '../pages/course/AttendanceTrack.vue'
+import privacy from '../pages/privacy.vue';
 
 const routes = [
   {
     path: "/",
     component: AllCourses,
+  },
+  {
+    path: "/privacy",
+    component: privacy
   },
   {
     path: '/login',
