@@ -11,11 +11,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Start Time">
-          <el-date-picker v-model="createAttendanceEventForm.start_time" type="datetime"
+          <el-date-picker v-model="createAttendanceEventForm.start_at" type="datetime"
             placeholder="Select start time"></el-date-picker>
         </el-form-item>
         <el-form-item label="End Time">
-          <el-date-picker v-model="createAttendanceEventForm.end_time" type="datetime"
+          <el-date-picker v-model="createAttendanceEventForm.end_at" type="datetime"
             placeholder="Select end time"></el-date-picker>
         </el-form-item>
       </el-form>
@@ -43,8 +43,8 @@
             createAttendanceEventForm: {
                 name: '',
                 location_id: '',
-                start_time: '',
-                end_time: '',
+                start_at: '',
+                end_at: '',
             },
         }
     },
