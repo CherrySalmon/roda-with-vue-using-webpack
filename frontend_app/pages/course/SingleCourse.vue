@@ -108,6 +108,7 @@ import CreateAttendanceEventDialog from './components/CreateAttendanceEventDialo
 import ModifyAttendanceEventDialog from './components/ModifyAttendanceEventDialog.vue'
 import AttendanceEventCard from './components/AttendanceEventCard.vue';
 import LocationCard from './components/LocationCard.vue'
+import { ElMessage } from 'element-plus'
 
 export default {
   name: 'SingleCourse',
@@ -248,7 +249,7 @@ export default {
       }).then(response => {
         this.enrollments = response.data.data;
         this.enrollments.forEach((enrollment) => {
-          enrollment.enrolls = enrollment.enroll_identity
+          enrollment.enrolls = response.data.data.enroll_identity
         });
 
       }).catch(error => {
@@ -265,17 +266,18 @@ export default {
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
+        ElMessage.error(error.message)
       });
     },
 
     updateEnrollment(enrollment) {
       let entollList = {
         enroll: {
-          email: enrollment.email,
-          roles: enrollment.enrolls.join(',')
+          email: enrollment.account.email,
+          roles: enrollment.enroll_identity.join(',')
         }
       }
-      axios.post(`/api/course/${this.course.id}/enroll/${enrollment.account_id}`, entollList, {
+      axios.post(`/api/course/${this.course.id}/enroll/${enrollment.account.id}`, entollList, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
         }
@@ -283,6 +285,7 @@ export default {
         this.fetchEnrollments()
       }).catch(error => {
         console.error('Error fetching enrollments:', error);
+        ElMessage.error(error.message)
       });
     },
 
