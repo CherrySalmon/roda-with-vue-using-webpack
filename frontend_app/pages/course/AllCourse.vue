@@ -196,7 +196,7 @@ export default {
             this.location = response.data.data;
             this.isEventDataFetched = true;
 
-            let range = 1.0005
+            let range = 0.0005
             const minLat = this.location.latitude - range;
             const maxLat = this.location.latitude + range;
             const minLng = this.location.longitude - range
