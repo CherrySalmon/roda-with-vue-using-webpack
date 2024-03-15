@@ -13,6 +13,7 @@ module Todo
     plugin :public, root: 'dist'
     plugin :all_verbs
     plugin :halt
+    plugin :multi_route
 
     # Register the error_handler plugin
     plugin :error_handler do |e|

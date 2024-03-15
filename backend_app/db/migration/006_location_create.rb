@@ -7,7 +7,7 @@ Sequel.migration do
     # Create locations table
     create_table(:locations) do
       primary_key :id
-      foreign_key :course_id, :courses # Links location to a specific course
+      foreign_key :course_id, :courses, on_delete: :cascade
 
       String :name
       Float :latitude

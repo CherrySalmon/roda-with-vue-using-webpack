@@ -8,27 +8,21 @@
         <el-form-item label="Name">
           <el-input v-model="localCourseForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="Semester">
-          <el-input v-model="localCourseForm.semester"></el-input>
-        </el-form-item>
         <el-form-item label="Start Time">
           <el-date-picker
-            v-model="localCourseForm.start_time"
+            v-model="localCourseForm.start_at"
             type="datetime"
-            placeholder="Select start time">
+            placeholder="Select start time"
+            time-format="HH:mm">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="Duration (hours)">
-          <el-input-number v-model="localCourseForm.duration" :min="1"></el-input-number>
-        </el-form-item>
-        <el-form-item label="Repeat">
-          <el-select v-model="localCourseForm.repeat" placeholder="Select">
-            <el-option label="Do not repeat" value="no-repeat"></el-option>
-            <el-option label="Weekly" value="weekly"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="localCourseForm.repeat !== 'no-repeat'" label="Occurrences">
-          <el-input-number v-model="localCourseForm.occurrence" :min="1" :step="1"></el-input-number>
+        <el-form-item label="End Time">
+          <el-date-picker
+            v-model="localCourseForm.end_at"
+            type="datetime"
+            placeholder="Select start time"
+            time-format="HH:mm">
+          </el-date-picker>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">

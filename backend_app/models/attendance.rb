@@ -8,8 +8,10 @@ module Todo
   class Attendance < Sequel::Model # rubocop:disable Style/Documentation
     plugin :validation_helpers
 
-    many_to_one :course, class: :'Todo::Course'
-    many_to_one :account_course_role, class: :'Todo::AccountCourse', key: :account_course_role_id
+    many_to_many :courses, join_table: :account_course_roles
+    many_to_many :roles, join_table: :account_course_roles
+    many_to_many :accounts, join_table: :account_course_roles
+    many_to_one :event
 
     plugin :timestamps, update_on_create: true
 
@@ -19,33 +21,25 @@ module Todo
     end
 
     def self.list_attendance(account_id, course_id)
-      # Assuming Attendance::account_id actually references account_course_roles.id
-      # First, find the account_course_role_id(s) that match the account_id and course_id
-      account_course_role_ids = AccountCourse.where(account_id:, course_id:).select_map(:id)
+      student_role = Role.first(name: "student")
 
-      # Then, query the attendances using those account_course_role_id(s)
-      attendances = Attendance.where(account_id: account_course_role_ids).all
-      attendances.map(&:values) # or any other way you wish to serialize the data
+      attendances = Attendance.where(account_id:, course_id:, role_id: student_role.id).all
+      attendances.map(&:values)
     end
 
     def self.add_attendance(account_id, course_id, attendance_details)
-      account_course_role_id = find_account_course_role_id(account_id, course_id)
-
-      # result = Attendance.where(account_id: account_course_role_id, course_id: course_id, event_id: attendance_details['event_id']).first
-      # raise 'Attendance already done' if result
-
+      student_role = Role.first(name: "student").id
       # Create the Attendance record
-      attendance = Attendance.create(
-        account_id: account_course_role_id, # This is actually the AccountCourseRole ID
+      attendance = Attendance.find_or_create(
+        account_id: account_id,
+        role_id: student_role,
         course_id: course_id, # Assuming you also directly relate attendances to courses
         event_id: attendance_details['event_id'],
         name: attendance_details['name'],
         latitude: attendance_details['latitude'],
-        longitude: attendance_details['longitude'],
-        created_at: Time.now, # or omit if using automatic timestamps
-        updated_at: Time.now  # or omit if using automatic timestamps
+        longitude: attendance_details['longitude']
       )
-
+      attendance
     rescue StandardError => e
       # Handle error (e.g., AccountCourseRole not found, validation errors)
       { error: "Failed to add attendance: #{e.message}" }

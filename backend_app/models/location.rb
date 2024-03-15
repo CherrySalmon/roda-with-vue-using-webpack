@@ -9,7 +9,10 @@ module Todo
     plugin :validation_helpers
     plugin :timestamps, update_on_create: true
 
-    many_to_one :course, class: :'Todo::Course'
+    # many_to_one :course, class: :'Todo::Course'
+    # one_to_many :events, class: :'Todo::Event', key: :location_id
+    many_to_one :course
+    one_to_many :events
 
     def validate
       super

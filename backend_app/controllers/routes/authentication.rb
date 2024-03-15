@@ -12,14 +12,16 @@ module Todo
           end
           r.post do
             request_body = JSON.parse(r.body.read)
-            user_data = request_body['user_data']
+            access_token = request_body['accessToken']
+            user_info = SSOAuth.fetch_user_info(access_token)
+            user_data = JSON.parse(user_info)
             # Check if the account exists
             account = Account.first(email: user_data['email'])
             if account
               account.update(
                 name: user_data['name'].force_encoding('UTF-8'),
                 avatar: user_data['picture'],
-                sso_token: user_data['sso_token']
+                access_token: user_data['access_token']
               )
               jwt = JWTCredential.generate_jwt(account.attributes[:id], account.attributes[:roles])
               account_data = account.attributes

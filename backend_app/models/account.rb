@@ -5,8 +5,11 @@ require 'sequel'
 
 module Todo
   class Account < Sequel::Model
-    # validation for the model
     plugin :validation_helpers
+    # many_to_many :roles, join_table: :account_roles
+    # one_to_many :account_roles
+    many_to_many :attendances
+    many_to_many :course
     many_to_many :roles, join_table: :account_roles
 
     def validate
@@ -20,13 +23,12 @@ module Todo
       account = Account.create(
         name: user_data[:name],
         email: user_data[:email],
-        sso_token: user_data[:sso_token],
+        access_token: user_data[:access_token],
         avatar: user_data[:avatar]
       )
-      # Find or create roles and associate them with the account
       user_data[:roles].each do |role_name|
-        role = Role.first(name: role_name)
-        account.add_role(role)
+        role = Role.find(name: role_name)
+        account.add_role(role) if role
       end
       account
     end
@@ -36,7 +38,7 @@ module Todo
       self.name = user_data['name'] if user_data['name']
       self.email = user_data['email'] if user_data['email']
       self.avatar = user_data['avatar'] if user_data['avatar']
-      self.sso_token = user_data['sso_token'] if user_data['sso_token']
+      self.access_token = user_data['access_token'] if user_data['access_token']
 
       save_changes
 
@@ -55,7 +57,7 @@ module Todo
         name:,
         email:,
         avatar:,
-        roles: roles.map(&:name)
+        roles: roles.map{|role| role.name}
       }
     end
   end
