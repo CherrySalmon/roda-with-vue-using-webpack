@@ -14,6 +14,8 @@ module Todo
     plugin :all_verbs
     plugin :halt
 
+    use Rack::SslEnforcer, hsts: true
+
     # Register the error_handler plugin
     plugin :error_handler do |e|
       case e
@@ -55,7 +57,7 @@ module Todo
           { success: true, message: 'Welcome to the Todo API' }.to_json
         end
       end
-
+  
       r.root do
         File.read(File.join('dist', 'index.html'))
       end
