@@ -6,6 +6,7 @@ require_relative '../models/account'
 require_relative '../controllers/routes/account'
 require_relative '../controllers/routes/authentication'
 require_relative '../controllers/routes/course'
+require 'rack/ssl-enforcer'
 
 module Todo
   class Api < Roda # rubocop:disable Style/Documentation
@@ -14,7 +15,9 @@ module Todo
     plugin :all_verbs
     plugin :halt
 
-    use Rack::SslEnforcer, hsts: true
+    if ENV['RACK_ENV'] == 'production'
+      use Rack::SslEnforcer, hsts: true
+    end    
 
     # Register the error_handler plugin
     plugin :error_handler do |e|
