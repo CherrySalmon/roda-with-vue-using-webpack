@@ -32,8 +32,8 @@ module Todo
         course_id: course_id,
         name: event_details['name'],
         location_id: event_details['location_id'],
-        start_at: event_details['start_time'],
-        end_at: event_details['end_time'],
+        start_at: event_details['start_at'],
+        end_at: event_details['end_at'],
       )
 
       # Return the created event record details

@@ -123,7 +123,7 @@ export default {
       createAttendanceEventForm: {
         name: '',
         location_id: '',
-        atart_at: '',
+        start_at: '',
         end_at: '',
       },
       attendanceEvents: [],
@@ -301,6 +301,7 @@ export default {
       });
     },
     createAttendanceEvent(eventForm) {
+      console.log(eventForm)
       axios.post(`/api/course/${this.course.id}/event`, eventForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
@@ -308,7 +309,7 @@ export default {
       }).then(() => {
         this.showCreateAttendanceEventDialog = false
         this.createAttendanceEventForm = {}
-        this.fetchAttendanceEvents(); // Refresh the list after adding
+        this.fetchAttendanceEvents() // Refresh the list after adding
       }).catch(error => {
         console.error('Error creating attendance event:', error);
       });
