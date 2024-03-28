@@ -56,7 +56,7 @@
     <div class="course-container">
       <template v-for="course in courses" :key="course.id">
         <el-card class="course-item" shadow="hover">
-          <div @click="changeRoute('/course/' + course.id)">
+          <div @click="changeRoute('/course/' + course.id + '/attendance')">
             <img :src="course.icon" class="image" />
             <div style="padding: 14px">
               <h3>{{ course.name }}</h3>

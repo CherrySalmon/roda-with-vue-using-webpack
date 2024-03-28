@@ -65,7 +65,7 @@ module Todo
         File.read(File.join('dist', 'index.html'))
       end
 
-      r.get [String, true], [String, true], [true] do |_parsed_request|
+      r.get [String, true], [String, true], [String, true], [true] do |_parsed_request|
         File.read(File.join('dist', 'index.html'))
       end
     end

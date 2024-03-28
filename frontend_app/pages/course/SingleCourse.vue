@@ -3,39 +3,31 @@
     <div class="page-title">{{ course.name }}</div>
     <el-row>
       <el-col :xs="24" :md="18">
-        <el-tabs :tab-position="tabStyle" style="height: 100%; text-align: left;" @tab-change="changeTab" v-model="activeTab">
           <div v-if="currentRole">
-            <div
+            <div class="course-content-container"
               v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
-              <el-tab-pane label="Attendance Events" name="events">
-                <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
-                <AttendanceEventCard :attendance-events="attendanceEvents" :locations="locations" @edit-event="editAttendanceEvent"
-                  @delete-event="deleteAttendanceEvent">
-                </AttendanceEventCard>
-              </el-tab-pane>
-              <el-tab-pane label="Locations" name="locations">
-                <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-                <div v-if="isGetCurrentLocation">
-                  <LocationCard :locations="locations" :currentLocationData="currentLocationData" @create-location="createNewLocation"
-                    @delete-location="deleteLocation"></LocationCard>
-                </div>
-              </el-tab-pane>
-              <el-tab-pane label="People" name="people">
-                <h3 style="margin: 30px 20px 10px 20px;">People</h3>
-                <ManagePeopleCard :enrollments="enrollments" @new-enrolls="addEnrollments"
-                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments"
-                  :currentRole="currentRole">
-                </ManagePeopleCard>
-              </el-tab-pane>
+              <div class="course-menu-bar">
+                <ul class="course-menu">
+                  <li class="tab" :class="$route.path.includes('attendance')?'active':''"><router-link to="attendance">Attendance Events</router-link></li>
+                  <li class="tab" :class="$route.path.includes('location')?'active':''"><router-link to="location">Locations</router-link></li>
+                  <li class="tab" :class="$route.path.includes('people')?'active':''"><router-link to="people">People</router-link></li>
+                </ul>
+              </div>
+              <div class="course-manage-view">
+                <RouterView
+                  :attendance-events="attendanceEvents" :locations="locations" @create-event="showCreateAttendanceEventDialog = true" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
+                  :currentLocationData="currentLocationData" @create-location="createNewLocation" @delete-location="deleteLocation"
+                  :enrollments="enrollments" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments" :currentRole="currentRole"
+                >
+                </RouterView>
+              </div>
             </div>
           </div>
-        </el-tabs>
       </el-col>
 
       <el-col :xs="24" :md="6">
         <div v-if="currentRole">
           <div v-if="currentRole != 'student'">
-            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
             <CourseInfoCard :course="course" :currentRole="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
             </CourseInfoCard>
             <div class="selecor-role-container">
@@ -83,7 +75,6 @@
         </div>
       </div>
     </div>
-    <!-- Modify Course Dialog -->
     <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
 
@@ -449,8 +440,87 @@ export default {
 
 <style>
 .single-course-container {
-  width: 100%;
+  max-width: 1680px;
+  margin: auto;
+  width: 95%;
   padding: 15px 30px;
+}
+/* share class for children cand*/
+.course-content-title {
+  font-size: 1.5rem;
+  text-align: left;
+  padding: 0px 20px;
+  width: 100%;
+}
+.course-card-container {
+  margin: 20px 20px;
+}
+@media (max-width: 768px) {
+  .course-card-container {
+    margin: 10px 0;
+  }
+}
+/* end of common class */
+.course-content-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+.course-manage-view {
+  width: 80%;
+}
+.course-menu-bar {
+  width: 20%;
+}
+.course-menu {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.course-menu .tab a {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin: 5px 0;
+  padding: 10px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #EAA034;
+  background-color: #fff;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  width: 90%;
+}
+
+.course-menu .tab a:hover {
+  background-color: #EAA034;
+  color: #fff;
+}
+
+.active a {
+  background-color: #EAA034 !important;
+  color: #fff !important;
+}
+
+@media (max-width: 768px) {
+  .course-manage-view {
+    width: 100%;
+  }
+  .course-menu-bar {
+    width: 100%;
+  }
+  .course-menu .tab {
+    flex-basis: 100%;
+    margin-bottom: 5px;
+    width: 100%;
+  }
+  .course-menu .tab a {
+    width: 100%;
+  }
+  .single-course-container {
+    width: 100%;
+    padding: 0px;
+  }
 }
 
 .event-item {

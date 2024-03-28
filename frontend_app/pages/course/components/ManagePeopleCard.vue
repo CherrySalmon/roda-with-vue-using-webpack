@@ -1,5 +1,6 @@
 <template>
-  <div class="people-card-container">
+  <div class="course-card-container">
+    <div class="course-content-title">People</div>
     <h1 class="people-title">Add new student</h1>
     <div class="input-email-container">
       <div style="height: 100px">
@@ -66,15 +67,13 @@
   
 <script>
 export default {
-  emits: ['dialog-closed', 'new-enrolls', 'update-enrollment', 'delete-enrollment'],
+  emits: ['create-event', 'edit-event', 'delete-event', 'create-location', 'delete-location', 'new-enrolls', 'update-enrollment', 'delete-enrollment'],
   props: {
-    enrollments: {
-      type: Object,
-      default: () => ({})
-    },
-    currentRole: {
-      type: String
-    }
+    attendanceEvents: Object,
+    locations: Array,
+    currentLocationData: Object,
+    enrollments: Object, 
+    currentRole: String
   },
   data() {
     return {
@@ -148,9 +147,6 @@ export default {
 </script>
 
 <style>
-.people-card-container {
-  margin: 20px 40px;
-}
 
 .input-email-container {
   text-align: left;

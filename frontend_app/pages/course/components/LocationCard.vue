@@ -1,5 +1,6 @@
 <template>
-    <div style="margin: 20px 40px;">
+    <div class="course-card-container">
+        <div class="course-content-title">Location</div>
         <div v-for="location in locations" :key="location.value" class="location-item">
             {{ location.value }}: {{ location.label }}
             <el-icon :size="14" @click.stop="$emit('delete-location', location.value)" class="location-icon">
@@ -26,13 +27,13 @@
   
 <script>
 export default {
-    emits: ['create-location', 'delete-location'],
+    emits: ['create-event', 'edit-event', 'delete-event', 'create-location', 'delete-location', 'new-enrolls', 'update-enrollment', 'delete-enrollment'],
     props: {
-        locations: Array,
-        currentLocationData:{
-            type: Object,
-            default: () => ({})
-        }
+      attendanceEvents: Object,
+      locations: Array,
+      currentLocationData: Object,
+      enrollments: Object, 
+      currentRole: String
     },
     name: 'GoogleMapComponent',
 
