@@ -174,7 +174,7 @@ module Todo
                   # PUT api/course/:course_id/location/:id
                   r.put do
                     request_body = JSON.parse(r.body.read)
-                    LocationService.update(requestor, location_id, request_body)
+                    LocationService.update(requestor, course_id, location_id, request_body)
                     response.status = 200
                     { success: true, message: 'Location updated'}.to_json
                   rescue LocationService::LocationNotFoundError => e

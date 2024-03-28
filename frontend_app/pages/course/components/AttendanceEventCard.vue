@@ -26,11 +26,10 @@
   
 <script>
   export default {
-    emits: ['create-event', 'edit-event', 'delete-event', 'create-location', 'delete-location', 'new-enrolls', 'update-enrollment', 'delete-enrollment'],
+    emits: ['create-event', 'edit-event', 'delete-event', 'create-location', 'update-location', 'delete-location', 'new-enrolls', 'update-enrollment', 'delete-enrollment'],
     props: {
       attendanceEvents: Object,
       locations: Array,
-      currentLocationData: Object,
       enrollments: Object, 
       currentRole: String
     },

@@ -16,7 +16,7 @@
               <div class="course-manage-view">
                 <RouterView
                   :attendance-events="attendanceEvents" :locations="locations" @create-event="showCreateAttendanceEventDialog = true" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
-                  :currentLocationData="currentLocationData" @create-location="createNewLocation" @delete-location="deleteLocation"
+                  @create-location="createNewLocation" @update-location="updateLocation" @delete-location="deleteLocation"
                   :enrollments="enrollments" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments" :currentRole="currentRole"
                 >
                 </RouterView>
@@ -119,7 +119,6 @@ export default {
       },
       attendanceEvents: [],
       locations: [],
-      currentLocationData: {},
       optionLocation: '',
       account: {
         roles: [],
@@ -132,7 +131,6 @@ export default {
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
-      isGetCurrentLocation: false,
       enrollments: [],
       currentEventID: '',
       activeTab: 'events'
@@ -158,7 +156,6 @@ export default {
       if(newRole == 'owner' || newRole == 'instructor' || newRole == 'staff') {
         this.fetchAttendanceEvents(this.course.id);
         this.fetchLocations();
-        this.getCurrentLocation();
         this.fetchEnrollments();
       }
     }
@@ -322,13 +319,7 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
-        this.locations = response.data.data.map(location => {
-          return {
-            value: location.id,
-            label: location.name
-          }
-        });
-
+        this.locations = response.data.data
       }).catch(error => {
         console.error('Error fetching locations:', error);
       });
@@ -341,12 +332,41 @@ export default {
         }
       })
         .then(response => {
-          alert('Location created successfully', response);
+          // alert('Location created successfully', response);
+          ElMessage({
+            type: 'success',
+            message: 'Location created successfully'
+          })
           this.fetchLocations();
         })
         .catch(error => {
           console.error('Error creating location', error);
-          alert('Error creating location');
+          ElMessage({
+            type: 'error',
+            message: 'Error creating location'
+          })
+        });
+    },
+    updateLocation(id, locationData) {
+      let courseId = this.$route.params.id;
+      axios.put(`/api/course/${courseId}/location/${id}`, locationData, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        }
+      })
+        .then(response => {
+          ElMessage({
+            type: 'success',
+            message: 'Location updated successfully'
+          })
+          this.fetchLocations();
+        })
+        .catch(error => {
+          console.error('Error updating location', error);
+          ElMessage({
+            type: 'error',
+            message: error,
+          })
         });
     },
     deleteLocation(locationId) {
@@ -359,27 +379,12 @@ export default {
         // Refresh the locations list
         this.fetchLocations();
       }).catch(error => {
-        console.error('Error deleting location:', error);
+        console.error('Error deleting location:', error.message);
+        ElMessage({
+            type: 'error',
+            message: error,
+          })
       });
-    },
-    getCurrentLocation() {
-            // Check if Geolocation is supported
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const { latitude, longitude } = position.coords
-                    this.currentLocationData = {
-                        latitude: latitude,
-                        longitude: longitude
-                    };
-                    this.isGetCurrentLocation = true;
-                }, (error) => {
-                    // Handle location 
-                    console.error('Error getting location', error);
-                });
-            } else {
-                // Geolocation is not supported by this browser
-                console.error('Geolocation is not supported by this browser.');
-            }
     },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
@@ -457,7 +462,7 @@ export default {
 }
 @media (max-width: 768px) {
   .course-card-container {
-    margin: 10px 0;
+    margin: 10px 0 !important;
   }
 }
 /* end of common class */
