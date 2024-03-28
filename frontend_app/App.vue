@@ -4,24 +4,27 @@
       <template v-if="account">
         <template v-if="account.roles.includes('admin')">
           <div class="app-meun-bar">
-            <el-menu
-              default-active="/course"
-              class="el-menu-vertical"
-              :collapse="isCollapse"
-              @select="handleSelect"
-              background-color="#545c64"
-              text-color="#fff"
-              active-text-color="#ffd04b"
-            >
-              <el-menu-item @click="isCollapse = !isCollapse">
-                <el-icon><component :is="isCollapse?'Expand':'Fold'" /></el-icon>
-                <template #title>{{ isCollapse?'Expand Menu':'Collapse Menu' }}</template>
-              </el-menu-item>
-              <el-menu-item v-for="item in menuItems" :key="item.index" :index="item.index">
-                <el-icon><component :is="item.icon" /></el-icon>
-                <template #title>{{ item.title }}</template>
-              </el-menu-item>
-            </el-menu>
+            <el-aside class="aside-container" :width="isCollapse?'60px':'300px'">
+              <el-menu
+                default-active="/course"
+                class="el-menu-vertical"
+                :collapse="isCollapse"
+                @select="handleSelect"
+                background-color="#545c64"
+                text-color="#fff"
+                active-text-color="#ffd04b"
+                style="position: fixed;"
+              >
+                <el-menu-item @click="isCollapse = !isCollapse">
+                  <el-icon><component :is="isCollapse?'Expand':'Fold'" /></el-icon>
+                  <template #title>{{ isCollapse?'Expand Menu':'Collapse Menu' }}</template>
+                </el-menu-item>
+                <el-menu-item v-for="item in menuItems" :key="item.index" :index="item.index">
+                  <el-icon><component :is="item.icon" /></el-icon>
+                  <template #title>{{ item.title }}</template>
+                </el-menu-item>
+              </el-menu>
+            </el-aside>
           </div>
         </template>
       </template>
@@ -158,10 +161,11 @@ export default {
 }
 
 .app-meun-bar {
-  position: relative;
+  display: block;
 }
 .el-menu-vertical {
   height: 100vh;
+  width: 300px;
 }
 .el-table--fit  {
   border-radius: 6px; -moz-border-radius: 6px; -webkit-border-radius: 6px;

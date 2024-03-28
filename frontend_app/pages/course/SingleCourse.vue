@@ -75,14 +75,14 @@
         </div>
       </div>
     </div>
-    <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
+    <ModifyCourseDialog class="dialog-container" :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
 
-    <CreateAttendanceEventDialog :visible="showCreateAttendanceEventDialog" :locations="locations"
+    <CreateAttendanceEventDialog class="dialog-container" :visible="showCreateAttendanceEventDialog" :locations="locations"
       @dialog-closed="showCreateAttendanceEventDialog = false" @create-event="createAttendanceEvent">
     </CreateAttendanceEventDialog>
 
-    <ModifyAttendanceEventDialog :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
+    <ModifyAttendanceEventDialog class="dialog-container" :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
       :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
       @update-event="updateAttendanceEvent">
     </ModifyAttendanceEventDialog>
@@ -489,22 +489,20 @@ export default {
   margin: 5px 0;
   padding: 10px 10px;
   font-size: 1rem;
-  font-weight: 600;
-  color: #EAA034;
-  background-color: #fff;
+  font-weight: 800;
   border-radius: 5px;
+  color: #333;
   transition: background-color 0.3s;
   width: 90%;
 }
 
 .course-menu .tab a:hover {
-  background-color: #EAA034;
-  color: #fff;
+  color: #EAA034;
+  background-color: #ebebeb;
 }
 
 .active a {
-  background-color: #EAA034 !important;
-  color: #fff !important;
+  color: #EAA034 !important;
 }
 
 @media (max-width: 768px) {
@@ -567,5 +565,13 @@ export default {
   display: flex;
   line-height: 40px;
 }
+
+.dialog-container {
+  width: 600px !important;
+}
+@media (max-width: 768px) {
+  .dialog-container {
+      width: 100% !important;
+  }
+}
 </style>
-``
