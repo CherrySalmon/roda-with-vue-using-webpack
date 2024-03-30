@@ -4,7 +4,7 @@ require 'sequel'
 
 Sequel.migration do
     change do
-      create_table(:courses) do
+      create_table?(:courses) do
         primary_key :id
         foreign_key :role_id, :roles
         foreign_key :account_id, :accounts

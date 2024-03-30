@@ -5,7 +5,7 @@ require 'sequel'
 Sequel.migration do
   change do
     # Create locations table
-    create_table(:locations) do
+    create_table?(:locations) do
       primary_key :id
       foreign_key :course_id, :courses, on_delete: :cascade
 

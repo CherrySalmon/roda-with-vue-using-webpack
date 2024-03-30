@@ -26,6 +26,45 @@ module Todo
           end
 
           r.on String do |course_id|
+            r.on 'assignment' do
+              r.on Integer do |assignment_id|
+                # GET /api/course/:course_id/assignment/:assignment_id
+                r.get do
+                  assignment = AssignmentService.find(requestor, course_id, assignment_id)
+                  response.status = assignment ? 200 : 404
+                  assignment ? { success: true, assignment: assignment }.to_json : { error: 'Assignment not found' }.to_json
+                end
+                
+                # PUT /api/course/:course_id/assignment/:assignment_id
+                r.put do
+                  assignment_data = JSON.parse(r.body.read)
+                  updated_assignment = AssignmentService.update(requestor, course_id, assignment_id, assignment_data)
+                  response.status = updated_assignment ? 200 : 404
+                  updated_assignment ? { success: true, assignment: updated_assignment }.to_json : { error: 'Assignment not found' }.to_json
+                end
+                
+                # DELETE /api/course/:course_id/assignment/:assignment_id
+                r.delete do
+                  deleted = AssignmentService.delete(requestor, course_id, assignment_id)
+                  response.status = deleted ? 200 : 404
+                  deleted ? { success: true, message: 'Assignment deleted' }.to_json : { error: 'Assignment not found' }.to_json
+                end
+              end
+              # GET /api/course/:course_id/assignment
+              r.get do
+                assignments = AssignmentService.list(requestor, course_id)
+                response.status = 200
+                { success: true, assignments: assignments }.to_json
+              end
+
+              # POST /api/course/:course_id/assignment
+              r.post do
+                assignment_data = JSON.parse(r.body.read)
+                assignment = AssignmentService.create(requestor, course_id, assignment_data)
+                response.status = 201
+                { success: true, assignment: assignment }.to_json
+              end
+            end
 
             r.on 'enroll' do
               r.on String do |account_id|
