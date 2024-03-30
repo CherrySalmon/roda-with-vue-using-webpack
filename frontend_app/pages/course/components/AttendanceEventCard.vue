@@ -14,7 +14,7 @@
         <el-icon :size="18" @click="$emit('edit-event', event.id)">
           <Edit />
         </el-icon>
-        <span style="margin-left: 10px;"></span> <!-- Add space between icons -->
+        <span style="margin-left: 10px;"></span>
         <el-icon :size="18" @click.stop="$emit('delete-event', event.id)">
           <Delete />
         </el-icon>
@@ -41,8 +41,8 @@
     },
     methods: {
       getEventLocationName(locationId) {
-          const location = this.locations.find(loc => loc.value === locationId);
-          return location ? location.label : 'Unknown Location'; // Provide a fallback name
+          const location = this.locations.find(loc => loc.id === locationId);
+          return location ? location.name : 'Unknown Location'; // Provide a fallback name
       }
     }
 }
