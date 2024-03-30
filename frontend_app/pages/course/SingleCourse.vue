@@ -3,39 +3,31 @@
     <div class="page-title">{{ course.name }}</div>
     <el-row>
       <el-col :xs="24" :md="18">
-        <el-tabs :tab-position="tabStyle" style="height: 100%; text-align: left;" @tab-change="changeTab" v-model="activeTab">
           <div v-if="currentRole">
-            <div
+            <div class="course-content-container"
               v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
-              <el-tab-pane label="Attendance Events" name="events">
-                <h3 style="margin: 30px 20px 10px 20px;">Attendance Events</h3>
-                <AttendanceEventCard :attendance-events="attendanceEvents" :locations="locations" @edit-event="editAttendanceEvent"
-                  @delete-event="deleteAttendanceEvent">
-                </AttendanceEventCard>
-              </el-tab-pane>
-              <el-tab-pane label="Locations" name="locations">
-                <h3 style="margin: 30px 20px 10px 20px;">Locations</h3>
-                <div v-if="isGetCurrentLocation">
-                  <LocationCard :locations="locations" :currentLocationData="currentLocationData" @create-location="createNewLocation"
-                    @delete-location="deleteLocation"></LocationCard>
-                </div>
-              </el-tab-pane>
-              <el-tab-pane label="People" name="people">
-                <h3 style="margin: 30px 20px 10px 20px;">People</h3>
-                <ManagePeopleCard :enrollments="enrollments" @new-enrolls="addEnrollments"
-                  @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments"
-                  :currentRole="currentRole">
-                </ManagePeopleCard>
-              </el-tab-pane>
+              <div class="course-menu-bar">
+                <ul class="course-menu">
+                  <li class="tab" :class="$route.path.includes('attendance')?'active':''"><router-link to="attendance">Attendance Events</router-link></li>
+                  <li class="tab" :class="$route.path.includes('location')?'active':''"><router-link to="location">Locations</router-link></li>
+                  <li class="tab" :class="$route.path.includes('people')?'active':''"><router-link to="people">People</router-link></li>
+                </ul>
+              </div>
+              <div class="course-manage-view">
+                <RouterView
+                  :attendance-events="attendanceEvents" :locations="locations" @create-event="showCreateAttendanceEventDialog = true" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
+                  @create-location="createNewLocation" @update-location="updateLocation" @delete-location="deleteLocation"
+                  :enrollments="enrollments" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments" :currentRole="currentRole"
+                >
+                </RouterView>
+              </div>
             </div>
           </div>
-        </el-tabs>
       </el-col>
 
       <el-col :xs="24" :md="6">
         <div v-if="currentRole">
           <div v-if="currentRole != 'student'">
-            <el-button type="primary" @click="showCreateAttendanceEventDialog = true">Create Event</el-button>
             <CourseInfoCard :course="course" :currentRole="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
             </CourseInfoCard>
             <div class="selecor-role-container">
@@ -61,7 +53,7 @@
     </el-row>
     <div v-if="currentRole">
       <div class="center-content" v-if="currentRole =='student'">
-        <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button>
+        <!-- <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button> -->
         <CourseInfoCard :course="course" :role="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
         </CourseInfoCard>
         <div class="selecor-role-container">
@@ -83,15 +75,14 @@
         </div>
       </div>
     </div>
-    <!-- Modify Course Dialog -->
-    <ModifyCourseDialog :courseForm="courseForm" :visible="showModifyCourseDialog"
+    <ModifyCourseDialog class="dialog-container" :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
 
-    <CreateAttendanceEventDialog :visible="showCreateAttendanceEventDialog" :locations="locations"
+    <CreateAttendanceEventDialog class="dialog-container" :visible="showCreateAttendanceEventDialog" :locations="locations"
       @dialog-closed="showCreateAttendanceEventDialog = false" @create-event="createAttendanceEvent">
     </CreateAttendanceEventDialog>
 
-    <ModifyAttendanceEventDialog :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
+    <ModifyAttendanceEventDialog class="dialog-container" :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
       :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
       @update-event="updateAttendanceEvent">
     </ModifyAttendanceEventDialog>
@@ -128,7 +119,6 @@ export default {
       },
       attendanceEvents: [],
       locations: [],
-      currentLocationData: {},
       optionLocation: '',
       account: {
         roles: [],
@@ -141,7 +131,6 @@ export default {
       showCreateAttendanceEventDialog: false,
       showModifyAttendanceEventDialog: false,
       isAddedValue: false,
-      isGetCurrentLocation: false,
       enrollments: [],
       currentEventID: '',
       activeTab: 'events'
@@ -167,7 +156,6 @@ export default {
       if(newRole == 'owner' || newRole == 'instructor' || newRole == 'staff') {
         this.fetchAttendanceEvents(this.course.id);
         this.fetchLocations();
-        this.getCurrentLocation();
         this.fetchEnrollments();
       }
     }
@@ -331,13 +319,7 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
-        this.locations = response.data.data.map(location => {
-          return {
-            value: location.id,
-            label: location.name
-          }
-        });
-
+        this.locations = response.data.data
       }).catch(error => {
         console.error('Error fetching locations:', error);
       });
@@ -350,12 +332,41 @@ export default {
         }
       })
         .then(response => {
-          alert('Location created successfully', response);
+          // alert('Location created successfully', response);
+          ElMessage({
+            type: 'success',
+            message: 'Location created successfully'
+          })
           this.fetchLocations();
         })
         .catch(error => {
           console.error('Error creating location', error);
-          alert('Error creating location');
+          ElMessage({
+            type: 'error',
+            message: 'Error creating location'
+          })
+        });
+    },
+    updateLocation(id, locationData) {
+      let courseId = this.$route.params.id;
+      axios.put(`/api/course/${courseId}/location/${id}`, locationData, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        }
+      })
+        .then(response => {
+          ElMessage({
+            type: 'success',
+            message: 'Location updated successfully'
+          })
+          this.fetchLocations();
+        })
+        .catch(error => {
+          console.error('Error updating location', error);
+          ElMessage({
+            type: 'error',
+            message: error,
+          })
         });
     },
     deleteLocation(locationId) {
@@ -368,27 +379,12 @@ export default {
         // Refresh the locations list
         this.fetchLocations();
       }).catch(error => {
-        console.error('Error deleting location:', error);
+        console.error('Error deleting location:', error.message);
+        ElMessage({
+            type: 'error',
+            message: error,
+          })
       });
-    },
-    getCurrentLocation() {
-            // Check if Geolocation is supported
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const { latitude, longitude } = position.coords
-                    this.currentLocationData = {
-                        latitude: latitude,
-                        longitude: longitude
-                    };
-                    this.isGetCurrentLocation = true;
-                }, (error) => {
-                    // Handle location 
-                    console.error('Error getting location', error);
-                });
-            } else {
-                // Geolocation is not supported by this browser
-                console.error('Geolocation is not supported by this browser.');
-            }
     },
     deleteAttendanceEvent(eventId) {
       axios.delete(`/api/course/${this.course.id}/event/${eventId}`, {
@@ -449,8 +445,85 @@ export default {
 
 <style>
 .single-course-container {
-  width: 100%;
+  max-width: 1680px;
+  margin: auto;
+  width: 95%;
   padding: 15px 30px;
+}
+/* share class for children cand*/
+.course-content-title {
+  font-size: 1.5rem;
+  text-align: left;
+  padding: 0px 20px;
+  width: 100%;
+}
+.course-card-container {
+  margin: 20px 20px;
+}
+@media (max-width: 768px) {
+  .course-card-container {
+    margin: 10px 0 !important;
+  }
+}
+/* end of common class */
+.course-content-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+.course-manage-view {
+  width: 80%;
+}
+.course-menu-bar {
+  width: 20%;
+}
+.course-menu {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.course-menu .tab a {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  margin: 5px 0;
+  padding: 10px 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 5px;
+  color: #333;
+  transition: background-color 0.3s;
+  width: 90%;
+}
+
+.course-menu .tab a:hover {
+  color: #EAA034;
+  background-color: #ebebeb;
+}
+
+.active a {
+  color: #EAA034 !important;
+}
+
+@media (max-width: 768px) {
+  .course-manage-view {
+    width: 100%;
+  }
+  .course-menu-bar {
+    width: 100%;
+  }
+  .course-menu .tab {
+    flex-basis: 100%;
+    margin-bottom: 5px;
+    width: 100%;
+  }
+  .course-menu .tab a {
+    width: 100%;
+  }
+  .single-course-container {
+    width: 100%;
+    padding: 0px;
+  }
 }
 
 .event-item {
@@ -492,5 +565,13 @@ export default {
   display: flex;
   line-height: 40px;
 }
+
+.dialog-container {
+  width: 600px !important;
+}
+@media (max-width: 768px) {
+  .dialog-container {
+      width: 100% !important;
+  }
+}
 </style>
-``

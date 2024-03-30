@@ -8,9 +8,6 @@ module Todo
   class Event < Sequel::Model # rubocop:disable Style/Documentation
     plugin :validation_helpers
 
-    # many_to_one :course, class: :'Todo::Course'
-    # many_to_one :location, class: :'Todo::Location'
-    # one_to_many :attendances, class: :'Todo::Attendance', key: :event_id
     many_to_one :course
     many_to_one :location
     one_to_many :attendances
