@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="login-container">Login</div>
-    <div class="login-btn" @click="handleGoogleAccessTokenLogin">
+    <div class="login-btn" @click="initiateServerSideAuth">
       <img class="login-icon-img" src="../static/google_icon.png" width="50" height="50"/>
       <div class="login-icon-text">Sign in with Google</div>
     </div>
@@ -20,7 +20,44 @@ export default {
     return {
     };
   },
+  created() {
+    this.handleQueryParameters();
+  },
   methods: {
+    initiateServerSideAuth() {
+      // Redirect user to your server-side endpoint that starts the OAuth flow
+      window.location.href = '/api/auth/google_login';
+    },
+    handleQueryParameters() {
+      const query = this.$route.query;
+      console.log(query); // Logs the query parameters to the console for debugging
+
+      // Handling the token parameter for authentication
+      if (query.token) {
+        this.storeToken(query.token);
+        // Redirect to the path specified by the redirect parameter, or to a default path
+        const path = query.redirect ? query.redirect : '/dashboard';
+        this.$router.push(path);
+      } 
+      // Handling error scenarios
+      else if (query.error) {
+        ElNotification({
+          title: 'Login Error',
+          message: this.parseErrorMessage(query.error),
+          type: 'error',
+        });
+      }
+      // Handling redirect without a token or error
+      else if (query.redirect && query.redirect !== '/') {
+        this.$router.push(query.redirect);
+      }
+    },
+
+    storeToken(token) {
+      // Store the token securely
+      Cookies.set('auth_token', token, { expires: 7 }); // Adjust as per your security requirements
+    },
+    
     async fetchLoginToken(accessToken) {
       try {
         const { status, data } = await axios.post('/api/auth/verify_google_token', { accessToken: accessToken });
