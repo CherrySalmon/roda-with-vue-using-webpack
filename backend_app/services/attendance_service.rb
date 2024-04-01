@@ -9,6 +9,15 @@ module Todo
     class ForbiddenError < StandardError; end
     class AttendanceNotFoundError < StandardError; end
 
+    # Lists all attendances, if authorized
+    def self.list_all(requestor, course_id)
+      course = find_course(course_id)
+      verify_policy(requestor, :view, course)
+      attendances = Attendance.where(course_id: course_id).all.map(&:attributes)
+
+      attendances || raise(ForbiddenError, 'You have no access to list locations.')
+    end
+
     # Lists joined course's attendance, if authorized
     def self.list(requestor, course_id)
       course = find_course(course_id)
