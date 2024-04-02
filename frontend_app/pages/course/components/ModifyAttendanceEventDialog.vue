@@ -50,7 +50,7 @@
     },
     mounted() {
       this.createAttendanceEventForm = this.eventForm
-      this.createAttendanceEventForm.start_at = new Date(this.createAttendanceEventForm.start_at)
+      this.createAttendanceEventForm.start_at = this.convertDateToLong(this.createAttendanceEventForm.start_at)
       this.createAttendanceEventForm.end_at = new Date(this.createAttendanceEventForm.end_at)
       this.showCreateAttendanceEventDialog =  this.visible
     },
@@ -59,6 +59,11 @@
           this.showCreateAttendanceEventDialog = false
           this.$emit('dialog-closed')
       },
+      convertDateToLong(dateString) {
+          // Convert the dateString to a format that the Date constructor can parse
+          const date = new Date(dateString);
+          return date.getTime();
+      }
   }
 }
 </script>
