@@ -144,7 +144,7 @@ export default {
 <style lang="css">
 @import url('https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 #app {
-  font-family: "Asap", 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
+  font-family: Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -200,9 +200,11 @@ export default {
     display: none;
   }
   .menu-mobile-btn {
+    word-break: break-word;
     display: block;
   }
   .avatar-mobile-name {
+    word-break: break-word;
     display: block;
     text-align: center;
     color: #afafaf !important;
@@ -221,7 +223,7 @@ export default {
 }
 
 .icon-text {
-  font-family: "Noto Sans", sans-serif;
+  font-family: Inter, 'Helvetica Neue', Helvetica, 'PingFang SC','Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial, sans-serif;
   font-size: 2.5rem;
   font-weight: 900;
   line-height: 80px;
