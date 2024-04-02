@@ -370,7 +370,7 @@ export default {
         },
       }).then(() => {
         this.showCreateCourseDialog = false;
-        this.fetchCourses(); // Refresh the list after adding
+        this.fetchCourses();
       }).catch(error => {
         console.error('Error creating course:', error);
       });
@@ -378,7 +378,8 @@ export default {
   },
 };
 </script>
-  
+
+
 <style scoped>
 p {
   margin-top: 12px;
