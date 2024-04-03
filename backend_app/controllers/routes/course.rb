@@ -82,6 +82,28 @@ module Todo
             end
 
             r.on 'attendance' do
+              r.on 'list_all' do
+                # GET api/course/:course_id/attendance/list_all
+                r.get do
+                  attendances = AttendanceService.list_all(requestor, course_id)
+                  response.status = 200
+                  { success: true, data: attendances }.to_json
+                rescue AttendanceService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+              end
+              r.on String do |event_id|
+                # GET api/course/:course_id/attendance/:event_id
+                r.get do
+                  attendances = AttendanceService.list_by_event(requestor, course_id, event_id)
+                  response.status = 200
+                  { success: true, data: attendances }.to_json
+                rescue AttendanceService::ForbiddenError => e
+                  response.status = 403
+                  { error: 'Forbidden', details: e.message }.to_json
+                end
+              end
               # GET api/course/:course_id/attendance
               r.get do
                 attendances = AttendanceService.list(requestor, course_id)
