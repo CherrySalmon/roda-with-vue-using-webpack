@@ -15,7 +15,8 @@
               </div>
               <div class="course-manage-view">
                 <RouterView
-                  :attendance-events="attendanceEvents" :locations="locations" @create-event="showCreateAttendanceEventDialog = true" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
+                  :course="course"
+                  :attendance-events="attendanceEvents" :locations="locations" @create-event="showAttendanceEvent" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
                   @create-location="createNewLocation" @update-location="updateLocation" @delete-location="deleteLocation"
                   :enrollments="enrollments" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments" :currentRole="currentRole"
                 >
@@ -289,7 +290,6 @@ export default {
       });
     },
     createAttendanceEvent(eventForm) {
-      console.log(eventForm)
       axios.post(`/api/course/${this.course.id}/event`, eventForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
@@ -399,12 +399,21 @@ export default {
         console.error('Error deleting attendance event:', error);
       });
     },
+    showAttendanceEvent() {
+      this.createAttendanceEventForm = {}
+      this.showCreateAttendanceEventDialog = true
+    },
     editAttendanceEvent(eventId) {
       const event = this.attendanceEvents.find(e => e.id === eventId);
       if (event) {
-        // Assuming `event` is already a reactive object, you might directly assign it
-        // Or use a spread operator for a shallow copy if modifications should not reflect back immediately
-        this.attendanceEventForm = { ...event };
+        // this.attendanceEventForm = {...event}
+        this.attendanceEventForm = {
+          "course_id": this.course.id,
+          "location_id": event.location_id,
+          "name": event.name,
+          "start_at": event.start_at,
+          "end_at": event.end_at
+        };
         delete this.attendanceEventForm.id;
         this.showModifyAttendanceEventDialog = true;
         this.createAttendanceEventForm = this.attendanceEventForm;
