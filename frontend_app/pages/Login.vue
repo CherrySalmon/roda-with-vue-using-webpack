@@ -68,7 +68,6 @@ export default {
 <style scoped>
 p {
   margin-top: 12px;
-  word-break: break-all;
 }
 
 .login-container {

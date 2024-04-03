@@ -2,7 +2,7 @@
   <div>
     <div style="margin: 40px">
       <h2>Welcome Back, {{account.name}}!</h2>
-      <p>We're thrilled to have you back! As {{ account.roles.join(' & ') }}, you have access to features including {{ getFeatures(account.roles) }}.</p>
+      <p>You have access to {{ getFeatures(account.roles) }}!</p>
     </div>
     <div v-if="events.length > 0">
       <div class="page-title">Events</div>
@@ -62,9 +62,14 @@
               <h3>{{ course.name }}</h3>
             </div>
           </div>
-          <div v-if="account.roles.includes('creator')" class="course-option-container" @click="deleteCourse(course.id)">
-            <el-icon><Delete /></el-icon>
-          </div>
+          <el-popconfirm v-if="account.roles.includes('creator')" title="Are you sure to delete this?" @confirm="deleteCourse(course.id)">
+            <template #reference>
+              <div class="course-option-container">
+                <el-icon><Delete /></el-icon>
+              </div><el-button>Delete</el-button>
+            </template>
+          </el-popconfirm>
+          
         </el-card>
       </template>
     </div>
@@ -365,7 +370,7 @@ export default {
         },
       }).then(() => {
         this.showCreateCourseDialog = false;
-        this.fetchCourses(); // Refresh the list after adding
+        this.fetchCourses();
       }).catch(error => {
         console.error('Error creating course:', error);
       });
@@ -373,11 +378,11 @@ export default {
   },
 };
 </script>
-  
+
+
 <style scoped>
 p {
   margin-top: 12px;
-  word-break: break-all;
 }
 
 .course-item {

@@ -83,10 +83,12 @@
       @dialog-closed="showCreateAttendanceEventDialog = false" @create-event="createAttendanceEvent">
     </CreateAttendanceEventDialog>
 
-    <ModifyAttendanceEventDialog class="dialog-container" :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
-      :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
-      @update-event="updateAttendanceEvent">
-    </ModifyAttendanceEventDialog>
+    <template v-if="showModifyAttendanceEventDialog">
+      <ModifyAttendanceEventDialog class="dialog-container" :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
+        :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
+        @update-event="updateAttendanceEvent">
+      </ModifyAttendanceEventDialog>
+    </template>
   </div>
 </template>
 
@@ -203,7 +205,10 @@ export default {
       }).then(response => {
         this.course = response.data.data;
         // Copying the course object to courseForm
-        this.courseForm = { ...this.course };
+        let course = {...this.course}
+        course.start_at = new Date(course.start_at)
+        course.end_at = new Date(course.end_at)
+        this.courseForm = course
         this.selectableRoles = this.course.enroll_identity
         this.selectRole = this.selectableRoles[0]
         this.currentRole = this.selectRole
@@ -308,7 +313,8 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
-        this.attendanceEvents = response.data.data;
+        let attendanceEvents = response.data.data;
+        this.attendanceEvents = attendanceEvents
       }).catch(error => {
         console.error('Error fetching attendance events:', error);
       });
