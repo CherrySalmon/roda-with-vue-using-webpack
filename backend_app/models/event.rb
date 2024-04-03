@@ -20,7 +20,7 @@ module Todo
     end
 
     def self.list_event(course_id)
-      events = Event.where(course_id: course_id).all
+      events = Event.where(course_id: course_id).order(:start_at).all
       events.map(&:attributes)
     end
 
