@@ -48,25 +48,18 @@
             },
         }
     },
-    watch: {
-        eventForm: {
-            deep: true,
-            handler(newVal) {
-                this.createAttendanceEventForm = newVal;
-            }
-        },
-        visible: {
-            handler(newVal) {
-                this.showCreateAttendanceEventDialog = newVal
-            }
-        }
+    mounted() {
+      this.createAttendanceEventForm = this.eventForm
+      this.createAttendanceEventForm.start_at = new Date(this.createAttendanceEventForm.start_at)
+      this.createAttendanceEventForm.end_at = new Date(this.createAttendanceEventForm.end_at)
+      this.showCreateAttendanceEventDialog =  this.visible
     },
     methods: {
-        onDialogClose() {
-            this.showCreateAttendanceEventDialog = false
-            this.$emit('dialog-closed')
-        }
-    }
+      onDialogClose() {
+          this.showCreateAttendanceEventDialog = false
+          this.$emit('dialog-closed')
+      },
+  }
 }
 </script>
   

@@ -15,7 +15,8 @@
               </div>
               <div class="course-manage-view">
                 <RouterView
-                  :attendance-events="attendanceEvents" :locations="locations" @create-event="showCreateAttendanceEventDialog = true" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
+                  :course="course"
+                  :attendance-events="attendanceEvents" :locations="locations" @create-event="showAttendanceEvent" @edit-event="editAttendanceEvent" @delete-event="deleteAttendanceEvent"
                   @create-location="createNewLocation" @update-location="updateLocation" @delete-location="deleteLocation"
                   :enrollments="enrollments" @new-enrolls="addEnrollments" @update-enrollment="updateEnrollment" @delete-enrollment="deleteEnrollments" :currentRole="currentRole"
                 >
@@ -82,10 +83,12 @@
       @dialog-closed="showCreateAttendanceEventDialog = false" @create-event="createAttendanceEvent">
     </CreateAttendanceEventDialog>
 
-    <ModifyAttendanceEventDialog class="dialog-container" :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
-      :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
-      @update-event="updateAttendanceEvent">
-    </ModifyAttendanceEventDialog>
+    <template v-if="showModifyAttendanceEventDialog">
+      <ModifyAttendanceEventDialog class="dialog-container" :eventForm="createAttendanceEventForm" :visible="showModifyAttendanceEventDialog"
+        :locations="locations" @dialog-closed="showModifyAttendanceEventDialog = false"
+        @update-event="updateAttendanceEvent">
+      </ModifyAttendanceEventDialog>
+    </template>
   </div>
 </template>
 
@@ -202,7 +205,10 @@ export default {
       }).then(response => {
         this.course = response.data.data;
         // Copying the course object to courseForm
-        this.courseForm = { ...this.course };
+        let course = {...this.course}
+        course.start_at = new Date(course.start_at)
+        course.end_at = new Date(course.end_at)
+        this.courseForm = course
         this.selectableRoles = this.course.enroll_identity
         this.selectRole = this.selectableRoles[0]
         this.currentRole = this.selectRole
@@ -289,7 +295,6 @@ export default {
       });
     },
     createAttendanceEvent(eventForm) {
-      console.log(eventForm)
       axios.post(`/api/course/${this.course.id}/event`, eventForm, {
         headers: {
           Authorization: `Bearer ${this.account.credential}`,
@@ -308,7 +313,8 @@ export default {
           Authorization: `Bearer ${this.account.credential}`,
         },
       }).then(response => {
-        this.attendanceEvents = response.data.data;
+        let attendanceEvents = response.data.data;
+        this.attendanceEvents = attendanceEvents
       }).catch(error => {
         console.error('Error fetching attendance events:', error);
       });
@@ -399,12 +405,21 @@ export default {
         console.error('Error deleting attendance event:', error);
       });
     },
+    showAttendanceEvent() {
+      this.createAttendanceEventForm = {}
+      this.showCreateAttendanceEventDialog = true
+    },
     editAttendanceEvent(eventId) {
       const event = this.attendanceEvents.find(e => e.id === eventId);
       if (event) {
-        // Assuming `event` is already a reactive object, you might directly assign it
-        // Or use a spread operator for a shallow copy if modifications should not reflect back immediately
-        this.attendanceEventForm = { ...event };
+        // this.attendanceEventForm = {...event}
+        this.attendanceEventForm = {
+          "course_id": this.course.id,
+          "location_id": event.location_id,
+          "name": event.name,
+          "start_at": event.start_at,
+          "end_at": event.end_at
+        };
         delete this.attendanceEventForm.id;
         this.showModifyAttendanceEventDialog = true;
         this.createAttendanceEventForm = this.attendanceEventForm;
