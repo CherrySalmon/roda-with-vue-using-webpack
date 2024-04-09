@@ -28,6 +28,42 @@ module Todo
           r.on String do |course_id|
             r.on 'assignment' do
               r.on Integer do |assignment_id|
+                r.on 'submission' do
+                  r.on Integer do |submission_id|
+                    # GET /api/course/:course_id/assignment/:assignment_id/submission/:submission_id
+                    r.get do
+                      submission = SubmissionService.find(requestor, course_id, assignment_id, submission_id)
+                      response.status = submission ? 200 : 404
+                      submission ? { success: true, submission: submission }.to_json : { error: 'Submission not found' }.to_json
+                    end
+                    # PUT /api/course/:course_id/assignment/:assignment_id/submission/:submission_id
+                    r.put do
+                      submission_data = JSON.parse(r.body.read)
+                      updated_submission = SubmissionService.update(requestor, course_id, assignment_id, submission_id, submission_data)
+                      response.status = updated_submission ? 200 : 404
+                      updated_submission ? { success: true, submission: updated_submission }.to_json : { error: 'Submission not found' }.to_json
+                    end
+                    # DELET /api/course/:course_id/assignment/:assignment_id/submission/:submission_id
+                    r.delete do
+                      deleted = SubmissionService.delete(requestor, course_id, assignment_id, submission_id)
+                      response.status = deleted ? 200 : 404
+                      deleted ? { success: true, message: 'Submission deleted' }.to_json : { error: 'Submission not found' }.to_json
+                    end
+                  end
+                  # GET /api/course/:course_id/assignment/:assignment_id/submission
+                  r.get do
+                    submission = SubmissionService.list(requestor, course_id, assignment_id)
+                    response.status = submission ? 200 : 404
+                    submission ? { success: true, submission: submission }.to_json : { error: 'Submission not found' }.to_json
+                  end
+                  # POST /api/course/:course_id/assignment/:assignment_id/submission
+                  r.post do
+                    submission_data = JSON.parse(r.body.read)
+                    new_submission = SubmissionService.create(requestor, course_id, assignment_id, submission_data)
+                    response.status = new_submission ? 201 : 400
+                    new_submission ? { success: true, submission: new_submission }.to_json : { error: 'Failed to create submission' }.to_json
+                  end
+                end
                 # GET /api/course/:course_id/assignment/:assignment_id
                 r.get do
                   assignment = AssignmentService.find(requestor, course_id, assignment_id)
