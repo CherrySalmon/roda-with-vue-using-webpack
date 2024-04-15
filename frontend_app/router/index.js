@@ -8,6 +8,7 @@ import ManageCourse from '../pages/ManageCourse.vue';
 import PageNotFound from '../pages/404.vue'
 import AttendanceTrack from '../pages/course/AttendanceTrack.vue'
 import AttendanceEventCard from '../pages/course/components/AttendanceEventCard.vue';
+import AssignmentCard from '../pages/course/components/AssignmentCard.vue'
 import LocationCard from '../pages/course/components/LocationCard.vue';
 import ManagePeopleCard from '../pages/course/components/ManagePeopleCard.vue';
 
@@ -40,6 +41,11 @@ const routes = [
             path: 'attendance',
             name: 'AttendanceEventCard',
             component: AttendanceEventCard
+          },
+          {
+            path: 'assignment',
+            name: 'AssignmentCard',
+            component: AssignmentCard
           },
           {
             path: 'location',

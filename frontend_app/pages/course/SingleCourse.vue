@@ -9,6 +9,7 @@
               <div class="course-menu-bar">
                 <ul class="course-menu">
                   <li class="tab" :class="$route.path.includes('attendance')?'active':''"><router-link to="attendance">Attendance Events</router-link></li>
+                  <li class="tab" :class="$route.path.includes('assignment')?'active':''"><router-link to="assignment">Assignments</router-link></li>
                   <li class="tab" :class="$route.path.includes('location')?'active':''"><router-link to="location">Locations</router-link></li>
                   <li class="tab" :class="$route.path.includes('people')?'active':''"><router-link to="people">People</router-link></li>
                 </ul>
@@ -469,7 +470,7 @@ export default {
 .course-content-title {
   font-size: 1.5rem;
   text-align: left;
-  padding: 0px 20px;
+  padding: 20px 0px;
   width: 100%;
 }
 .course-card-container {
@@ -499,7 +500,7 @@ export default {
 
 .course-menu .tab a {
   display: block;
-  text-align: center;
+  text-align: left;
   text-decoration: none;
   margin: 5px 0;
   padding: 10px 10px;
