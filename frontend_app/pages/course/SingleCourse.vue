@@ -4,14 +4,13 @@
     <el-row>
       <el-col :xs="24" :md="18">
           <div v-if="currentRole">
-            <div class="course-content-container"
-              v-if="currentRole =='owner' || currentRole =='instructor' || currentRole =='staff'">
+            <div class="course-content-container">
               <div class="course-menu-bar">
                 <ul class="course-menu">
-                  <li class="tab" :class="$route.path.includes('attendance')?'active':''"><router-link to="attendance">Attendance Events</router-link></li>
-                  <li class="tab" :class="$route.path.includes('assignment')?'active':''"><router-link to="assignment">Assignments</router-link></li>
-                  <li class="tab" :class="$route.path.includes('location')?'active':''"><router-link to="location">Locations</router-link></li>
-                  <li class="tab" :class="$route.path.includes('people')?'active':''"><router-link to="people">People</router-link></li>
+                  <li v-if="isStaff()" class="tab" :class="$route.path.includes('attendance')?'active':''"><router-link :to="'/course/'+course.id+'/attendance'">Attendance Events</router-link></li>
+                  <li class="tab" :class="$route.path.includes('assignment')?'active':''"><router-link :to="'/course/'+course.id+'/assignment'">Assignments</router-link></li>
+                  <li v-if="isStaff()" class="tab" :class="$route.path.includes('location')?'active':''"><router-link :to="'/course/'+course.id+'/location'">Locations</router-link></li>
+                  <li v-if="isStaff()" class="tab" :class="$route.path.includes('people')?'active':''"><router-link :to="'/course/'+course.id+'/people'">People</router-link></li>
                 </ul>
               </div>
               <div class="course-manage-view">
@@ -28,35 +27,7 @@
       </el-col>
 
       <el-col :xs="24" :md="6">
-        <div v-if="currentRole">
-          <div v-if="currentRole != 'student'">
-            <CourseInfoCard :course="course" :currentRole="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
-            </CourseInfoCard>
-            <div class="selecor-role-container">
-              <span style="margin: 0 10px;">View</span>
-              <el-select
-                v-model="selectRole"
-                placeholder="Select"
-                size="large"
-                style="width: 100%;"
-                @change="changeRole"
-              >
-                <el-option
-                  v-for="role in selectableRoles"
-                  :key="role"
-                  :label="role"
-                  :value="role"
-                />
-              </el-select>
-            </div>
-          </div>
-        </div>
-      </el-col>
-    </el-row>
-    <div v-if="currentRole">
-      <div class="center-content" v-if="currentRole =='student'">
-        <!-- <el-button type="primary" @click="changeRoute($route.params.id + '/attendance')">Mark Attendance</el-button> -->
-        <CourseInfoCard :course="course" :role="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
+        <CourseInfoCard :course="course" :currentRole="currentRole" @show-modify-dialog="showModifyCourseDialog = true" style="margin: 20px 0;">
         </CourseInfoCard>
         <div class="selecor-role-container">
           <span style="margin: 0 10px;">View</span>
@@ -75,8 +46,9 @@
             />
           </el-select>
         </div>
-      </div>
-    </div>
+      </el-col>
+    </el-row>
+
     <ModifyCourseDialog class="dialog-container" :courseForm="courseForm" :visible="showModifyCourseDialog"
       @dialog-closed="showModifyCourseDialog = false" @update-course="updateCourse"></ModifyCourseDialog>
 
@@ -165,6 +137,12 @@ export default {
     }
   },
   methods: {
+    isStaff() {
+      if (this.currentRole =='owner' || this.currentRole =='instructor' || this.currentRole =='staff') {
+        return true
+      }
+      return false
+    },
     changeRole(role) {
       ElMessageBox.confirm(
         'page will change to '+role+' view. Continue?',

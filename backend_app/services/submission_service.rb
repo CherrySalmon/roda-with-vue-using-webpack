@@ -11,22 +11,29 @@ module Todo
       verify_policy(requestor, :create, course_id, assignment_id)
       submission = Submission.new(submission_data)
       assignment = Assignment.first(id: assignment_id)
+      account = Account.first(id: requestor['account_id'])
       submission.assignment = assignment
+      submission.account = account
       raise "Invalid submission data." unless submission.valid?
       submission.save
       submission.values
     end
 
+    def self.list_all(requestor, course_id, assignment_id)
+      verify_policy(requestor, :view_all, course_id, assignment_id)
+      Submission.where(assignment_id: assignment_id).map(&:attributes)
+    end
+
     def self.list(requestor, course_id, assignment_id)
       verify_policy(requestor, :view, course_id, assignment_id)
-      Submission.where(assignment_id: assignment_id).map(&:values)
+      Submission.where(assignment_id: assignment_id, account_id: requestor['account_id']).map(&:attributes)
     end
 
     def self.find(requestor, course_id, assignment_id, submission_id)
       verify_policy(requestor, :view, course_id, assignment_id, submission_id)
       submission = Submission.first(id: submission_id)
       raise SubmissionNotFoundError, "Submission not found." unless submission
-      submission.values
+      submission.attributes
     end
 
     def self.update(requestor, course_id, assignment_id, submission_id, submission_data)

@@ -50,6 +50,14 @@ module Todo
                       deleted ? { success: true, message: 'Submission deleted' }.to_json : { error: 'Submission not found' }.to_json
                     end
                   end
+                  # GET /api/course/:course_id/assignment/:assignment_id/submission/list_all
+                  r.on 'list_all' do
+                    r.get do
+                      submission = SubmissionService.list_all(requestor, course_id, assignment_id)
+                      response.status = submission ? 200 : 404
+                      submission ? { success: true, submission: submission }.to_json : { error: 'Submission not found' }.to_json
+                    end
+                  end
                   # GET /api/course/:course_id/assignment/:assignment_id/submission
                   r.get do
                     submission = SubmissionService.list(requestor, course_id, assignment_id)

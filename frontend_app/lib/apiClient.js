@@ -34,6 +34,9 @@ export default {
     getSubmissions(courseId, assignmentId) {
         return apiClient.get(`/course/${courseId}/assignment/${assignmentId}/submission`);
     },
+    getAllSubmissions(courseId, assignmentId) {
+        return apiClient.get(`/course/${courseId}/assignment/${assignmentId}/submission/list_all`);
+    },
     postSubmission(courseId, assignmentId, submissionData) {
         return apiClient.post(`/course/${courseId}/assignment/${assignmentId}/submission`, submissionData);
     },

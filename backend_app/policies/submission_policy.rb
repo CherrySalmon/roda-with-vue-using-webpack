@@ -8,6 +8,10 @@ module Todo
       @submission_owner_id = submission_owner_id
     end
 
+    def can_view_all?
+      puts requestor_is_admin? || requestor_is_instructor? || requestor_is_staff? || requestor_is_owner?
+      requestor_is_admin? || requestor_is_instructor? || requestor_is_staff? || requestor_is_owner?
+    end
     def can_view?
       requestor_is_admin? || requestor_is_instructor? || requestor_is_staff? || requestor_is_owner? || self_submitted?
     end
@@ -27,6 +31,7 @@ module Todo
     # Summary of permissions
     def summary
       {
+        can_view_all: can_view_all?,
         can_view: can_view?,
         can_create: can_create?,
         can_update: can_update?,

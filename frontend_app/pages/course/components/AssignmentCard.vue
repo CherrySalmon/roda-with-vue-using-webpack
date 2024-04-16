@@ -1,11 +1,12 @@
 <template>
   <div class="event-card-container course-card-container">
     <div class="course-content-title">Attendance Events</div>
-    <el-button @click="showAssignmentDialog = true">+ Create assignment</el-button>
+    <el-button @click="showAssignmentDialog = true" type="primary">+ Create assignment</el-button>
     <submission
       v-for="assignment in assignments"
       :key="assignment.id"
       :assignment="assignment"
+      :currentRole="currentRole"
       @edit-assignment="editAssignment"
       @delete-assignment="deleteAssignemnt"
     />
