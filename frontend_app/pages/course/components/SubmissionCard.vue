@@ -185,7 +185,7 @@ export default {
       reader.readAsText(this.fileList[0].raw);
     },
     beforeUpload(file) {
-      const allowedTypes = ['Rmd', 'md'];
+      const allowedTypes = ['Rmd', 'md', 'qmd'];
       const isRmdOrMd = allowedTypes.some(type => file.name.includes(`.${type}`));
       const isExceedingLimit = this.fileList.length >= 1;
       
