@@ -1,6 +1,6 @@
 <template>
-  <div class="event-card-container course-card-container">
-    <div class="course-content-title">Attendance Events</div>
+  <div class="assignment-card-container">
+    <div class="course-content-title">Assignments</div>
     <el-button v-if="currentRole!='student'" @click="showAssignmentDialog = true" type="primary">+ Create assignment</el-button>
     <submission
       v-for="assignment in assignments"
@@ -100,13 +100,14 @@ export default {
 </script>
 
 <style scoped>
-.event-card-container {
+.assignment-card-container {
   display: flex;
   justify-content: flex-start;
   flex-wrap: wrap;
+  margin: 20px 20px;
 }
 @media (max-width: 768px) {
-  .event-card-container {
+  .assignment-card-container {
     justify-content: center;
   }
 }

@@ -6,7 +6,7 @@
         <p class="due-text">Due at: {{ getLocalDateString(assignment.due_at) }}</p>
       </h3>
     </template>
-    <p>{{ assignment.description }}</p>
+    <p class="submission-description-text">{{ assignment.description }}</p>
     <template v-if="currentRole=='student'">
       <h3 class="submission-subtitle">Submitted</h3>
       <el-empty v-if="submissions.length < 1"  description="No Data" />
@@ -21,10 +21,9 @@
           <div class="submission-content-text">{{ submission.content }}</div>
         </el-dialog>
       </div>
-      <div class="submission-content">
-        <el-button v-show="!showUploadSection" @click="showUploadSection=true" type="primary" style="margin: 10px 0;">Start Assignment</el-button>
-        <el-collapse-transition>
-          <div v-show="showUploadSection" class="submission-upload">
+      <div class="submission-content" ref="submissionSection">
+        <el-button v-show="!showUploadSection" @click="startAssignment" type="primary" style="margin: 10px 0;">Start Assignment</el-button>
+          <div v-show="showUploadSection" class="submission-upload" ref="uploadSection">
             <h3>File Upload</h3>
               <el-upload
                 class="upload-demo"
@@ -51,8 +50,7 @@
               <el-button type="primary" @click="submitAssignment">Submit Assignment</el-button>
             </div>
           </div>
-        </el-collapse-transition>
-      </div>
+        </div>
     </template>
     
     <template v-if="currentRole!='student'">
@@ -159,6 +157,12 @@ export default {
     },
     startAssignment() {
       this.showUploadSection = true;
+      this.$nextTick(() => {
+        const uploadSection = this.$refs.uploadSection;
+        if (uploadSection) {
+          uploadSection.scrollIntoView({behavior: 'smooth'})
+        }
+      });
     },
     cancelUpload() {
       this.showUploadSection = false;
@@ -282,6 +286,8 @@ export default {
   text-align: left;
   width: 100%;
   margin: 10px 0;
+  height: 370px;
+  overflow-y: auto;
 }
 .submission-header {
   cursor: pointer;
@@ -300,6 +306,9 @@ export default {
 }
 .submit-date-text {
   text-align: right;
+}
+.submission-description-text {
+  min-height: 90px;
 }
 @media (max-width: 1248px) {
   .submit-text {
