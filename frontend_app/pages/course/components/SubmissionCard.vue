@@ -9,10 +9,10 @@
     <p class="submission-description-text">{{ assignment.description }}</p>
     <template v-if="currentRole=='student'">
       <h3 class="submission-subtitle">Submitted</h3>
-      <el-empty v-if="submissions.length < 1"  description="No Data" />
       <div v-for="(submission, i) in submissions" :key="submission.id" class="submitted-container">
         <div class="submission-preview-btn submit-text" @click="submission.dialogVisible = true">{{ submission.name }}</div>
         <div class="submit-text submit-date-text">{{  getLocalDateString(submission.updated_at) }}</div>
+        <el-button type="danger" icon="Delete" circle @click.stop="confirmDeletion(submission.id)"/>
         <el-dialog v-model="submission.dialogVisible" :title="submission.name" :width="dialogWidth">
           <div class="submission-preview-btn" style="margin: 10px 0;" @click="downloadFile(submission.name, submission.content)">Download</div>
           <h3>Comment</h3>
@@ -22,7 +22,7 @@
         </el-dialog>
       </div>
       <div class="submission-content" ref="submissionSection">
-        <el-button v-show="!showUploadSection" @click="startAssignment" type="primary" style="margin: 10px 0;">Start Assignment</el-button>
+        <el-button v-show="!showUploadSection" @click="startAssignment" type="primary" style="margin: 10px 0;">{{submissionCount?'Re-submit Assignment':'Start Assignment'}}</el-button>
           <div v-show="showUploadSection" class="submission-upload" ref="uploadSection">
             <h3>File Upload</h3>
               <el-upload
@@ -47,10 +47,11 @@
             ></el-input>
             <div class="dialog-footer">
               <el-button @click="cancelUpload">Cancel</el-button>
-              <el-button type="primary" @click="submitAssignment">Submit Assignment</el-button>
+              <el-button type="primary" @click="submitAssignment()">Submit Assignment</el-button>
             </div>
           </div>
         </div>
+        <el-empty v-if="!submissionCount"  description="No Data" />
     </template>
     
     <template v-if="currentRole!='student'">
@@ -82,7 +83,7 @@
 
 <script>
 import apiClient from '../../../lib/apiClient'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -104,6 +105,7 @@ export default {
       submissions: [],
       allSubmissions: [],
       dialogWidth: "800px",
+      submissionCount: 0
     }
   },
   watch: {
@@ -181,7 +183,13 @@ export default {
         formData['name'] = file_name;
         formData['content'] = content;
         formData['comment'] = this.comments;
-        this.postSubmission(formData)
+        if(this.submissionCount) {
+
+          this.putSubmission(this.submissions[0].id, formData)
+        } else {
+          this.postSubmission(formData)
+        }
+        
       };
       reader.onerror = () => {
         ElMessage.error('Error reading file.')
@@ -217,6 +225,7 @@ export default {
       apiClient.getSubmissions(this.assignment.course_id, this.assignment.id)
         .then(response => {
           this.submissions = response.data.submission;
+          this.submissionCount = this.submissions.length
         })
         .catch(error => {
           console.error("Error fetching submissions:", error);
@@ -229,6 +238,16 @@ export default {
         })
         .catch(error => {
           console.error("Error fetching submissions:", error);
+        });
+    },
+    putSubmission(id, submission) {
+      apiClient.updateSubmission(this.assignment.course_id, this.assignment.id, id, submission)
+        .then(response => {
+          this.showUploadSection = false;
+          this.fetchSubmissions();
+        })
+        .catch(error => {
+          console.error("Error updating submission:", error);
         });
     },
     postSubmission(submission) {
@@ -249,6 +268,30 @@ export default {
         .catch(error => {
           console.error("Error updating submission:", error);
         });
+    },
+    confirmDeletion(submissionId) {
+      ElMessageBox.confirm(
+        'Are you sure you want to delete this submission?',
+        'Warning',
+        {
+          confirmButtonText: 'OK',
+          cancelButtonText: 'Cancel',
+          type: 'warning',
+        }
+      )
+        .then(() => {
+          this.deleteSubmission(submissionId);
+          ElMessage({
+            type: 'success',
+            message: 'Delete completed',
+          })
+        })
+        .catch(() => {
+          ElMessage({
+            type: 'info',
+            message: 'Delete canceled',
+          })
+        })
     },
     deleteSubmission(submissionId) {
       apiClient.deleteSubmission(this.assignment.course_id, this.assignment.id, submissionId)
@@ -312,7 +355,7 @@ export default {
 }
 @media (max-width: 1248px) {
   .submit-text {
-    width: 50%;
+    width: 45%;
   }
   .submit-date-text {
     text-align: left;
