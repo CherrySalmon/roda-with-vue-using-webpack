@@ -13,7 +13,7 @@ module Todo
     def self.list(requestor, course_id)
       course = find_course(course_id)
       verify_policy(requestor, :view, course_id)
-      events = Event.list_event(course_id)
+      events = Event.list_event(requestor, course_id)
       events || raise(ForbiddenError, 'You have no access to list events.')
     end
 

@@ -27,11 +27,11 @@ module Todo
       attendances.map(&:values)
     end
 
-    def self.add_attendance(account_id, course_id, attendance_details)
+    def self.add_attendance(course_id, attendance_details)
       student_role = Role.first(name: "student").id
       # Create the Attendance record
       attendance = Attendance.find_or_create(
-        account_id: account_id,
+        account_id: attendance_details['account_id'],
         role_id: student_role,
         course_id: course_id, # Assuming you also directly relate attendances to courses
         event_id: attendance_details['event_id'],

@@ -19,9 +19,9 @@ module Todo
       validates_presence %i[name location_id]
     end
 
-    def self.list_event(course_id)
+    def self.list_event(requestor = nil, course_id)
       events = Event.where(course_id: course_id).order(:start_at).all
-      events.map(&:attributes)
+      events.map { |event| event.attributes(requestor['account_id']) }
     end
 
     def self.add_event(course_id, event_details)
@@ -45,7 +45,7 @@ module Todo
       events.map(&:attributes)
     end
 
-    def attributes
+    def attributes(account_id = nil)
       {
         id:,
         course_id:,
@@ -55,7 +55,17 @@ module Todo
         end_at:,
         longitude: location.longitude,
         latitude: location.latitude,
+        isMarked: account_id ? find_attendance(account_id) : false,
       }
+    end
+
+    private
+
+    def find_attendance(account_id)
+      attendance = Attendance.first(account_id:, event_id: id, course_id:)
+      puts attendance
+      return true if attendance
+      return false
     end
   end
 end

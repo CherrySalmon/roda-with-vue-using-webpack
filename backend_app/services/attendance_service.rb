@@ -37,7 +37,7 @@ module Todo
     def self.create(requestor, attendance_data, course_id)
       course = find_course(course_id)
       verify_policy(requestor, :create, course, course_id)
-      Attendance.add_attendance(requestor['account_id'], course_id, attendance_data)
+      Attendance.add_attendance(course_id, attendance_data)
     end
 
     def self.find_course(course_id)
