@@ -16,7 +16,7 @@
                   <p>Location: {{ event.location_name || 'N/A' }}</p>
               </div>
               <br />
-              <div v-if="event.isAttendanceExisted">
+              <div v-if="event.isMarked">
                   <el-button type="success" disabled>Attendance Recorded</el-button>
               </div>
               <div v-else>
@@ -121,29 +121,16 @@ export default {
     }
   },
   methods: {
-    async fetchEventData() {
-        try {
-            const response = await axios.get(`/api/current_event/`, {
-                headers: {
-                    Authorization: `Bearer ${this.accountCredential}`,
-                },
-            });
-
-            this.events = await Promise.all(response.data.data.map(async (event) => {
-                // Use getCourseName to fetch the course name asynchronously
-                let course_name = await this.getCourseName(event.course_id)
-                let location_name = await this.getLocationName(event)
-                let isAttendanceExisted = await this.findAttendance(event)
-                return {
-                    ...event,
-                    course_name: course_name,
-                    location_name: location_name,
-                    isAttendanceExisted: isAttendanceExisted,
-                };
-            }));
-        } catch (error) {
-            console.error('Error fetching event data:', error);
-        }
+    fetchEventData() {
+      axios.get(`/api/current_event/`, {
+        headers: {
+          Authorization: `Bearer ${this.account.credential}`,
+        },
+      }).then(response => {
+        this.events = response.data.data;
+      }).catch(error => {
+        console.error('Error fetching event data:', error);
+      });
     },
     getCourseName(course_id) {
         return axios.get(`/api/course/${course_id}`, {
@@ -295,7 +282,7 @@ export default {
     updateEventAttendanceStatus(eventId, status) {
         const eventIndex = this.events.findIndex(event => event.id === eventId);
         if (eventIndex !== -1) {
-            this.events[eventIndex].isAttendanceExisted = status;
+            this.events[eventIndex].isMarked = status;
         }
     },
     getFeatures(roles) {

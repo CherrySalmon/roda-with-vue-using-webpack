@@ -42,14 +42,17 @@ module Todo
     def self.find_event(requestor, time)
       course_ids = AccountCourse.where(account_id: requestor['account_id']).select_map(:course_id)
       events = Event.where{start_at <= time}.where{end_at >= time}.where(course_id: course_ids).all
-      events.map(&:attributes)
+      # events.map(&:attributes)
+      events.map { |event| event.attributes(requestor['account_id']) }
     end
 
     def attributes(account_id = nil)
       {
         id:,
         course_id:,
+        course_name: course.name,
         location_id:,
+        location_name: location.name,
         name:,
         start_at:,
         end_at:,
