@@ -98,6 +98,7 @@ export default {
       },
       courses: [],
       account: {
+        id: '',
         roles: [],
         credential: ''
       },
@@ -120,7 +121,7 @@ export default {
     }
   },
   methods: {
-    async fetchEventData() { // Mark the method as async
+    async fetchEventData() {
         try {
             const response = await axios.get(`/api/current_event/`, {
                 headers: {
@@ -149,10 +150,10 @@ export default {
             headers: {
                 Authorization: `Bearer ${this.accountCredential}`,
             },
-        }).then(response => response.data.data.name) // Assuming the response has this structure
+        }).then(response => response.data.data.name)
         .catch(error => {
             console.error('Error fetching course name:', error);
-            return 'Error fetching course name'; // Provide a fallback or error message
+            return 'Error fetching course name';
         });
     },
     getLocationName(event) {
@@ -160,10 +161,10 @@ export default {
             headers: {
                 Authorization: `Bearer ${this.accountCredential}`,
             },
-        }).then(response => response.data.data.name) // Assuming the response has this structure
+        }).then(response => response.data.data.name)
         .catch(error => {
             console.error('Error fetching location name:', error);
-            return 'Error fetching location name'; // Provide a fallback or error message
+            return 'Error fetching location name';
         });
     },
     getLocation(event) {
@@ -209,7 +210,6 @@ export default {
 
             // Check if the current position is within the range
             if (this.latitude >= minLat && this.latitude <= maxLat && this.longitude >= minLng && this.longitude <= maxLng) {
-                // Call your API if within the range
                 this.postAttendance(loading, event);
             } else {
                 ElMessageBox.alert('You are not in the right location', 'Failed', {
@@ -239,10 +239,9 @@ export default {
         }
     },
     postAttendance(loading, event) {
-        // Use your actual course ID here
-        const courseId = event.course_id; // Example course ID
+        const courseId = event.course_id;
         axios.post(`/api/course/${courseId}/attendance`, {
-            // Include any required data here
+            account_id: this.account.id,
             event_id: event.id,
             name: event.name,
             latitude: this.latitude,
@@ -253,7 +252,6 @@ export default {
             }
         })
             .then(response => {
-                // Handle success
                 console.log('Attendance recorded successfully', response.data);
                 this.updateEventAttendanceStatus(event.id, true);
                 ElMessageBox.alert('Attendance recorded successfully', 'Success', {
@@ -262,7 +260,6 @@ export default {
                 })
             })
             .catch(error => {
-                // Handle error
                 console.error('Error recording attendance', error);
                 this.updateEventAttendanceStatus(event.id, true);
                 ElMessageBox.alert('Attendance has already recorded', 'Warning', {
@@ -274,14 +271,13 @@ export default {
             });
     },
     findAttendance(event) {
-        // Return a new promise that resolves with the boolean result
         return new Promise((resolve, reject) => {
             axios.get(`/api/course/${event.course_id}/attendance`, {
                 headers: {
                     Authorization: `Bearer ${this.accountCredential}`,
                 },
             }).then(response => {
-                const accountId = this.account.id; // Ensure this is set correctly
+                const accountId = this.account.id;
                 const eventId = event.id;
                 const matchingAttendances = response.data.data.filter(attendance => 
                     parseInt(attendance.account_id) == accountId && parseInt(attendance.event_id) == eventId
@@ -291,7 +287,6 @@ export default {
                 resolve(matchingAttendances.length > 0);
             }).catch(error => {
                 console.error('Error fetching attendance data:', error);
-                // Reject the promise in case of an error
                 reject(error);
             });
         });
@@ -300,9 +295,6 @@ export default {
     updateEventAttendanceStatus(eventId, status) {
         const eventIndex = this.events.findIndex(event => event.id === eventId);
         if (eventIndex !== -1) {
-            // Vue 2 reactivity caveat workaround
-            // this.$set(this.events[eventIndex], 'isAttendanceExisted', status);
-            // For Vue 3, you can directly assign the value:
             this.events[eventIndex].isAttendanceExisted = status;
         }
     },
