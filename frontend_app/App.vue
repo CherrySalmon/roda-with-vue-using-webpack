@@ -108,14 +108,8 @@ export default {
           }
         };
     },
-    created() {
+    mounted() {
       this.account = cookieManager.getAccount()
-      if(!this.account) {
-        this.logout()
-        if (window.location.pathname!='/login') {
-          this.$router.push({ path: '/login', query: { redirect: window.location.pathname } })
-        }
-      }
     },
     watch: {
       $route(to, from) {

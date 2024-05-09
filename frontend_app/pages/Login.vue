@@ -30,73 +30,26 @@ export default {
     },
     handleQueryParameters() {
       const query = this.$route.query;
-      console.log(query); // Logs the query parameters to the console for debugging
-
-      // Handling the token parameter for authentication
-      if (query.token) {
-        this.storeToken(query.token);
-        // Redirect to the path specified by the redirect parameter, or to a default path
-        const path = query.redirect ? query.redirect : '/dashboard';
+      if (query.credential) {
+        this.setUserInfoCookies(query);
+        const path = query.redirect ? query.redirect : '/course';
         this.$router.push(path);
       } 
-      // Handling error scenarios
       else if (query.error) {
         ElNotification({
           title: 'Login Error',
-          message: this.parseErrorMessage(query.error),
+          message: query.error,
           type: 'error',
         });
       }
-      // Handling redirect without a token or error
-      else if (query.redirect && query.redirect !== '/') {
-        this.$router.push(query.redirect);
-      }
-    },
-
-    storeToken(token) {
-      // Store the token securely
-      Cookies.set('auth_token', token, { expires: 7 }); // Adjust as per your security requirements
-    },
-    
-    async fetchLoginToken(accessToken) {
-      try {
-        const { status, data } = await axios.post('/api/auth/verify_google_token', { accessToken: accessToken });
-        if (status === 200 || status === 201) {
-          this.setUserInfoCookies(data.user_info);
-          if (this.$route.query.redirect && this.$route.query.redirect!='/' ) {
-            this.$router.push(this.$route.query.redirect)
-          }
-          else {
-            this.$router.push('/course')
-          }
-        } 
-      } catch (error) {
-        console.error('Error:', error.response || error);
-        ElNotification({
-          title: 'Error',
-          message: 'Account not found, please contact your teaching staff.',
-          type: 'error',
-        })
-      }
-    },
-    async handleGoogleAccessTokenLogin() {
-      try {
-        const response = await googleTokenLogin({
-            clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
-        })
-        this.fetchLoginToken(response.access_token)
-      } catch (error) {
-          console.error('Login Failed:', error);
-      }
-    },
-    setUserInfoCookies(user_info) {
+    },    
+    setUserInfoCookies(query) {
       const expDay = 180;
-      Cookies.set('account_id', user_info.id, { expires: expDay });
-      Cookies.set('account_roles', user_info.roles.join(','), { expires: expDay });
-      Cookies.set('account_credential', user_info.credential, { expires: expDay });
-      Cookies.set('account_img', user_info.avatar, { expires: expDay })
-      Cookies.set('account_name', user_info.name, { expires: expDay })
+      Cookies.set('account_id', query.id, { expires: expDay });
+      Cookies.set('account_roles', query.roles, { expires: expDay });
+      Cookies.set('account_credential', query.credential, { expires: expDay });
+      Cookies.set('account_img', query.avatar, { expires: expDay })
+      Cookies.set('account_name', query.name, { expires: expDay })
     },
   },
 };
