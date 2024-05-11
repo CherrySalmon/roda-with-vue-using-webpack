@@ -5,6 +5,7 @@
       <img class="login-icon-img" src="../static/google_icon.png" width="50" height="50"/>
       <div class="login-icon-text">Sign in with Google</div>
     </div>
+    <el-button @click="testCookie()">Test Cookies Secure</el-button>
   </div>
 </template>
 
@@ -24,6 +25,29 @@ export default {
     this.handleQueryParameters();
   },
   methods: {
+    testCookie() {
+      axios.get(`/api/auth/cookie_test`).then(response => {
+        let secret_cookie = Cookies.get('test_jwt')
+        if (secret_cookie) {
+          ElNotification({
+            title: 'Secret Spill!',
+            message: secret_cookie,
+            type: 'error',
+          });
+        }
+        else {
+          ElNotification({
+            title: 'Unable to access secret by JS',
+            message: "Secret Secured!",
+            type: 'success',
+          });
+        }
+      }) 
+      .catch(error => {
+          console.error('Error fetching course name:', error);
+          return 'Error fetching course name'; // Provide a fallback or error message
+      });
+    },
     initiateServerSideAuth() {
       // Redirect user to your server-side endpoint that starts the OAuth flow
       window.location.href = '/api/auth/google_login';

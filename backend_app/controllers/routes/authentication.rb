@@ -4,7 +4,16 @@
 module Todo
   module Routes
     class Authentication < Roda # rubocop:disable Style/Documentation
+      plugin :cookies
       route do |r|
+
+        r.on 'cookie_test' do
+          r.get do
+            response.set_cookie("test_jwt",
+                    value: 'test token',
+        )
+          end
+        end
         r.on 'google_login' do
           # api/auth/google
           r.get do
@@ -55,10 +64,21 @@ module Todo
               )
               jwt = JWTCredential.generate_jwt(account.attributes[:id], account.attributes[:roles])
 
-              roles_name = account.roles.map{|role| role.name}
-              r.redirect "/login?credential=#{jwt}&name=#{account.name}&id=#{account.id}&avatar=#{account.avatar}&roles=#{roles_name.join(',')}"
+              roles_name = account.roles.map{|role| role.name} # should we delete the this, in model the role already append to attributes 
+              
+              response.set_cookie("jwt",
+                    value: jwt,
+                    http_only: true,
+                    secure: true,
+                    same_site: "Strict")
+
+
+              response.status = 200
+              { success: true, data: account.attributes }.to_json
+              # r.redirect "/login?credential=#{jwt}&name=#{account.name}&id=#{account.id}&avatar=#{account.avatar}&roles=#{roles_name.join(',')}"
             else
-              r.redirect '/login?error=account_not_found'
+              response.status = 403
+              { error: 'Forbidden', details: 'Account not found' }.to_json
             end
           end
         end
