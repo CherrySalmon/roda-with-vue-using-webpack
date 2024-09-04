@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "webpack serve --config webpack/webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prod": "webpack --config webpack/webpack.prod.js"
+    "prod": "webpack --config webpack/webpack.prod.js",
+    "serve": "rspack serve --config rspack/rspack.dev.js",
+    "build": "rspack build --config rspack/rspack.prod.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@rspack/cli": "^1.0.2",
+    "@rspack/core": "^1.0.2",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.3",
     "dotenv": "^16.4.1",
